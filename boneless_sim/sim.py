@@ -1,5 +1,6 @@
 import array
 
+
 class BonelessSimulator:
     def __init__(self, start_pc=0x10, memsize=1024, io_callback=None):
         def memset():
@@ -9,6 +10,7 @@ class BonelessSimulator:
         self.sim_active = False
         self.window = 0
         self.pc = start_pc
+        self.flags = { "Z" : 0, "S" : 0, "C" : 0, "V" : 0}
         self.mem = array.array("H", memset())
         self.io_callback = io_callback
 
@@ -63,22 +65,67 @@ class BonelessSimulator:
         def reg_loc(offs):
             return self.window + offs
 
+        # Used to calculate sign bit and also
+        # overflow.
+        def sign(val):
+            return int((val & 0x08000) != 0)
+
         # Handle Opcode Clases
         def do_a_class():
             dst = (0x0700 & opcode) >> 8
             opa = (0x00E0 & opcode) >> 5
             opb = (0x001C & opcode) >> 2
             typ = (0x0003 & opcode)
+            code = (0x0800 & opcode) >> 11
 
-            # print(self.pc, opcode, dst, opa, opb, typ)
-            if typ == 0x00:
-                val = read_reg(opa) + read_reg(opb)
-            elif typ == 0x01:
-                val = read_reg(opa) - read_reg(opb)
+            val_a = read_reg(opa)
+            val_b = read_reg(opb)
+            s_a = sign(val_a)
+            s_b = sign(val_b)
+
+            if code and (typ in range(3)):
+                # ADD
+                if typ == 0x00:
+                    raw = val_a + val_b
+                    s_r = sign(raw)
+
+                    self.flags["C"] = int(raw > 65535)
+                    # http://teaching.idallen.com/dat2343/10f/notes/040_overflow.txt
+                    self.flags["V"] = int((s_a and s_b and not s_r) or (not s_a and not s_b and s_r))
+
+                    # Bring raw back into range.
+                    if self.flags["C"]:
+                        write_reg(dst, raw - 65536)
+                    else:
+                        write_reg(dst, raw)
+                # SUB/CMP
+                else:
+                    raw = val_a - val_b
+                    s_r = sign(raw)
+
+                    self.flags["C"] = int(val_a < val_b)
+                    self.flags["V"] = int((s_a and not s_b and not s_r) or (not s_a and s_b and s_r))
+
+                    # CMP skips writing results
+                    if typ == 0x01:
+                        # Bring raw back into range
+                        if raw < 0:
+                            write_reg(dst, raw + 65536)
+                        else:
+                            write_reg(dst, raw)
+            elif not code and typ in range(3):
+                if typ == 0x00:
+                    raw = val_a & val_b
+                elif typ == 0x01:
+                    raw = val_a | val_b
+                else:
+                    raw = val_a ^ val_b
+                write_reg(dst, raw)
             else:
                 raise NotImplementedError("Do A Class")
 
-            write_reg(dst, val)
+            self.flags["Z"] = (raw == 0)
+            self.flags["S"] = sign(raw)
 
         def do_i_class():
             opc = (0x3800 & opcode) >> 11
