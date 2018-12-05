@@ -65,6 +65,21 @@ class TestMovI(BonelessTestCase):
         self.run_cpu(3)
         self.assertEqual(self.cpu.regs()[:3].tolist(), [0xFF00, 0x8000, 0xFF])
 
+    def test_mova(self):
+        self.payload = [
+            MOVA(R0, -1),
+            MOVA(R1, -128),
+            MOVA(R2, 127),
+            MOVA(R3, 0),
+        ]
+
+        self.cpu.load_program(self.flatten())
+        self.run_cpu(4)
+        self.assertEqual(self.cpu.regs()[0], 16)
+        self.assertEqual(self.cpu.regs()[1], 17 + 65536 - 128 + 1)
+        self.assertEqual(self.cpu.regs()[2], 18 + 127 + 1)
+        self.assertEqual(self.cpu.regs()[3], 20)
+
 
 class TestClassA(BonelessTestCase):
     def test_add(self):

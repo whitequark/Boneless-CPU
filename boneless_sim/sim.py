@@ -142,6 +142,12 @@ class BonelessSimulator:
         self.flags["S"] = sign(raw)
 
     def do_i_class(self, opcode):
+        def to_signed8b(val):
+            if val > 127:
+                return val - 256
+            else:
+                return val
+
         opc = (0x3800 & opcode) >> 11
         srcdst = (0x0700 & opcode) >> 8
         imm = (0x00FF & opcode)
@@ -153,6 +159,15 @@ class BonelessSimulator:
         # MOVH
         elif opc == 0x01:
             val = (self.read_reg(srcdst) & 0x00FF) | (imm << 8)
+        # MOVA
+        elif opc == 0x02:
+            raw = (self.pc + 1 + to_signed8b(imm))
+            if (raw < 0):
+                val = raw + 65536 # TODO: Variable width-PC?
+            elif (raw > 65536):
+                val = raw - 65536
+            else:
+                val = raw
         else:
             raise NotImplementedError("Do I Class")
 
