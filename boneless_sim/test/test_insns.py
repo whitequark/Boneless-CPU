@@ -21,6 +21,11 @@ class BonelessTestCase(unittest.TestCase):
 
         return assemble(self.payload)
 
+    def run_cpu(self, count):
+        with self.cpu:
+            for i in range(count):
+                self.cpu.stepi()
+
     def run_cpu_until_pc(self, final_pc, fail_count=100):
         with self.cpu:
             for i in range(fail_count):
@@ -61,7 +66,7 @@ class TestClassA(BonelessTestCase):
 
         self.cpu.load_program(self.flatten())
         # self.run(10) # Doesn't work if I define run() in parent object
-        self.run_cpu_until_pc(18)
+        self.run_cpu(2)
         self.assertEqual(self.cpu.regs()[:3].tolist(), [1, 2, 3])
         self.assertEqual(self.cpu.regs()[3:6].tolist(), [0xFFFE, 2, 0])
 
@@ -74,7 +79,7 @@ class TestClassA(BonelessTestCase):
         ]
 
         self.cpu.load_program(self.flatten())
-        self.run_cpu_until_pc(17)
+        self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[2], 0x7fff)
         self.assertEqual(self.cpu.flags, { "Z" : 0, "S" : 0, "C" : 0, "V" : 1})
 
@@ -93,11 +98,11 @@ class TestClassA(BonelessTestCase):
         ]
 
         self.cpu.load_program(self.flatten())
-        self.run_cpu_until_pc(17)
+        self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[3], 0)
 
-        self.run_cpu_until_pc(18)
+        self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[4], 0xDEAD)
 
-        self.run_cpu_until_pc(19)
+        self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[5], 0b0010000101010010)
