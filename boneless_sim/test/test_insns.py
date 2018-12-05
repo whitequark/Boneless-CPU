@@ -48,8 +48,22 @@ class TestMovI(BonelessTestCase):
         ]
 
         self.cpu.load_program(self.flatten())
-        self.run_cpu_until_pc(0x13)
+        self.run_cpu(3)
         self.assertEqual(self.cpu.regs()[:3].tolist(), [0x00FF, 0xFF80, 0])
+
+    def test_movh(self):
+        self.init_regs[R1] = 0xFF00
+        self.init_regs[R2] = 0x00FF
+
+        self.payload = [
+            MOVH(R0, 0xFF),
+            MOVH(R1, 0x80),
+            MOVH(R2, 0x0),
+        ]
+
+        self.cpu.load_program(self.flatten())
+        self.run_cpu(3)
+        self.assertEqual(self.cpu.regs()[:3].tolist(), [0xFF00, 0x8000, 0xFF])
 
 
 class TestClassA(BonelessTestCase):
@@ -76,12 +90,17 @@ class TestClassA(BonelessTestCase):
 
         self.payload = [
             SUB(R2, R0, R1),
+            SUB(R2, R2, R2),
         ]
 
         self.cpu.load_program(self.flatten())
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[2], 0x7fff)
         self.assertEqual(self.cpu.flags, { "Z" : 0, "S" : 0, "C" : 0, "V" : 1})
+
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[2], 0)
+        self.assertEqual(self.cpu.flags, { "Z" : 1, "S" : 0, "C" : 0, "V" : 0})
 
     def test_logical(self):
         op_and = lambda x, y : x & y
@@ -100,9 +119,27 @@ class TestClassA(BonelessTestCase):
         self.cpu.load_program(self.flatten())
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[3], 0)
+        self.assertEqual(self.cpu.flags, { "Z" : 1, "S" : 0, "C" : 0, "V" : 0})
 
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[4], 0xDEAD)
 
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[5], 0b0010000101010010)
+
+
+class Test32bMath(BonelessTestCase):
+    @unittest.skip("Test Not Ready")
+    def test_32b_sub(self):
+        self.init_regs[R0] = 0x7FFF
+        self.init_regs[R1] = 0xFFFF
+        self.init_regs[R3] = 0xC000
+        self.init_regs[R4] = 0xFFFE
+
+        self.payload = [
+            SUB(R5, R0, R3),
+            SUBI(R6, 1),
+            SUB(R6, R4, R1),
+        ]
+
+        self.cpu.load_program(self.flatten())

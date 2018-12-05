@@ -75,8 +75,8 @@ class BonelessSimulator:
             self.do_a_class(opcode)
             self.pc = self.pc + 1
         elif op_class in [0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]:
-            self.do_i_class(opcode)
-            self.pc = self.pc + 1
+            pc_incr = self.do_i_class(opcode)
+            self.pc = self.pc + pc_incr
         else:
             raise NotImplementedError("Step Instruction")
 
@@ -146,11 +146,15 @@ class BonelessSimulator:
         srcdst = (0x0700 & opcode) >> 8
         imm = (0x00FF & opcode)
 
+        pc_incr = 1
+        # MOVL
         if opc == 0x00:
             val = (self.read_reg(srcdst) & 0xFF00) | imm
+        # MOVH
         elif opc == 0x01:
-            val = (self.read_reg(srcdst) & 0x00FF) | imm
+            val = (self.read_reg(srcdst) & 0x00FF) | (imm << 8)
         else:
             raise NotImplementedError("Do I Class")
 
         self._write_reg(srcdst, val)
+        return pc_incr
