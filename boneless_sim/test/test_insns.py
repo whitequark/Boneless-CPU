@@ -36,7 +36,7 @@ class BonelessTestCase(unittest.TestCase):
                 self.fail("Emergency stop of CPU after {} insns.".format(fail_count))
 
 
-class TestMovI(BonelessTestCase):
+class TestClassI(BonelessTestCase):
     def test_movl(self):
         self.init_regs[R1] = 0xFF00
         self.init_regs[R2] = 0x00FF
@@ -79,6 +79,27 @@ class TestMovI(BonelessTestCase):
         self.assertEqual(self.cpu.regs()[1], 17 + 65536 - 128 + 1)
         self.assertEqual(self.cpu.regs()[2], 18 + 127 + 1)
         self.assertEqual(self.cpu.regs()[3], 20)
+
+    def test_addsubi(self):
+        self.init_regs[R0] = 0xFF00
+        self.init_regs[R1] = 0x00FF
+
+        self.payload = [
+            ADDI(R0, -1),
+            SUBI(R0, -1),
+            ADDI(R1, 127),
+            SUBI(R1, 128)
+        ]
+
+        self.cpu.load_program(self.flatten())
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[0], 0xFEFF)
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[0], 0xFF00)
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[1], 0x017E)
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[1], 0x00FE)
 
 
 class TestClassA(BonelessTestCase):

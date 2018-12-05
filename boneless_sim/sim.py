@@ -148,6 +148,15 @@ class BonelessSimulator:
             else:
                 return val
 
+        # Works with signed _or_ unsigned math.
+        def to_unsigned16b(val):
+            if val < 0:
+                return val + 65536
+            elif val > 65536:
+                return val - 65536
+            else:
+                return val
+
         opc = (0x3800 & opcode) >> 11
         srcdst = (0x0700 & opcode) >> 8
         imm = (0x00FF & opcode)
@@ -161,13 +170,10 @@ class BonelessSimulator:
             val = (self.read_reg(srcdst) & 0x00FF) | (imm << 8)
         # MOVA
         elif opc == 0x02:
-            raw = (self.pc + 1 + to_signed8b(imm))
-            if (raw < 0):
-                val = raw + 65536 # TODO: Variable width-PC?
-            elif (raw > 65536):
-                val = raw - 65536
-            else:
-                val = raw
+            val = to_unsigned16b(self.pc + 1 + to_signed8b(imm))
+        # ADDI/SUBI
+        elif opc == 0x03:
+            val = to_unsigned16b(self.read_reg(srcdst) + to_signed8b(imm))
         else:
             raise NotImplementedError("Do I Class")
 
