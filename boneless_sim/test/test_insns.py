@@ -101,6 +101,18 @@ class TestClassI(BonelessTestCase):
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[1], 0x00FE)
 
+    def test_addldisti(self):
+        self.init_regs[R0] = 0xBEEF
+
+        self.payload = [
+            STI(R0, -15),
+            LDI(R2, -16)
+        ]
+
+        self.cpu.load_program(self.flatten())
+        self.run_cpu(2)
+        self.assertEqual(self.cpu.regs()[:3].tolist(), [0xBEEF, 0xBEEF, 0xBEEF])
+
 
 class TestClassA(BonelessTestCase):
     def test_add(self):

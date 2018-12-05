@@ -174,8 +174,15 @@ class BonelessSimulator:
         # ADDI/SUBI
         elif opc == 0x03:
             val = to_unsigned16b(self.read_reg(srcdst) + to_signed8b(imm))
+        # LDI
+        elif opc == 0x04:
+            val = self.mem[to_unsigned16b(self.pc + to_signed8b(imm))]
+        # STI
+        elif opc == 0x05:
+            self.mem[to_unsigned16b(self.pc + to_signed8b(imm))] = self.read_reg(srcdst)
         else:
             raise NotImplementedError("Do I Class")
 
-        self._write_reg(srcdst, val)
+        if opc not in [0x05]:
+            self._write_reg(srcdst, val)
         return pc_incr
