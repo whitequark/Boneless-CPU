@@ -49,7 +49,7 @@ class TestClassI(BonelessTestCase):
 
         self.cpu.load_program(self.flatten())
         self.run_cpu(3)
-        self.assertEqual(self.cpu.regs()[:3].tolist(), [0x00FF, 0xFF80, 0])
+        self.assertEqual(self.cpu.regs()[:3].tolist(), [0x00FF, 0x80, 0])
 
     def test_movh(self):
         self.init_regs[R1] = 0xFF00
@@ -63,7 +63,7 @@ class TestClassI(BonelessTestCase):
 
         self.cpu.load_program(self.flatten())
         self.run_cpu(3)
-        self.assertEqual(self.cpu.regs()[:3].tolist(), [0xFF00, 0x8000, 0xFF])
+        self.assertEqual(self.cpu.regs()[:3].tolist(), [0xFF00, 0x8000, 0])
 
     def test_mova(self):
         self.payload = [

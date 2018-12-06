@@ -164,10 +164,10 @@ class BonelessSimulator:
         pc_incr = 1
         # MOVL
         if opc == 0x00:
-            val = (self.read_reg(srcdst) & 0xFF00) | imm
+            val = imm
         # MOVH
         elif opc == 0x01:
-            val = (self.read_reg(srcdst) & 0x00FF) | (imm << 8)
+            val = (imm << 8)
         # MOVA
         elif opc == 0x02:
             val = to_unsigned16b(self.pc + 1 + to_signed8b(imm))
