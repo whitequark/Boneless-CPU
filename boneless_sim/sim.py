@@ -212,6 +212,8 @@ class BonelessSimulator:
 
             val = to_unsigned16b(raw)
 
+            s_a = sign(op_a)
+            s_b = sign(op_b)
             s_r = sign(raw)
             self.flags["Z"] = (raw == 0)
             self.flags["S"] = s_r

@@ -62,6 +62,14 @@ class TestClassA(BonelessTestCase):
         self.assertEqual(self.cpu.regs()[5], 0b0010000101010010)
 
 
+class TestClassS(BonelessTestCase):
+    pass
+
+
+class TestClassM(BonelessTestCase):
+    pass
+
+
 class TestClassI(BonelessTestCase):
     def test_movl(self):
         self.init_regs[R1] = 0xFF00
@@ -150,19 +158,6 @@ class TestClassI(BonelessTestCase):
             JR(R0, -2)
         ]
 
-        # Original test... save for later.
-        # *[NOP() for _ in range(16)],
-        # L("entry"),
-        # JR(R0, "jump_table"),
-        # L("jump_table"),
-        # ADDI(R0, 4),
-        # JR(R0, "entry"),
-        # ADDI(R0, 4),
-        # JR(R0, "entry"),
-        # SUBI(R0, 2),
-        # JR(R0, "entry"),
-        # ADDI(R0, 0)
-
         self.cpu.load_program(self.flatten())
         self.run_cpu(2)
         self.assertEqual(self.cpu.pc, 19)
@@ -170,3 +165,16 @@ class TestClassI(BonelessTestCase):
         self.assertEqual(self.cpu.pc, 16)
         self.run_cpu(4)
         self.assertEqual(self.cpu.pc, 16)
+
+
+class TestClassJ(BonelessTestCase):
+    def mk_payload(Ra, Rb, Jcc):
+        return [
+            L("start"),
+            CMP(Ra, Rb),
+            Jcc("end_branch"),
+            L("end_no_branch"),
+            NOP(),
+            L("end_branch"),
+            NOP()
+        ]
