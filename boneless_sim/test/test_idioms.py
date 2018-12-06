@@ -2,6 +2,7 @@ from boneless_sim.test.common import *
 
 # Test common assembly-language idioms in this file.
 class Test32bMath(BonelessTestCase):
+    @unittest.skip("Needs to be reworked.")
     def test_32b_sub(self):
         self.init_regs[R0] = 0x7FFF
         self.init_regs[R1] = 0xFFFF

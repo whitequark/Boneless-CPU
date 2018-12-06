@@ -12,7 +12,7 @@ def sign(val):
 def to_unsigned16b(val):
     if val < 0:
         return val + 65536
-    elif val > 65536:
+    elif val >= 65536:
         return val - 65536
     else:
         return val
@@ -113,32 +113,21 @@ class BonelessSimulator:
             # ADD
             if typ == 0x00:
                 raw = val_a + val_b
-                s_r = sign(raw)
-
-                self.flags["C"] = int(raw > 65535)
-                # http://teaching.idallen.com/dat2343/10f/notes/040_overflow.txt
-                self.flags["V"] = int((s_a and s_b and not s_r) or (not s_a and not s_b and s_r))
-
-                # Bring raw back into range.
-                if self.flags["C"]:
-                    self._write_reg(dst, raw - 65536)
-                else:
-                    self._write_reg(dst, raw)
+                self._write_reg(dst, to_unsigned16b(raw))
             # SUB/CMP
             else:
-                raw = val_a - val_b
-                s_r = sign(raw)
-
-                self.flags["C"] = int(val_a < val_b)
-                self.flags["V"] = int((s_a and not s_b and not s_r) or (not s_a and s_b and s_r))
+                raw = val_a + ~val_b + 1
 
                 # CMP skips writing results
                 if typ == 0x01:
-                    # Bring raw back into range
-                    if raw < 0:
-                        self._write_reg(dst, raw + 65536)
-                    else:
-                        self._write_reg(dst, raw)
+                    self._write_reg(dst, to_unsigned16b(raw))
+
+            # Carry and V use 65xx semantics:
+            # http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
+            # http://teaching.idallen.com/dat2343/10f/notes/040_overflow.txt
+            s_r = sign(raw)
+            self.flags["C"] = int(raw > 65535)
+            self.flags["V"] = int((s_a and not s_b and not s_r) or (not s_a and s_b and s_r))
         elif not code and typ in range(3):
             if typ == 0x00:
                 raw = val_a & val_b
@@ -152,6 +141,7 @@ class BonelessSimulator:
 
         self.flags["Z"] = (raw == 0)
         self.flags["S"] = sign(raw)
+
 
     def do_s_class(self, opcode):
         dst = (0x0700 & opcode) >> 8
