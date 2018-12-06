@@ -113,6 +113,38 @@ class TestClassI(BonelessTestCase):
         self.run_cpu(2)
         self.assertEqual(self.cpu.regs()[:3].tolist(), [0xBEEF, 0xBEEF, 0xBEEF])
 
+    def test_jaljr(self):
+        self.payload = [
+            L("entry"),
+            ADDI(R0, 1),
+            JAL(R0, "my_fun"),
+            NOP(),
+            L("my_fun"),
+            ADDI(R1, 1),
+            JR(R0, -2)
+        ]
+
+        # Original test... save for later.
+        # *[NOP() for _ in range(16)],
+        # L("entry"),
+        # JR(R0, "jump_table"),
+        # L("jump_table"),
+        # ADDI(R0, 4),
+        # JR(R0, "entry"),
+        # ADDI(R0, 4),
+        # JR(R0, "entry"),
+        # SUBI(R0, 2),
+        # JR(R0, "entry"),
+        # ADDI(R0, 0)
+
+        self.cpu.load_program(self.flatten())
+        self.run_cpu(2)
+        self.assertEqual(self.cpu.pc, 19)
+        self.run_cpu(2)
+        self.assertEqual(self.cpu.pc, 16)
+        self.run_cpu(4)
+        self.assertEqual(self.cpu.pc, 16)
+
 
 class TestClassA(BonelessTestCase):
     def test_add(self):

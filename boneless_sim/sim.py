@@ -8,6 +8,15 @@ __all__ = ["BonelessSimulator"]
 def sign(val):
     return int((val & 0x08000) != 0)
 
+# Works with signed _or_ unsigned math.
+def to_unsigned16b(val):
+    if val < 0:
+        return val + 65536
+    elif val > 65536:
+        return val - 65536
+    else:
+        return val
+
 
 class BonelessSimulator:
     def __init__(self, start_pc=0x10, memsize=1024, io_callback=None):
@@ -73,10 +82,10 @@ class BonelessSimulator:
 
         if op_class in [0x00, 0x01]:
             self.do_a_class(opcode)
-            self.pc = self.pc + 1
+            self.pc = to_unsigned16b(self.pc + 1)
         elif op_class in [0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]:
             pc_incr = self.do_i_class(opcode)
-            self.pc = self.pc + pc_incr
+            self.pc = to_unsigned16b(self.pc + pc_incr)
         else:
             raise NotImplementedError("Step Instruction")
 
@@ -148,15 +157,6 @@ class BonelessSimulator:
             else:
                 return val
 
-        # Works with signed _or_ unsigned math.
-        def to_unsigned16b(val):
-            if val < 0:
-                return val + 65536
-            elif val > 65536:
-                return val - 65536
-            else:
-                return val
-
         opc = (0x3800 & opcode) >> 11
         srcdst = (0x0700 & opcode) >> 8
         imm = (0x00FF & opcode)
@@ -180,9 +180,17 @@ class BonelessSimulator:
         # STI
         elif opc == 0x05:
             self.mem[to_unsigned16b(self.pc + to_signed8b(imm))] = self.read_reg(srcdst)
+        # JAL
+        elif opc == 0x06:
+            val = to_unsigned16b(self.pc + 1)
+            pc_incr = 1 + to_signed8b(imm)
+        # JR
+        elif opc == 0x07:
+            raw_pc = self.read_reg(srcdst) + to_signed8b(imm)
+            pc_incr = to_unsigned16b(raw_pc - self.pc)
         else:
             raise NotImplementedError("Do I Class")
 
-        if opc not in [0x05]:
+        if opc not in [0x05, 0x07]:
             self._write_reg(srcdst, val)
         return pc_incr
