@@ -83,6 +83,9 @@ class BonelessSimulator:
         if op_class in [0x00, 0x01]:
             self.do_a_class(opcode)
             self.pc = to_unsigned16b(self.pc + 1)
+        elif op_class in [0x03, 0x04]:
+            self.do_s_class(opcode)
+            self.pc = to_unsigned16b(self.pc + 1)
         elif op_class in [0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]:
             pc_incr = self.do_i_class(opcode)
             self.pc = to_unsigned16b(self.pc + pc_incr)
@@ -147,6 +150,46 @@ class BonelessSimulator:
         else:
             raise NotImplementedError("Do A Class")
 
+        self.flags["Z"] = (raw == 0)
+        self.flags["S"] = sign(raw)
+
+    def do_s_class(self, opcode):
+        dst = (0x0700 & opcode) >> 8
+        opa = (0x00E0 & opcode) >> 5
+        amt = (0x001E & opcode) >> 1
+        typ = (0x0001 & opcode)
+        code = (0x0800 & opcode) >> 11
+
+        if code:
+            # SLL/MOV
+            if typ == 0:
+                raw = self.read_reg(opa) << amt
+            # ROT
+            else:
+                # Don't actually rotate, but implement
+                # in terms of bitshifts.
+                val = self.read_reg(opa)
+                hi_mask = ((1 << amt) - 1) << (15 - amt + 1)
+                lo_mask = (1 << (15 - amt + 1)) - 1
+                raw_hi = (hi_mask & val) >> (15 - amt)
+                raw_lo = (lo_mask & val) << amt
+                raw = raw_hi | raw_lo
+        else:
+            # SRL
+            if typ == 0:
+                raw = self.read_reg(opa) >> amt
+            # SRA
+            else:
+                val = self.read_reg(opa)
+                sign_bit = sign(val)
+                u_shift = self.read_reg(opa) >> amt
+                if sign_bit:
+                    sign_mask = ((1 << amt) - 1) << (15 - amt)
+                    raw = sign_mask | u_shift
+                else:
+                    raw = u_shift
+
+        self._write_reg(dst, raw & 0x0FFFF)
         self.flags["Z"] = (raw == 0)
         self.flags["S"] = sign(raw)
 
