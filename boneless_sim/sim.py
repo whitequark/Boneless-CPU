@@ -206,7 +206,17 @@ class BonelessSimulator:
             val = to_unsigned16b(self.pc + 1 + to_signed8b(imm))
         # ADDI/SUBI
         elif opc == 0x03:
-            val = to_unsigned16b(self.read_reg(srcdst) + to_signed8b(imm))
+            op_a = self.read_reg(srcdst)
+            op_b = to_signed8b(imm)
+            raw = op_a + op_b
+
+            val = to_unsigned16b(raw)
+
+            s_r = sign(raw)
+            self.flags["Z"] = (raw == 0)
+            self.flags["S"] = s_r
+            self.flags["C"] = int(raw > 65535)
+            self.flags["V"] = int((s_a and not s_b and not s_r) or (not s_a and s_b and s_r))
         # LDI
         elif opc == 0x04:
             val = self.mem[to_unsigned16b(self.pc + to_signed8b(imm))]
