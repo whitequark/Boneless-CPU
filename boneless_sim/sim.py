@@ -193,7 +193,6 @@ class BonelessSimulator:
                 if sign_bit:
                     sign_mask = ((1 << amt) - 1) << (15 - amt + 1)
                     raw = sign_mask | u_shift
-                    print(sign_mask, u_shift)
                 else:
                     raw = u_shift
 
@@ -218,7 +217,6 @@ class BonelessSimulator:
             self._write_reg(srcdst, self.mem[self.read_reg(adr) + to_signed5b(imm)])
         # ST
         elif code == 0x01:
-            print("ST", adr, imm)
             self.mem[self.read_reg(adr) + to_signed5b(imm)] = self.read_reg(srcdst)
         # LDX
         elif code == 0x02:
@@ -316,7 +314,7 @@ class BonelessSimulator:
             cond_met = (self.flags["S"]  == flag)
         # JNO, JO
         elif cond == 0x03:
-            cond_met = (self.flags["O"]  == flag)
+            cond_met = (self.flags["V"]  == flag)
         # JNC/JUGE, JC/JULT
         elif cond == 0x04:
             cond_met = (self.flags["C"]  == flag)
