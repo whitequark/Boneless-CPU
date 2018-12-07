@@ -79,14 +79,14 @@ class BonelessSimulator:
 
     # Replace the currently-defined I/O callback with a new one.
     # I/O callback has the following signature:
-    # fn(addr, write=False). Reads return read value.
+    # fn(addr, data=None). Reads return read value.
     # Writes return anything (including None), return value ignored.
     def register_io(self, callback):
         """Replace the currently-defined I/O callback with a new one.
 
         The I/O callback has the following signature:
         ``fn(addr, data=None)``, where `addr` is the I/O address to read/write,
-        and `data` is the data to write, `None` is this I/O access is a read.
+        and `data` is the data to write, `None` if this I/O access is a read.
         Reads return value read from I/O device. Writes return None, return
         value ignored.
         """
@@ -102,6 +102,9 @@ class BonelessSimulator:
             self.pc = to_unsigned16b(self.pc + 1)
         elif op_class in [0x02, 0x03]:
             self.do_s_class(opcode)
+            self.pc = to_unsigned16b(self.pc + 1)
+        elif op_class in [0x04, 0x05, 0x06, 0x07]:
+            self.do_m_class(opcode)
             self.pc = to_unsigned16b(self.pc + 1)
         elif op_class in [0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]:
             pc_incr = self.do_i_class(opcode)
@@ -196,6 +199,41 @@ class BonelessSimulator:
         self._write_reg(dst, raw & 0x0FFFF)
         self.flags["Z"] = zero(raw)
         self.flags["S"] = sign(raw)
+
+    def do_m_class(self, opcode):
+        def to_signed5b(val):
+            if val > 16:
+                return val - 32
+            else:
+                return val
+
+        code = (0x1800 & opcode) >> 11
+        srcdst = (0x0700 & opcode) >> 8
+        adr = (0x00E0 & opcode) >> 5
+        imm = (0x001F & opcode)
+
+        # LD
+        if code == 0x00:
+            self._write_reg(srcdst, self.mem[self.read_reg(adr) + to_signed5b(imm)])
+        # ST
+        elif code == 0x01:
+            print("ST", adr, imm)
+            self.mem[self.read_reg(adr) + to_signed5b(imm)] = self.read_reg(srcdst)
+        # LDX
+        elif code == 0x02:
+            if self.io_callback:
+                val = self.io_callback(self.read_reg(adr) + to_signed5b(imm), None)
+                self._write_reg(srcdst, val)
+            else:
+                # TODO: Raise exception
+                self._write_reg(srcdst, 0)
+        # STX
+        else:
+            if self.io_callback:
+                # TODO: Raise exception
+                val = self.read_reg(srcdst)
+                self.io_callback(self.read_reg(adr) + to_signed5b(imm), val)
+
 
     def do_i_class(self, opcode):
         def to_signed8b(val):

@@ -145,7 +145,52 @@ class TestClassS(BonelessTestCase):
 
 
 class TestClassM(BonelessTestCase):
-    pass
+    def test_ldst(self):
+        self.init_regs[R0] = 0xBEEF
+        self.init_regs[R1] = 0xDEAD
+        self.init_regs[R2] = 0x41
+
+        self.payload = [
+            ST(R0, R2, 0),
+            ST(R1, R2, -1),
+            LD(R3, R2, -1),
+            LD(R4, R2, 0)
+        ]
+
+        self.cpu.load_program(self.flatten())
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.mem[0x41], 0xBEEF)
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.mem[0x40:0x42].tolist(), [0xDEAD, 0xBEEF])
+        self.run_cpu(2)
+        self.assertEqual(self.cpu.regs()[3:5].tolist(), [0xDEAD, 0xBEEF])
+
+    def test_ldxstx(self):
+        my_str = ["H", "e", "l", "l", "o"]
+        def callback(addr, data):
+            if data:
+                if addr < 5:
+                    my_str[addr] = chr(data & 0x00FF)
+            else:
+                if addr < 5:
+                    return ord(my_str[addr])
+            return None
+
+        self.init_regs[R0] = ord("L")
+
+        self.payload = [
+            STX(R0, R1, 3),
+            LDX(R2, R1, 3),
+            ADDI(R1, 1),
+            LDX(R3, R1, -1)
+        ]
+
+        self.cpu.register_io(callback)
+        self.cpu.load_program(self.flatten())
+        self.run_cpu(1)
+        self.assertEqual(my_str, ["H", "e", "l", "L", "o"])
+        self.run_cpu(3)
+        self.assertEqual(self.cpu.regs()[2:4].tolist(), [ord("L"), ord("H")])
 
 
 class TestClassI(BonelessTestCase):
