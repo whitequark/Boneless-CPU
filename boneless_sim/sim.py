@@ -3,10 +3,27 @@ import array
 __all__ = ["BonelessSimulator"]
 
 
+# Flag functions
 # Used to calculate sign bit and also
 # overflow.
 def sign(val):
     return int((val & 0x08000) != 0)
+
+def zero(val):
+    return int(val == 0)
+
+# Carry and V use 65xx semantics:
+# http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
+# http://teaching.idallen.com/dat2343/10f/notes/040_overflow.txt
+def carry(val):
+    return int(val > 65535)
+
+def overflow(a, b, out):
+    s_a = sign(a)
+    s_b = sign(b)
+    s_o = sign(out)
+
+    return int((s_a and not s_b and not s_o) or (not s_a and s_b and s_o))
 
 # Works with signed _or_ unsigned math.
 def to_unsigned16b(val):
@@ -106,8 +123,6 @@ class BonelessSimulator:
 
         val_a = self.read_reg(opa)
         val_b = self.read_reg(opb)
-        s_a = sign(val_a)
-        s_b = sign(val_b)
 
         if code and (typ in range(3)):
             # ADD
@@ -122,12 +137,8 @@ class BonelessSimulator:
                 if typ == 0x01:
                     self._write_reg(dst, to_unsigned16b(raw))
 
-            # Carry and V use 65xx semantics:
-            # http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
-            # http://teaching.idallen.com/dat2343/10f/notes/040_overflow.txt
-            s_r = sign(raw)
-            self.flags["C"] = int(raw > 65535)
-            self.flags["V"] = int((s_a and not s_b and not s_r) or (not s_a and s_b and s_r))
+            self.flags["C"] = carry(raw)
+            self.flags["V"] = overflow(val_a, val_b, raw)
         elif not code and typ in range(3):
             # AND
             if typ == 0x00:
@@ -142,7 +153,7 @@ class BonelessSimulator:
         else:
             raise NotImplementedError("Do A Class")
 
-        self.flags["Z"] = (raw == 0)
+        self.flags["Z"] = zero(raw)
         self.flags["S"] = sign(raw)
 
     def do_s_class(self, opcode):
@@ -183,7 +194,7 @@ class BonelessSimulator:
                     raw = u_shift
 
         self._write_reg(dst, raw & 0x0FFFF)
-        self.flags["Z"] = (raw == 0)
+        self.flags["Z"] = zero(raw)
         self.flags["S"] = sign(raw)
 
     def do_i_class(self, opcode):
@@ -215,13 +226,10 @@ class BonelessSimulator:
 
             val = to_unsigned16b(raw)
 
-            s_a = sign(op_a)
-            s_b = sign(op_b)
-            s_r = sign(raw)
-            self.flags["Z"] = (raw == 0)
-            self.flags["S"] = s_r
-            self.flags["C"] = int(raw > 65535)
-            self.flags["V"] = int((s_a and not s_b and not s_r) or (not s_a and s_b and s_r))
+            self.flags["Z"] = zero(raw)
+            self.flags["S"] = sign(raw)
+            self.flags["C"] = carry(raw)
+            self.flags["V"] = overflow(op_a, op_b, raw)
         # LDI
         elif opc == 0x04:
             val = self.mem[to_unsigned16b(self.pc + to_signed8b(imm))]
