@@ -10,7 +10,7 @@ def sign(val):
     return int((val & 0x08000) != 0)
 
 def zero(val):
-    return int(val == 0)
+    return int(to_unsigned16b(val) == 0)
 
 # Carry and V use 65xx semantics:
 # http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
@@ -19,6 +19,13 @@ def carry(val):
     return int(val > 65535)
 
 def overflow(a, b, out):
+    s_a = sign(a)
+    s_b = sign(b)
+    s_o = sign(out)
+
+    return int((s_a and s_b and not s_o) or (s_a and s_b and s_o))
+
+def overflow_sub(a, b, out):
     s_a = sign(a)
     s_b = sign(b)
     s_o = sign(out)
@@ -132,17 +139,19 @@ class BonelessSimulator:
             # ADD
             if typ == 0x00:
                 raw = val_a + val_b
+                self.flags["V"] = overflow(val_a, val_b, raw)
                 self._write_reg(dst, to_unsigned16b(raw))
-            # SUB/CMP
+            # SUB
+            elif typ == 0x01:
+                raw = val_a + to_unsigned16b(~val_b) + 1
+                self.flags["V"] = overflow_sub(val_a, val_b, raw)
+                self._write_reg(dst, to_unsigned16b(raw))
+            # CMP
             else:
-                raw = val_a + ~val_b + 1
-
-                # CMP skips writing results
-                if typ == 0x01:
-                    self._write_reg(dst, to_unsigned16b(raw))
+                raw = val_a + to_unsigned16b(~val_b) + 1
+                self.flags["V"] = overflow_sub(val_a, val_b, raw)
 
             self.flags["C"] = carry(raw)
-            self.flags["V"] = overflow(val_a, val_b, raw)
         elif not code and typ in range(3):
             # AND
             if typ == 0x00:
@@ -232,7 +241,6 @@ class BonelessSimulator:
                 # TODO: Raise exception
                 val = self.read_reg(srcdst)
                 self.io_callback(self.read_reg(adr) + to_signed5b(imm), val)
-
 
     def do_i_class(self, opcode):
         def to_signed8b(val):
