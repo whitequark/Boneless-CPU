@@ -83,7 +83,7 @@ class BonelessSimulator:
         if op_class in [0x00, 0x01]:
             self.do_a_class(opcode)
             self.pc = to_unsigned16b(self.pc + 1)
-        elif op_class in [0x03, 0x04]:
+        elif op_class in [0x02, 0x03]:
             self.do_s_class(opcode)
             self.pc = to_unsigned16b(self.pc + 1)
         elif op_class in [0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]:
@@ -129,10 +129,13 @@ class BonelessSimulator:
             self.flags["C"] = int(raw > 65535)
             self.flags["V"] = int((s_a and not s_b and not s_r) or (not s_a and s_b and s_r))
         elif not code and typ in range(3):
+            # AND
             if typ == 0x00:
                 raw = val_a & val_b
+            # OR
             elif typ == 0x01:
                 raw = val_a | val_b
+            # XOR
             else:
                 raw = val_a ^ val_b
             self._write_reg(dst, raw)
@@ -142,7 +145,6 @@ class BonelessSimulator:
         self.flags["Z"] = (raw == 0)
         self.flags["S"] = sign(raw)
 
-
     def do_s_class(self, opcode):
         dst = (0x0700 & opcode) >> 8
         opa = (0x00E0 & opcode) >> 5
@@ -150,7 +152,7 @@ class BonelessSimulator:
         typ = (0x0001 & opcode)
         code = (0x0800 & opcode) >> 11
 
-        if code:
+        if not code:
             # SLL/MOV
             if typ == 0:
                 raw = self.read_reg(opa) << amt
@@ -174,8 +176,9 @@ class BonelessSimulator:
                 sign_bit = sign(val)
                 u_shift = self.read_reg(opa) >> amt
                 if sign_bit:
-                    sign_mask = ((1 << amt) - 1) << (15 - amt)
+                    sign_mask = ((1 << amt) - 1) << (15 - amt + 1)
                     raw = sign_mask | u_shift
+                    print(sign_mask, u_shift)
                 else:
                     raw = u_shift
 

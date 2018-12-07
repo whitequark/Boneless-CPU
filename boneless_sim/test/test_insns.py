@@ -63,7 +63,85 @@ class TestClassA(BonelessTestCase):
 
 
 class TestClassS(BonelessTestCase):
-    pass
+    def test_sll(self):
+        self.init_regs[R0] = 0x1
+
+        self.payload = [
+            SLL(R0, R0, 4)
+        ]
+
+        self.cpu.load_program(self.flatten())
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[0], 0x10)
+
+    def test_mov(self):
+        self.init_regs[R0] = 0x55AA
+
+        self.payload = [
+            MOV(R1, R0)
+        ]
+
+        self.cpu.load_program(self.flatten())
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[1], 0x55AA)
+
+    def test_srl(self):
+        self.init_regs[R0] = 0x8000
+
+        self.payload = [
+            SRL(R0, R0, 4)
+        ]
+
+        self.cpu.load_program(self.flatten())
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[0], 0x0800)
+
+    def test_sra(self):
+        self.init_regs[R0] = 0x8000
+
+        self.payload = [
+            SRA(R0, R0, 4)
+        ]
+
+        self.cpu.load_program(self.flatten())
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[0], 0xF800)
+
+    @unittest.skip("ROR not found.")
+    def test_rot(self):
+        self.init_regs[R0] = 0x10
+
+        self.payload = [
+            ROT(R0, R0, 4),
+            ROR(R0, R0, 4),
+        ]
+
+        self.cpu.load_program(self.flatten())
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[0], 0x10)
+
+    def test_flags(self):
+        self.init_regs[R0] = 0x1
+        self.init_regs[R1] = 0x8000
+        self.init_regs[R2] = 0x4000
+
+        self.payload = [
+            SLL(R2, R2, 1),
+            SRL(R2, R2, 1),
+            SRA(R2, R2, 15),
+            SRA(R1, R1, 15)
+        ]
+
+        self.cpu.load_program(self.flatten())
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.flags, { "Z" : 0, "S" : 1, "C" : 0, "V" : 0})
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.flags, { "Z" : 0, "S" : 0, "C" : 0, "V" : 0})
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.flags, { "Z" : 1, "S" : 0, "C" : 0, "V" : 0})
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[1], 0xFFFF)
+        self.assertEqual(self.cpu.flags, { "Z" : 0, "S" : 1, "C" : 0, "V" : 0})
 
 
 class TestClassM(BonelessTestCase):
