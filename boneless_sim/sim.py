@@ -110,7 +110,8 @@ class BonelessSimulator:
             pc_incr = self.do_i_class(opcode)
             self.pc = to_unsigned16b(self.pc + pc_incr)
         else:
-            raise NotImplementedError("Step Instruction")
+            pc_incr = self.do_c_class(opcode)
+            self.pc = to_unsigned16b(self.pc + pc_incr)
 
     # Utility Functions- Do not call directly
     def _write_reg(self, reg, val):
@@ -287,4 +288,51 @@ class BonelessSimulator:
 
         if opc not in [0x05, 0x07]:
             self._write_reg(srcdst, val)
+        return pc_incr
+
+    def do_c_class(self, opcode):
+        def to_signed11b(val):
+            if val > 1023:
+                return val - 2048
+            else:
+                return val
+
+        cond = (0x7000 & opcode) >> 12
+        flag = (0x0800 & opcode) >> 11
+        offs = (0x7FF & opcode)
+
+        # J
+        if cond == 0x00:
+            if flag:
+                raise NotImplementedError("Do C Class")
+            else:
+                cond_met = True
+
+        # JNZ/JNE, JZ/JE
+        elif cond == 0x01:
+            cond_met = (self.flags["Z"]  == flag)
+        # JNS, JS
+        elif cond == 0x02:
+            cond_met = (self.flags["S"]  == flag)
+        # JNO, JO
+        elif cond == 0x03:
+            cond_met = (self.flags["O"]  == flag)
+        # JNC/JUGE, JC/JULT
+        elif cond == 0x04:
+            cond_met = (self.flags["C"]  == flag)
+        # JUGT, JULE
+        elif cond == 0x05:
+            cond_met = ((self.flags["C"] or self.flags["Z"])  == flag)
+        # JSGE, JSLT
+        elif cond == 0x06:
+            cond_met = ((self.flags["S"] ^ self.flags["V"])  == flag)
+        # JSGT, JSLE
+        elif cond == 0x07:
+            cond_met = (((self.flags["S"] ^ self.flags["V"]) or self.flags["Z"])  == flag)
+
+        if cond_met:
+            pc_incr = to_signed11b(offs) + 1
+        else:
+            pc_incr = 1
+
         return pc_incr

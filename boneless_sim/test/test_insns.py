@@ -290,8 +290,8 @@ class TestClassI(BonelessTestCase):
         self.assertEqual(self.cpu.pc, 16)
 
 
-class TestClassJ(BonelessTestCase):
-    def mk_payload(Ra, Rb, Jcc):
+class TestClassC(BonelessTestCase):
+    def mk_payload(self, Jcc, Ra=R5, Rb=R6):
         return [
             L("start"),
             CMP(Ra, Rb),
@@ -301,3 +301,22 @@ class TestClassJ(BonelessTestCase):
             L("end_branch"),
             NOP()
         ]
+
+    def test_jmps(self):
+        for val_a, val_b, jcc, taken in [
+            (0, 0, J, True),
+            (1, 2, JS, True),
+        ]:
+            with self.subTest(val_a=val_a, val_b=val_b, jcc=jcc, taken=taken):
+                self.init_regs[R5] = val_a
+                self.init_regs[R6] = val_b
+
+                self.payload = self.mk_payload(jcc)
+                self.cpu.pc = 16
+                self.cpu.load_program(self.flatten())
+                self.run_cpu(2)
+                print(self.cpu.flags)
+                if taken:
+                    self.assertEqual(self.cpu.pc, 19)
+                else:
+                    self.assertEqual(self.cpu.pc, 18)
