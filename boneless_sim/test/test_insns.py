@@ -348,7 +348,7 @@ class TestClassC(BonelessTestCase):
     def test_jmps(self):
         for val_a, val_b, jcc, taken in [
             (0, 0, J, True),
-            (1, 2, JS, True),
+            (2, 1, JS, True),
         ]:
             with self.subTest(val_a=val_a, val_b=val_b, jcc=jcc, taken=taken):
                 self.init_regs[R5] = val_a
