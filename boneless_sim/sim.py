@@ -91,11 +91,30 @@ class BonelessSimulator:
     def register_io(self, callback):
         """Replace the currently-defined I/O callback with a new one.
 
-        The I/O callback has the following signature:
-        ``fn(addr, data=None)``, where `addr` is the I/O address to read/write,
-        and `data` is the data to write, `None` if this I/O access is a read.
-        Reads return value read from I/O device. Writes return None, return
-        value ignored.
+        The Simulated Boneless CPU needs a way to contact the outside world.
+        The architecture itself defines a secondary address space for I/O,
+        similar in idea to x86 port-mapped I/O. When the ``STX`` and ``LDX``
+        instructions are encountered, the provided callback will execute to
+        simulate I/O. It is up to the user to decode the I/O address passed
+        into the callback accordingly.
+
+        The I/O callback can only be replaced when a simulation is inactive.
+
+        Parameters
+        ----------
+        callback: function
+            The callback function, using the following signature:
+            ``fn(addr, data=None)``
+
+            * ``addr``: 16-bit int
+                Virtual I/O address to read/write
+            * ``data``: 16-bit int or ``None``
+                If this I/O access is a read, ``data`` is ``None``. Otherwise,
+                ``data`` contains a value to write to a virtual I/O device.
+
+            The callback should return a 16-bit int if the I/O access was a
+            read and ``None`` if the I/O access was a write (ignored by the
+            simulator).
         """
         if not self.sim_active:
             self.io_callback = callback
