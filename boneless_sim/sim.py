@@ -43,6 +43,61 @@ def to_unsigned16b(val):
 
 
 class BonelessSimulator:
+    """The Boneless CPU instruction-level simulator object.
+
+    Instantiating this object will create a simulator context in
+    which Boneless CPU code runs, one instruction at a time. A
+    sample simulation session looks similar to the following:
+    ::
+        from boneless_sim import *
+        from glasgow.arch.boneless.instr import *
+
+        cpu = BonelessSimulator(start_pc=0x10, memsize=65536)
+        program = assemble([MOVL(R0, 0xFF)])
+        cpu.load_program(program)
+
+        with cpu:
+            cpu.stepi()
+
+        print(cpu.regs())
+
+    Parameters
+    ----------
+    start_pc: ``int``, optional
+        The Program Counter register is set to this value when instantiating
+        an object of this class.
+    memsize: ``int``, optional
+        Number of 16-bit words that the simulated CPU can access, starting
+        from address zero. Accessing out-of-bounds memory will cause an
+        exception.
+    io_callback: function
+        Initial I/O callback to use. See
+        :func:`~boneless_sim.BonelessSimulator.register_io` for usage.
+
+    Attributes
+    ----------
+    sim_active: bool
+        ``True`` if a simulation is in progress, ``False`` otherwise.
+    window: int
+        Offset of the register window into memory (Boneless CPU registers
+        are just memory locations.)
+    pc: int
+        Current program counter pointer.
+    flags: dict
+        Current value of the flags register. Each dictionary entry is either
+        ``1`` for ``True``, or ``0`` for ``False``. Valid keys are:
+
+        * "Z" : Zero bit
+        * "S" : Sign bit
+        * "C" : Carry bit
+        * "V" : OVerflow bit
+
+    mem: array
+        Contents of the primary address space seen by the simulated CPU.
+
+    io_callback: function
+        Reference to the current I/O callback function.
+    """
     def __init__(self, start_pc=0x10, memsize=1024, io_callback=None):
         def memset():
             for i in range(memsize):
@@ -63,6 +118,13 @@ class BonelessSimulator:
         self.sim_active = False
 
     def regs(self):
+        """Return the 8 registers within the current register window.
+
+        Returns
+        -------
+        array
+            Array of 16-bit ints representing registers.
+        """
         return self.mem[self.window:self.window+16]
 
     def read_reg(self, reg):
@@ -108,7 +170,7 @@ class BonelessSimulator:
 
             * ``addr``: 16-bit int
                 Virtual I/O address to read/write
-            * ``data``: 16-bit int or ``None``
+            * ``data``: 16-bit int` or ``None``
                 If this I/O access is a read, ``data`` is ``None``. Otherwise,
                 ``data`` contains a value to write to a virtual I/O device.
 
