@@ -259,19 +259,19 @@ class BonelessSimulator:
         op_class = (0xF800 & opcode) >> 11
 
         if op_class in [0x00, 0x01]:
-            self.do_a_class(opcode)
+            self._do_a_class(opcode)
             self.pc = to_unsigned16b(self.pc + 1)
         elif op_class in [0x02, 0x03]:
-            self.do_s_class(opcode)
+            self._do_s_class(opcode)
             self.pc = to_unsigned16b(self.pc + 1)
         elif op_class in [0x04, 0x05, 0x06, 0x07]:
-            self.do_m_class(opcode)
+            self._do_m_class(opcode)
             self.pc = to_unsigned16b(self.pc + 1)
         elif op_class in [0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]:
-            pc_incr = self.do_i_class(opcode)
+            pc_incr = self._do_i_class(opcode)
             self.pc = to_unsigned16b(self.pc + pc_incr)
         else:
-            pc_incr = self.do_c_class(opcode)
+            pc_incr = self._do_c_class(opcode)
             self.pc = to_unsigned16b(self.pc + pc_incr)
 
     # Utility Functions- Do not call directly
@@ -279,7 +279,7 @@ class BonelessSimulator:
         self.mem[self.reg_loc(reg)] = val
 
     # Handle Opcode Clases- Do not call directly
-    def do_a_class(self, opcode):
+    def _do_a_class(self, opcode):
         dst = (0x0700 & opcode) >> 8
         opa = (0x00E0 & opcode) >> 5
         opb = (0x001C & opcode) >> 2
@@ -323,7 +323,7 @@ class BonelessSimulator:
         self.flags["Z"] = zero(raw)
         self.flags["S"] = sign(raw)
 
-    def do_s_class(self, opcode):
+    def _do_s_class(self, opcode):
         dst = (0x0700 & opcode) >> 8
         opa = (0x00E0 & opcode) >> 5
         amt = (0x001E & opcode) >> 1
@@ -363,7 +363,7 @@ class BonelessSimulator:
         self.flags["Z"] = zero(raw)
         self.flags["S"] = sign(raw)
 
-    def do_m_class(self, opcode):
+    def _do_m_class(self, opcode):
         def to_signed5b(val):
             if val > 16:
                 return val - 32
@@ -396,7 +396,7 @@ class BonelessSimulator:
                 val = self.read_reg(srcdst)
                 self.io_callback(self.read_reg(adr) + to_signed5b(imm), val)
 
-    def do_i_class(self, opcode):
+    def _do_i_class(self, opcode):
         def to_signed8b(val):
             if val > 127:
                 return val - 256
@@ -450,7 +450,7 @@ class BonelessSimulator:
             self._write_reg(srcdst, val)
         return pc_incr
 
-    def do_c_class(self, opcode):
+    def _do_c_class(self, opcode):
         def to_signed11b(val):
             if val > 1023:
                 return val - 2048
