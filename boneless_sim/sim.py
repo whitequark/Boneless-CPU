@@ -63,10 +63,10 @@ class BonelessSimulator:
 
     Parameters
     ----------
-    start_pc: ``int``, optional
+    start_pc: int, optional
         The Program Counter register is set to this value when instantiating
         an object of this class.
-    memsize: ``int``, optional
+    memsize: int, optional
         Number of 16-bit words that the simulated CPU can access, starting
         from address zero. Accessing out-of-bounds memory will cause an
         exception.
@@ -93,7 +93,8 @@ class BonelessSimulator:
         * "V" : OVerflow bit
 
     mem: array
-        Contents of the primary address space seen by the simulated CPU.
+        Contents of the primary address space seen by the simulated CPU. On
+        object construction this is initialized to all zeroes.
 
     io_callback: function
         Reference to the current I/O callback function.
@@ -128,28 +129,95 @@ class BonelessSimulator:
         return self.mem[self.window:self.window+16]
 
     def read_reg(self, reg):
+        """Read the value of a single 16-bit register.
+
+        Parameters
+        ----------
+        reg: int
+            Register number to read. ``R[0-8]`` from the `glasgow` package
+            is also acceptable.
+
+        Returns
+        -------
+        int
+            Current value of the queried register.
+        """
         return self.mem[self.reg_loc(reg)]
 
     def reg_loc(self, offs):
+        """Convenience function to return the address of a register in memory.
+
+        A register's location changes when the CPU's :attr:`window` is updated.
+
+        Parameters
+        ----------
+        offs: int
+            Register number to read. ``R[0-8]`` from the `glasgow` package
+            is also acceptable.
+
+        Returns
+        -------
+        int
+            16-bit memory address of the queried register.
+        """
         return self.window + offs
 
     def set_pc(self, new_pc):
+        """Set the program counter to a new value.
+
+        The program counter can only be updated using this function when
+        a simulation is inactive.
+
+        Parameters
+        ----------
+        new_pc: int
+            16-bit (`treated as unsigned`) to write to the PC register. If the
+            value is out of range, a read to :attr:`mem` will throw an
+            exception.
+        """
         if not self.sim_active:
             self.pc = new_pc
 
     def write_reg(self, reg, val):
+        """Write the value of a single 16-bit register.
+
+        Registers can only be updated using this function when a simulation
+        is inactive.
+
+        Parameters
+        ----------
+        reg: int
+            Register number to write. ``R[0-8]`` from the ``glasgow`` package
+            is also acceptable.
+        val: int
+            16-bit (`treated as unsigned`) to write to a register. If the
+            value is out of range, the write to :attr:`mem` will throw an
+            exception.
+        """
         if not self.sim_active:
             self.mem[self.reg_loc(reg)] = val
 
     def load_program(self, contents, start=0x10):
+        """Inject program code into the memory space of the simulated CPU.
+
+        This function does not distinguish between loading program code and
+        raw data. Program code can only be loaded using this function when a
+        simulation is inactive.
+
+        Parameters
+        ----------
+        contents: list of ints
+            Integer representation of opcodes to load into the memory space of
+            the simulated CPU. The ``assemble`` function from the ``glasgow``
+            package produces a list compatible with this input parameter.
+        start: int
+            16-bit int offset representing the starting location in memory
+            in which to load ``contents``.
+        """
         if not self.sim_active:
             for i, c in enumerate(contents):
                 self.mem[i + start] = c
 
-    # Replace the currently-defined I/O callback with a new one.
-    # I/O callback has the following signature:
-    # fn(addr, data=None). Reads return read value.
-    # Writes return anything (including None), return value ignored.
     def register_io(self, callback):
         """Replace the currently-defined I/O callback with a new one.
 
@@ -182,6 +250,11 @@ class BonelessSimulator:
             self.io_callback = callback
 
     def stepi(self):
+        """Run a single instruction of the simulated CPU.
+
+        The state of the CPU will be available through the attributes of
+        :obj:`~boneless_sim.BonelessSimulator`.
+        """
         opcode = self.mem[self.pc]
         op_class = (0xF800 & opcode) >> 11
 
