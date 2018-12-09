@@ -341,7 +341,7 @@ class BonelessSimulator:
                 val = self.read_reg(opa)
                 hi_mask = ((1 << amt) - 1) << (15 - amt + 1)
                 lo_mask = (1 << (15 - amt + 1)) - 1
-                raw_hi = (hi_mask & val) >> (15 - amt)
+                raw_hi = (hi_mask & val) >> (15 - amt + 1)
                 raw_lo = (lo_mask & val) << amt
                 raw = raw_hi | raw_lo
         else:

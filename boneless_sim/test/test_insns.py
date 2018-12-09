@@ -150,18 +150,25 @@ class TestClassS(BonelessTestCase):
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[0], 0xF800)
 
-    @unittest.skip("ROR not found.")
     def test_rot(self):
-        self.init_regs[R0] = 0x10
+        self.init_regs[R0] = 0xDEAD
 
         self.payload = [
-            ROT(R0, R0, 4),
-            ROR(R0, R0, 4),
+            ROT(R0, R0, 12),
+            ROR(R0, R0, 12),
+            ROR(R0, R0, 3),
+            ROL(R0, R0, 3),
         ]
 
         self.cpu.load_program(self.flatten())
         self.run_cpu(1)
-        self.assertEqual(self.cpu.regs()[0], 0x10)
+        self.assertEqual(self.cpu.regs()[0], 0xDDEA)
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[0], 0xDEAD)
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[0], 0xBBD5)
+        self.run_cpu(1)
+        self.assertEqual(self.cpu.regs()[0], 0xDEAD)
 
     def test_flags(self):
         self.init_regs[R0] = 0x1
