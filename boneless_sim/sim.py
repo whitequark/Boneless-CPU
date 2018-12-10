@@ -421,7 +421,9 @@ class BonelessSimulator:
         elif opc == 0x03:
             op_a = self.read_reg(srcdst)
             op_b = to_signed8b(imm)
-            raw = op_a + op_b
+            # Flags will not be set correctly unless we convert
+            # op_b to unsigned to force a carry when op_a > op_b.
+            raw = op_a + to_unsigned16b(op_b)
 
             val = to_unsigned16b(raw)
 
