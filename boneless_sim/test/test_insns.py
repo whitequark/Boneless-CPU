@@ -344,7 +344,7 @@ class TestClassC(BonelessTestCase):
     def mk_payload(self, Jcc, Ra=R5, Rb=R6):
         return [
             L("start"),
-            CMP(Ra, Rb),
+            CMP(Rb, Ra),
             Jcc("end_branch"),
             L("end_no_branch"),
             NOP(),
@@ -353,9 +353,55 @@ class TestClassC(BonelessTestCase):
         ]
 
     def test_jmps(self):
-        for val_a, val_b, jcc, taken in [
+        for val_b, val_a, jcc, taken in [
             (0, 0, J, True),
+
+            (0x7FFF, 0x7FFF, JZ, True),
+            (0x8000, 0x7FFF, JE, False),
+            (0xFFFF, 2, JNZ, True),
+            (0xFFFF, 0xFFFF, JNE, False),
+
             (2, 1, JS, True),
+            (1, 2, JS, False),
+            (1, 2, JNS, True),
+            (2, 1, JNS, False),
+
+            (0x8001, 1, JO, True),
+            (0x8002, 1, JO, False),
+            (1, 0x8001, JNO, True),
+            (1, 0x8000, JNO, False),
+
+            (0xC000, 0x8001, JC, False),
+            (0x8000, 0x8001, JULT, True),
+            (0x8001, 0x8001, JULT, False),
+
+            (0xC000, 0x8001, JULE, False),
+            (0x8000, 0x8001, JULE, True),
+            (0x8001, 0x8001, JULE, True),
+
+            (0xFFFF, 0x7FFF, JUGT, True),
+            (0x7FFF, 0xFFFF, JUGT, False),
+            (0xFFFF, 0xFFFF, JUGT, False),
+
+            (0xFFFF, 0x7FFF, JNC, True),
+            (0x7FFF, 0xFFFF, JUGE, False),
+            (0xFFFF, 0xFFFF, JUGE, True),
+
+            (0xC000, 0x8001, JSLT, False),
+            (0x8000, 0x8001, JSLT, True),
+            (0x8001, 0x8001, JSLT, False),
+
+            (0xC000, 0x8001, JSLE, False),
+            (0x8000, 0x8001, JSLE, True),
+            (0x8001, 0x8001, JSLE, False),
+
+            (0xFFFF, 0x7FFF, JSGT, False),
+            (0x7FFF, 0xFFFF, JSGT, True),
+            (0xFFFF, 0xFFFF, JSGT, False),
+
+            (0xFFFF, 0x7FFF, JSGE, False),
+            (0x7FFF, 0xFFFF, JSGE, True),
+            (0xFFFF, 0xFFFF, JSGE, True),
         ]:
             with self.subTest(val_a=val_a, val_b=val_b, jcc=jcc, taken=taken):
                 self.init_regs[R5] = val_a
