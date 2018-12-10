@@ -8,7 +8,7 @@ setup(
     url="https://github.com/cr1901/boneless-sim",
     author="William D. Jones",
     author_email="thor0505@comcast.net",
-    license="BSD",
+    license="0-clause BSD License",
     packages=find_packages(exclude=["tests"]),
     platforms=["Any"],
     classifiers=[
