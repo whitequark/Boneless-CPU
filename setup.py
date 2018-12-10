@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="boneless_sim",
-    version="0.1.0",
+    version="0.9.0",
     description="Simulator for the Boneless CPU",
     long_description=open("README.md").read(),
     url="https://github.com/cr1901/boneless-sim",
