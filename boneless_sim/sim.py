@@ -476,15 +476,15 @@ class BonelessSimulator:
         # JNS, JS
         elif cond == 0x02:
             cond_met = (self.flags["S"]  == flag)
-        # JNO, JO
+        # JNC/JULT, JC/JUGE
         elif cond == 0x03:
-            cond_met = (self.flags["V"]  == flag)
-        # JNC/JUGE, JC/JULT
-        elif cond == 0x04:
             cond_met = (self.flags["C"]  == flag)
-        # JUGT, JULE
+        # JNO, JO
+        elif cond == 0x04:
+            cond_met = (self.flags["V"]  == flag)
+        # JULE, JUGT
         elif cond == 0x05:
-            cond_met = ((self.flags["C"] or self.flags["Z"])  == flag)
+            cond_met = ((not self.flags["C"] or self.flags["Z"])  == flag)
         # JSGE, JSLT
         elif cond == 0x06:
             cond_met = ((self.flags["S"] ^ self.flags["V"])  == flag)
