@@ -30,3 +30,19 @@ class Test32bMath(BonelessTestCase):
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[6], 0)
         self.assertEqual(self.cpu.flags, { "Z" : 1, "S" : 0, "C" : 1, "V" : 0})
+
+
+class TestLoop(BonelessTestCase):
+    def test_loop(self):
+        self.init_regs[R0] = 0x10
+
+        self.payload = [
+            L("loop"),
+            SUBI(R0, 1),
+            JC("loop"),
+            L("end"),
+            NOP()
+        ]
+
+        self.cpu.load_program(self.flatten())
+        self.run_cpu_until_pc(0x12, fail_count=34)
