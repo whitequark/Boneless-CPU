@@ -55,15 +55,15 @@ class TestClassA(BonelessTestCase):
         # (Sign and Zero are mutually exclusive in twos comp, so we only need
         # to test twelve possble combinations). Commented-out combinations
         # are not possible with subtraction or at all.
-        for rb, ra, f in [
+        for ra, rb, f in [
             # (_, _, { "Z" : 0, "S" : 0, "C" : 0, "V" : 0}), # S=0, C=0 impossible
             # (_, _, { "Z" : 0, "S" : 0, "C" : 0, "V" : 1}),
-            (R1, R7, { "Z" : 0, "S" : 0, "C" : 1, "V" : 0}),
-            (R1, R5, { "Z" : 0, "S" : 0, "C" : 1, "V" : 1}),
+            (R7, R1, { "Z" : 0, "S" : 0, "C" : 1, "V" : 0}),
+            (R5, R1, { "Z" : 0, "S" : 0, "C" : 1, "V" : 1}),
 
-            (R7, R1, { "Z" : 0, "S" : 1, "C" : 0, "V" : 0}),
-            (R2, R6, { "Z" : 0, "S" : 1, "C" : 0, "V" : 1}),
-            (R0, R2, { "Z" : 0, "S" : 1, "C" : 1, "V" : 0}),
+            (R1, R7, { "Z" : 0, "S" : 1, "C" : 0, "V" : 0}),
+            (R6, R2, { "Z" : 0, "S" : 1, "C" : 0, "V" : 1}),
+            (R2, R0, { "Z" : 0, "S" : 1, "C" : 1, "V" : 0}),
             # (_, _, { "Z" : 0, "S" : 1, "C" : 1, "V" : 1}),
             # (_, _, { "Z" : 1, "S" : 0, "C" : 0, "V" : 0}), # Z=1, C=0 impossible
             # (_, _, { "Z" : 1, "S" : 0, "C" : 0, "V" : 1}),
@@ -72,7 +72,7 @@ class TestClassA(BonelessTestCase):
         ]:
             with self.subTest(rb=rb, ra=ra, f=f):
                 self.payload = [
-                    CMP(rb, ra),
+                    CMP(ra, rb),
                 ]
                 self.cpu.pc = 16
                 self.cpu.load_program(self.flatten())
