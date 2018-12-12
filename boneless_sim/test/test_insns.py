@@ -344,7 +344,7 @@ class TestClassC(BonelessTestCase):
     def mk_payload(self, Jcc, Ra=R5, Rb=R6):
         return [
             L("start"),
-            CMP(Rb, Ra),
+            CMP(Ra, Rb),
             Jcc("end_branch"),
             L("end_no_branch"),
             NOP(),
@@ -353,7 +353,7 @@ class TestClassC(BonelessTestCase):
         ]
 
     def test_jmps(self):
-        for val_b, val_a, jcc, taken in [
+        for val_a, val_b, jcc, taken in [
             (0, 0, J, True),
 
             (0x7FFF, 0x7FFF, JZ, True),
@@ -361,17 +361,17 @@ class TestClassC(BonelessTestCase):
             (0xFFFF, 2, JNZ, True),
             (0xFFFF, 0xFFFF, JNE, False),
 
-            (2, 1, JS, True),
-            (1, 2, JS, False),
-            (1, 2, JNS, True),
-            (2, 1, JNS, False),
+            (2, 1, JS, False),
+            (1, 2, JS, True),
+            (1, 2, JNS, False),
+            (2, 1, JNS, True),
 
-            (0x8001, 1, JO, True),
-            (0x8002, 1, JO, False),
-            (1, 0x8001, JNO, True),
-            (1, 0x8000, JNO, False),
+            (1, 0x8001, JO, True),
+            (1, 0x8002, JO, False),
+            (0x8001, 1, JNO, True),
+            (0x8000, 1, JNO, False),
 
-            (0xC000, 0x8001, JC, False),
+            (0xC000, 0x8001, JNC, False),
             (0x8000, 0x8001, JULT, True),
             (0x8001, 0x8001, JULT, False),
 
@@ -383,7 +383,7 @@ class TestClassC(BonelessTestCase):
             (0x7FFF, 0xFFFF, JUGT, False),
             (0xFFFF, 0xFFFF, JUGT, False),
 
-            (0xFFFF, 0x7FFF, JNC, True),
+            (0xFFFF, 0x7FFF, JC, True),
             (0x7FFF, 0xFFFF, JUGE, False),
             (0xFFFF, 0xFFFF, JUGE, True),
 
@@ -393,7 +393,7 @@ class TestClassC(BonelessTestCase):
 
             (0xC000, 0x8001, JSLE, False),
             (0x8000, 0x8001, JSLE, True),
-            (0x8001, 0x8001, JSLE, False),
+            (0x8001, 0x8001, JSLE, True),
 
             (0xFFFF, 0x7FFF, JSGT, False),
             (0x7FFF, 0xFFFF, JSGT, True),
