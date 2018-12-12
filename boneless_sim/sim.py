@@ -1,6 +1,6 @@
 import array
 
-__all__ = ["BonelessSimulator"]
+__all__ = ["BonelessSimulator", "BonelessError"]
 
 
 # Flag functions
@@ -318,7 +318,7 @@ class BonelessSimulator:
                 raw = val_a ^ val_b
             self._write_reg(dst, raw)
         else:
-            raise NotImplementedError("Do A Class")
+            raise BonelessError("A-class opcode with typ == 0x03 is a reserved instruction.")
 
         self.flags["Z"] = zero(raw)
         self.flags["S"] = sign(raw)
@@ -387,14 +387,14 @@ class BonelessSimulator:
                 val = self.io_callback(self.read_reg(adr) + to_signed5b(imm), None)
                 self._write_reg(srcdst, val)
             else:
-                # TODO: Raise exception
-                self._write_reg(srcdst, 0)
+                raise BonelessError("LDX instruction encountered but io_callback not set.")
         # STX
         else:
             if self.io_callback:
-                # TODO: Raise exception
                 val = self.read_reg(srcdst)
                 self.io_callback(self.read_reg(adr) + to_signed5b(imm), val)
+            else:
+                raise BonelessError("STX instruction encountered but io_callback not set.")
 
     def _do_i_class(self, opcode):
         def to_signed8b(val):
@@ -442,11 +442,9 @@ class BonelessSimulator:
             val = to_unsigned16b(self.pc + 1)
             pc_incr = 1 + to_signed8b(imm)
         # JR
-        elif opc == 0x07:
+        else:
             raw_pc = self.read_reg(srcdst) + to_signed8b(imm)
             pc_incr = to_unsigned16b(raw_pc - self.pc)
-        else:
-            raise NotImplementedError("Do I Class")
 
         if opc not in [0x05, 0x07]:
             self._write_reg(srcdst, val)
@@ -466,7 +464,7 @@ class BonelessSimulator:
         # J
         if cond == 0x00:
             if flag:
-                raise NotImplementedError("Do C Class")
+                raise BonelessError("Unconditional J with flag==1 is a reserved instruction.")
             else:
                 cond_met = True
 
@@ -498,3 +496,15 @@ class BonelessSimulator:
             pc_incr = 1
 
         return pc_incr
+
+
+class BonelessError(Exception):
+    """Exception raised when the CPU simulator doesn't know what to do.
+
+    Attributes
+    ----------
+    reason: str
+        Short message indicating why the simulator was unable to continue.
+    """
+    def __init__(self, reason):
+        self.reason = reason
