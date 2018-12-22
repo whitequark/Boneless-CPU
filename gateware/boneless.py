@@ -787,7 +787,7 @@ class BonelessTestCase(unittest.TestCase):
 # -------------------------------------------------------------------------------------------------
 
 import argparse
-from nmigen.compat.fhdl import verilog
+from nmigen import cli
 
 
 class BonelessTestbench(Module):
@@ -808,6 +808,17 @@ class BonelessTestbench(Module):
             ]
 
         self.specials.mem = Memory(width=16, depth=256)
+        self.mem.init = [
+            0, 0, 0, 0, 0, 0, 0, 0,
+            *assemble([
+                MOVL(R1, 1),
+            "loop",
+                STX (R1, R0, 0),
+                ROT (R1, R1, 1),
+                J   ("loop"),
+            ])
+        ]
+
         self.specials.mem_rdport = self.mem.get_port(has_re=True, mode=READ_FIRST)
         self.specials.mem_wrport = self.mem.get_port(write_capable=True)
         self.submodules.dut = BonelessCore(reset_addr=8,
@@ -820,6 +831,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "type", metavar="TYPE", choices=["alu", "sru", "bus", "pins"], default="bus")
+    cli.main_parser(parser)
+
     args = parser.parse_args()
 
     if args.type == "alu":
@@ -840,5 +853,4 @@ if __name__ == "__main__":
         tb  = BonelessTestbench(has_pins=True)
         ios = (tb.pins,)
 
-    design = verilog.convert(tb, ios=ios, name="boneless")
-    design.write("boneless.v")
+    cli.main_runner(parser, args, tb.get_fragment(), name="boneless", ports=ios)
