@@ -221,7 +221,7 @@ class BonelessCore(Module):
         self.fsm.act("DECODE/LOAD/JUMP",
             NextValue(r_insn, mem_r_d),
             If(i_clsA,
-                mem_r_a.eq(Cat(i_regX, r_win)),
+                mem_r_a.eq(Cat(i_regY, r_win)),
                 NextState("A-READ")
             ).Elif(i_clsS,
                 mem_r_a.eq(Cat(i_regY, r_win)),
@@ -256,12 +256,12 @@ class BonelessCore(Module):
             )
         )
         self.fsm.act("A-READ",
-            mem_r_a.eq(Cat(i_regY, r_win)),
-            NextValue(s_opB, mem_r_d),
+            mem_r_a.eq(Cat(i_regX, r_win)),
+            NextValue(r_opA, mem_r_d),
             NextState("A-EXECUTE")
         )
         self.fsm.act("A-EXECUTE",
-            r_opA.eq(mem_r_d),
+            s_opB.eq(mem_r_d),
             s_res.eq(alu.s_o),
             mem_w_a.eq(Cat(i_regZ, r_win)),
             mem_w_d.eq(s_res),
