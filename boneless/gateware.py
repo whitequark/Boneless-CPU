@@ -87,7 +87,7 @@ class _SRU(Module):
 
 
 class BonelessCore(Module):
-    def __init__(self, reset_addr, mem_rdport, mem_wrport, ext_port=None, simulation=False):
+    def __init__(self, reset_addr, mem_rdport, mem_wrport, ext_port=None):
         if ext_port is None:
             ext_port = _StubMemoryPort("ext")
 
@@ -128,7 +128,7 @@ class BonelessCore(Module):
         s_addr  = Signal(16)
         r_addr  = Signal(16)
 
-        s_insn  = Signal(16)
+        s_insn  = self.s_insn = Signal(16)
         i_type1 = decode(s_insn[0:1])
         i_type2 = decode(s_insn[0:2])
         i_shift = decode(s_insn[1:5])
@@ -249,10 +249,7 @@ class BonelessCore(Module):
                 If(s_cond == i_flag,
                     NextValue(r_pc, AddSignedImm(r_pc, i_imm11))
                 ),
-                NextState("FETCH"),
-                If(simulation & (i_imm11 == 0x400),
-                    NextState("HALT")
-                )
+                NextState("FETCH")
             )
         )
         self.fsm.act("A-READ",
@@ -352,9 +349,6 @@ class BonelessCore(Module):
             NextValue(r_pc, AddSignedImm(mem_r_d, i_imm11)),
             NextState("FETCH")
         )
-        self.fsm.act("HALT",
-            NextState("HALT")
-        )
 
 # -------------------------------------------------------------------------------------------------
 
@@ -402,8 +396,7 @@ class BonelessSimulationTestbench(Module):
         self.submodules.dut = BonelessCore(reset_addr=8,
             mem_rdport=mem_rdport,
             mem_wrport=mem_wrport,
-            ext_port=ext_port,
-            simulation=True)
+            ext_port=ext_port)
 
 
 class BonelessTestCase(unittest.TestCase):
@@ -411,14 +404,11 @@ class BonelessTestCase(unittest.TestCase):
         self.tb = BonelessSimulationTestbench()
 
     def configure(self, tb, code, regs=[], data=[], extr=[]):
-        tb.mem_init = [*regs, *[0] * (8 - len(regs))] + assemble(code + [J(-1024)] + data)
+        tb.mem_init = [*regs, *[0] * (8 - len(regs))] + assemble(code + [J(-1)] + data)
         tb.ext_init = extr
 
-    def dut_state(self, tb):
-        return tb.dut.fsm.decoding[(yield tb.dut.fsm.state)]
-
     def run_core(self, tb):
-        while (yield from self.dut_state(tb)) != "HALT":
+        while (yield tb.dut.s_insn) != J(-1)[0]:
             yield
 
     def assertMemory(self, tb, addr, value):

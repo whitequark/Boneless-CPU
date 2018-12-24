@@ -130,7 +130,7 @@
 # Move instructions
 # -----------------
 #
-# Mnemonic:  MOV  Rd, Ra
+# Mnemonic:  MOV  Rd, Ra (alias)
 # Operation: Rd ← Ra
 #
 # Mnemonic:  MOVL Rd, imm
@@ -203,20 +203,20 @@
 # Mnemonic:  LD   Rd, Ra, off
 # Operation: Rd ← mem[Ra+off]
 #
-# Mnemonic:  LDI  Rd, ±off
-# Operation: Rd ← mem[PC+off]
-#
 # Mnemonic:  LDX  Rd, Ra, off
 # Operation: Rd ← ext[Ra+off]
+#
+# Mnemonic:  LDI  Rd, ±off
+# Operation: Rd ← mem[PC+off]
 #
 # Mnemonic:  ST   Rs, Ra, off
 # Operation: mem[Ra+off] ← Rs
 #
-# Mnemonic:  STI  Rs, ±off
-# Operation: mem[PC+off] ← Rs
-#
 # Mnemonic:  STX  Rs, Ra, off
 # Operation: ext[Ra+off] ← Rs
+#
+# Mnemonic:  STI  Rs, ±off
+# Operation: mem[PC+off] ← Rs
 #
 # Control instructions
 # --------------------
