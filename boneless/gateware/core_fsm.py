@@ -1,6 +1,7 @@
 from nmigen.compat import *
 
 from ..opcode import *
+from ..instr import *
 from .formal import *
 
 
@@ -438,6 +439,10 @@ class BonelessFSMTestbench(Module):
             "loop",
                 STX (R1, R0, 0),
                 ROT (R1, R1, 1),
+                MOVH(R2, 1),
+            "delay",
+                SUBI(R2, 1),
+                JNZ ("delay"),
                 J   ("loop"),
             ])
         ]
