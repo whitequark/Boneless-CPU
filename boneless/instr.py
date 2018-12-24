@@ -5,10 +5,10 @@ from .opcode import *
 
 __all__ = [
     "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7",
-    "ADD", "ADDI", "AND", "CMP", "J", "JAL", "JC", "JE", "JNC", "JNE", "JNO", "JNS", "JNZ", "JO",
-    "JR", "JS", "JSGE", "JSGT", "JSLE", "JSLT", "JUGE", "JUGT", "JULE", "JULT", "JZ", "LD", "LDI",
-    "LDX", "MOV", "MOVA", "MOVH", "MOVI", "MOVL", "NOP", "OR", "ROT", "ROL", "ROR", "SLL", "SRA",
-    "SRL", "ST", "STI", "STX", "SUB", "SUBI", "XOR",
+    "ADD", "ADDI", "AND", "CMP", "ILL", "J", "JAL", "JC", "JE", "JNC", "JNE", "JNO", "JNS", "JNZ",
+    "JO", "JR", "JS", "JSGE", "JSGT", "JSLE", "JSLT", "JUGE", "JUGT", "JULE", "JULT", "JZ",
+    "LD", "LDI", "LDX", "MOV", "MOVA", "MOVH", "MOVI", "MOVL", "NOP", "OR", "ROT", "ROL", "ROR",
+    "SLL", "SRA", "SRL", "ST", "STI", "STX", "SUB", "SUBI", "XOR",
     "L", "assemble",
 ]
 
@@ -125,6 +125,8 @@ def MOVI(rd, imm16):
     else:
         return MOVH(rd, (imm16 >> 8) + ((imm16 >> 7) & 1)) + \
                [I_FORMAT(OPCODE_ADDI, rd, imm16 & 0xff, u=True)]
+
+def ILL(insn):         return [insn & 0xffff]
 
 
 def L(label): return label

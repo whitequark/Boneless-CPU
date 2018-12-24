@@ -200,19 +200,19 @@
 # Memory instructions
 # -------------------
 #
-# Mnemonic:  LD   Rd, Ra, off
+# Mnemonic:  LD   Rd, Ra, ±off
 # Operation: Rd ← mem[Ra+off]
 #
-# Mnemonic:  LDX  Rd, Ra, off
+# Mnemonic:  LDX  Rd, Ra, ±off
 # Operation: Rd ← ext[Ra+off]
 #
 # Mnemonic:  LDI  Rd, ±off
 # Operation: Rd ← mem[PC+off]
 #
-# Mnemonic:  ST   Rs, Ra, off
+# Mnemonic:  ST   Rs, Ra, ±off
 # Operation: mem[Ra+off] ← Rs
 #
-# Mnemonic:  STX  Rs, Ra, off
+# Mnemonic:  STX  Rs, Ra, ±off
 # Operation: ext[Ra+off] ← Rs
 #
 # Mnemonic:  STI  Rs, ±off
