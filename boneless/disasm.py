@@ -39,6 +39,9 @@ def disassemble(insn, python=False):
     i_flag  = bits(insn, 11)
     i_cond  = bits(insn, 12, 15)
 
+    if insn == 0x0000:
+        return "NOP  {}{}".format(l, r)
+
     if i_code5 == OPCODE_LOGIC:
         if i_type2 == OPTYPE_AND:
             return "AND  {}R{}, R{}, R{}{}".format(l, i_regZ, i_regY, i_regX, r)
