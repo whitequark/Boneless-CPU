@@ -8,7 +8,7 @@ __all__ = [
     "ADD", "ADDI", "AND", "CMP", "ILL", "J", "JAL", "JC", "JE", "JNC", "JNE", "JNO", "JNS", "JNZ",
     "JO", "JR", "JS", "JSGE", "JSGT", "JSLE", "JSLT", "JUGE", "JUGT", "JULE", "JULT", "JZ",
     "LD", "LDI", "LDX", "MOV", "MOVA", "MOVH", "MOVI", "MOVL", "NOP", "OR", "ROT", "ROL", "ROR",
-    "SLL", "SRA", "SRL", "ST", "STI", "STX", "SUB", "SUBI", "XOR",
+    "SLL", "SRA", "SRL", "ST", "STI", "STX", "SUB", "SUBI", "XCHG", "XOR",
     "L", "assemble",
 ]
 
@@ -65,6 +65,10 @@ def NOP ():            return [A_FORMAT(OPCODE_LOGIC,   OPTYPE_AND,  0,  0,  0)]
 def AND (rd, ra, rb):  return [A_FORMAT(OPCODE_LOGIC,   OPTYPE_AND, rd, ra, rb)]
 def OR  (rd, ra, rb):  return [A_FORMAT(OPCODE_LOGIC,   OPTYPE_OR,  rd, ra, rb)]
 def XOR (rd, ra, rb):  return [A_FORMAT(OPCODE_LOGIC,   OPTYPE_XOR, rd, ra, rb)]
+
+def XCHG(rx, ry):      return [*XOR(rx, rx, ry),
+                               *XOR(ry, ry, rx),
+                               *XOR(rx, rx, ry)]
 
 def ADD (rd, ra, rb):  return [A_FORMAT(OPCODE_ARITH,   OPTYPE_ADD, rd, ra, rb)]
 def SUB (rd, ra, rb):  return [A_FORMAT(OPCODE_ARITH,   OPTYPE_SUB, rd, ra, rb)]

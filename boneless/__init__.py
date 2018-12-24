@@ -133,6 +133,9 @@
 # Mnemonic:  MOV  Rd, Ra (alias)
 # Operation: Rd ← Ra
 #
+# Mnemonic:  XCHG Rx, Ry (pseudo)
+# Operation: {Rx, Ry} ← {Ry, Rx}
+#
 # Mnemonic:  MOVL Rd, imm
 # Operation: Rd[15:8] ← 0,   Rd[7:0] ← imm
 #
