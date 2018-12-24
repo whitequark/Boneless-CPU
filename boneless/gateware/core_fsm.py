@@ -1,6 +1,7 @@
 from nmigen.compat import *
 
 from ..opcode import *
+from .formal import *
 
 
 __all__ = ["BonelessCore"]
@@ -88,6 +89,8 @@ class _SRU(Module):
 
 class BonelessCoreFSM(Module):
     def __init__(self, reset_addr, mem_rdport, mem_wrport, ext_port=None):
+        self.formal = fi = BonelessFormalInterface()
+
         if ext_port is None:
             ext_port = _StubMemoryPort("ext")
 
@@ -102,6 +105,11 @@ class BonelessCoreFSM(Module):
         mem_w_a = mem_wrport.adr
         mem_w_d = mem_wrport.dat_w
         mem_we  = mem_wrport.we
+        self.comb += [
+            fi.mem_w_addr.eq(mem_wrport.adr),
+            fi.mem_w_data.eq(mem_wrport.dat_w),
+            fi.mem_w_en.eq(mem_wrport.we),
+        ]
 
         ext_r_a = ext_port.adr
         ext_r_d = ext_port.dat_r
@@ -109,6 +117,13 @@ class BonelessCoreFSM(Module):
         ext_w_a = ext_port.adr
         ext_w_d = ext_port.dat_w
         ext_we  = ext_port.we
+        self.comb += [
+            fi.ext_addr.eq(ext_port.adr),
+            fi.ext_r_data.eq(ext_port.dat_r),
+            fi.ext_r_en.eq(ext_port.re),
+            fi.ext_w_data.eq(ext_port.dat_w),
+            fi.ext_w_en.eq(ext_port.we),
+        ]
 
         pc_bits = max(mem_r_a.nbits, mem_w_a.nbits)
 
@@ -167,22 +182,30 @@ class BonelessCoreFSM(Module):
             })
         ]
 
+        s_z     = Signal()
+        s_s     = Signal()
+        s_c     = Signal()
+        s_v     = Signal()
         s_sub   = Signal()
         s_cmp   = Signal()
         c_flags = Signal()
+        self.comb += [
+            s_z.eq(s_res[0:16] == 0),
+            s_s.eq(s_res[15]),
+            s_c.eq(s_res[16]),
+            # http://teaching.idallen.com/cst8214/08w/notes/overflow.txt
+            Case(Cat(s_sub | s_cmp, r_opA[15], s_opB[15], s_res[15]), {
+                0b1000: s_v.eq(1),
+                0b0110: s_v.eq(1),
+                0b1101: s_v.eq(1),
+                0b0011: s_v.eq(1),
+                "default": s_v.eq(0),
+            }),
+            fi.flags.eq(Cat(s_z, s_s, s_c, s_v))
+        ]
         self.sync += [
             If(c_flags,
-                r_z.eq(s_res[0:16] == 0),
-                r_s.eq(s_res[15]),
-                r_c.eq(s_res[16]),
-                # http://teaching.idallen.com/cst8214/08w/notes/overflow.txt
-                Case(Cat(s_sub | s_cmp, r_opA[15], s_opB[15], s_res[15]), {
-                    0b1000: r_v.eq(1),
-                    0b0110: r_v.eq(1),
-                    0b1101: r_v.eq(1),
-                    0b0011: r_v.eq(1),
-                    "default": r_v.eq(0),
-                })
+                Cat(r_z, r_s, r_c, r_v).eq(Cat(s_z, s_s, s_c, s_v))
             )
         ]
 
@@ -209,16 +232,20 @@ class BonelessCoreFSM(Module):
             sru.s_i.eq(mem_r_d),
         ]
 
-        self.comb += mem_re.eq(1)
+        self.comb += [
+            mem_re.eq(1),
+        ]
 
         self.submodules.fsm = FSM(reset_state="FETCH")
         self.fsm.act("FETCH",
             mem_r_a.eq(r_pc),
+            NextValue(fi.pc, r_pc),
             NextValue(r_pc, r_pc + 1),
             NextState("DECODE/LOAD/JUMP")
         )
         self.comb += s_insn.eq(Mux(self.fsm.ongoing("DECODE/LOAD/JUMP"), mem_r_d, r_insn))
         self.fsm.act("DECODE/LOAD/JUMP",
+            NextValue(fi.insn, mem_r_d),
             NextValue(r_insn, mem_r_d),
             If(i_clsA,
                 mem_r_a.eq(Cat(i_regY, r_win)),
@@ -264,6 +291,7 @@ class BonelessCoreFSM(Module):
             mem_w_d.eq(s_res),
             mem_we.eq(~s_cmp),
             c_flags.eq(1),
+            fi.stb.eq(1),
             NextState("FETCH")
         )
         self.fsm.act("S-READ",
@@ -285,10 +313,11 @@ class BonelessCoreFSM(Module):
             s_res.eq(sru.r_o),
             mem_w_a.eq(Cat(i_regZ, r_win)),
             mem_w_d.eq(s_res),
-            mem_we.eq(1),
             c_flags.eq(1),
             NextValue(r_shift, r_shift - 1),
             If(r_shift == 0,
+                mem_we.eq(1),
+                fi.stb.eq(1),
                 NextState("FETCH")
             )
         )
@@ -307,6 +336,7 @@ class BonelessCoreFSM(Module):
             mem_w_a.eq(Cat(i_regZ, r_win)),
             mem_w_d.eq(Mux(i_ext, ext_r_d, mem_r_d)),
             mem_we.eq(1),
+            fi.stb.eq(1),
             NextState("FETCH")
         )
         self.fsm.act("M/I-STORE-1",
@@ -325,6 +355,7 @@ class BonelessCoreFSM(Module):
             ext_w_a.eq(r_addr),
             ext_w_d.eq(mem_r_d),
             ext_we.eq(i_ext),
+            fi.stb.eq(1),
             NextState("FETCH")
         )
         self.fsm.act("I-EXECUTE-MOVx/ADDI",
@@ -336,6 +367,7 @@ class BonelessCoreFSM(Module):
                 OPCODE_ADDI: mem_w_d.eq(AddSignedImm(mem_r_d, i_imm8)),
             }),
             mem_we.eq(1),
+            fi.stb.eq(1),
             NextState("FETCH")
         )
         self.fsm.act("I-EXECUTE-JAL",
@@ -343,10 +375,12 @@ class BonelessCoreFSM(Module):
             mem_w_d.eq(r_pc),
             mem_we.eq(1),
             NextValue(r_pc, AddSignedImm(r_pc, i_imm11)),
+            fi.stb.eq(1),
             NextState("FETCH")
         )
         self.fsm.act("I-EXECUTE-JR",
             NextValue(r_pc, AddSignedImm(mem_r_d, i_imm11)),
+            fi.stb.eq(1),
             NextState("FETCH")
         )
 
@@ -387,16 +421,27 @@ class BonelessFSMTestbench(Module):
 
         self.specials.mem_rdport = self.mem.get_port(has_re=True, mode=READ_FIRST)
         self.specials.mem_wrport = self.mem.get_port(write_capable=True)
-        self.submodules.dut = BonelessCoreFSM(reset_addr=8,
+        self.submodules.core = BonelessCoreFSM(reset_addr=8,
             mem_rdport=self.mem_rdport,
             mem_wrport=self.mem_wrport,
-            ext_port=self.ext_port)
+            ext_port  =self.ext_port)
+
+
+class BonelessFSMFormal(Module):
+    def __init__(self):
+        self.submodules.ext_port   = _StubMemoryPort("ext")
+        self.submodules.mem_rdport = _StubMemoryPort("mem_r")
+        self.submodules.mem_wrport = _StubMemoryPort("mem_w")
+        self.submodules.core = BonelessCoreFSM(reset_addr=8,
+            mem_rdport=self.mem_rdport,
+            mem_wrport=self.mem_wrport,
+            ext_port  =self.ext_port)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "type", choices=["alu", "sru", "bus", "pins"], default="bus")
+        "type", choices=["alu", "sru", "bus", "pins", "formal"], default="bus")
     cli.main_parser(parser)
 
     args = parser.parse_args()
@@ -410,13 +455,22 @@ if __name__ == "__main__":
         ios = (tb.s_i, tb.s_c, tb.r_o, tb.c_ld, tb.c_dir)
 
     if args.type == "bus":
-        tb  = BonelessTestbench()
+        tb  = BonelessFSMTestbench()
         ios = (tb.ext_port.adr,
                tb.ext_port.re, tb.ext_port.dat_r,
                tb.ext_port.we, tb.ext_port.dat_w)
 
     if args.type == "pins":
-        tb  = BonelessTestbench(has_pins=True)
+        tb  = BonelessFSMTestbench(has_pins=True)
         ios = (tb.pins,)
+
+    if args.type == "formal":
+        tb  = BonelessFSMFormal()
+        ios = tb.core.formal._all + [
+            tb.mem_rdport.adr, tb.mem_rdport.dat_r, tb.mem_rdport.re,
+            tb.mem_wrport.adr, tb.mem_wrport.dat_w, tb.mem_wrport.we,
+            tb.ext_port.adr,   tb.ext_port.dat_r, tb.ext_port.re,
+                               tb.ext_port.dat_w, tb.ext_port.we,
+        ]
 
     cli.main_runner(parser, args, tb.get_fragment(), name="boneless", ports=ios)
