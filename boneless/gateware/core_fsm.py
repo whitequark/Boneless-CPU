@@ -201,11 +201,17 @@ class BonelessCoreFSM(Module):
                 0b0011: s_v.eq(1),
                 "default": s_v.eq(0),
             }),
-            fi.flags.eq(Cat(s_z, s_s, s_c, s_v))
         ]
         self.sync += [
             If(c_flags,
-                Cat(r_z, r_s, r_c, r_v).eq(Cat(s_z, s_s, s_c, s_v))
+                Cat(r_z, r_s, r_c, r_v).eq(Cat(s_z, s_s, s_c, s_v)),
+            )
+        ]
+        self.comb += [
+            If(c_flags,
+                fi.flags.eq(Cat(s_z, s_s, s_c, s_v)),
+            ).Else(
+                fi.flags.eq(Cat(r_z, r_s, r_c, r_v)),
             )
         ]
 
@@ -243,9 +249,11 @@ class BonelessCoreFSM(Module):
             NextValue(r_pc, r_pc + 1),
             NextState("DECODE/LOAD/JUMP")
         )
-        self.comb += s_insn.eq(Mux(self.fsm.ongoing("DECODE/LOAD/JUMP"), mem_r_d, r_insn))
+        self.comb += [
+            s_insn.eq(Mux(self.fsm.ongoing("DECODE/LOAD/JUMP"), mem_r_d, r_insn)),
+            fi.insn.eq(s_insn),
+        ]
         self.fsm.act("DECODE/LOAD/JUMP",
-            NextValue(fi.insn, mem_r_d),
             NextValue(r_insn, mem_r_d),
             If(i_clsA,
                 mem_r_a.eq(Cat(i_regY, r_win)),
@@ -276,6 +284,7 @@ class BonelessCoreFSM(Module):
                 If(s_cond == i_flag,
                     NextValue(r_pc, AddSignedImm(r_pc, i_imm11))
                 ),
+                fi.stb.eq(1),
                 NextState("FETCH")
             )
         )
@@ -374,12 +383,12 @@ class BonelessCoreFSM(Module):
             mem_w_a.eq(Cat(i_regZ, r_win)),
             mem_w_d.eq(r_pc),
             mem_we.eq(1),
-            NextValue(r_pc, AddSignedImm(r_pc, i_imm11)),
+            NextValue(r_pc, AddSignedImm(r_pc, i_imm8)),
             fi.stb.eq(1),
             NextState("FETCH")
         )
         self.fsm.act("I-EXECUTE-JR",
-            NextValue(r_pc, AddSignedImm(mem_r_d, i_imm11)),
+            NextValue(r_pc, AddSignedImm(mem_r_d, i_imm8)),
             fi.stb.eq(1),
             NextState("FETCH")
         )

@@ -332,16 +332,14 @@ module boneless_formal(
                 assert (fi_mem_w_addr == a_regZ);
                 assert (fi_mem_w_data == {$signed(fi_pc) + 16'sd1});
                 assert (fi_flags == $past(fi_flags));
-                // FIXME: true bug!
-                // fs_next_pc <= $signed($signed(fi_pc) + 16'sd1 + $signed(i_imm8));
-                // fs_jumped  <= 1;
+                fs_next_pc <= $signed($signed(fi_pc) + 16'sd1 + $signed(i_imm8));
+                fs_jumped  <= 1;
             end
             if (i_code5 == OPCODE_JR) begin
                 assert (!fi_mem_w_en);
                 assert (fi_flags == $past(fi_flags));
-                // FIXME: true bug!
-                // fs_next_pc <= $signed($signed(mem[a_regZ]) + $signed(i_imm8));
-                // fs_jumped  <= 1;
+                fs_next_pc <= $signed($signed(mem[a_regZ]) + $signed(i_imm8));
+                fs_jumped  <= 1;
             end
             if (i_clsC) begin
                 assert (!fi_mem_w_en);
