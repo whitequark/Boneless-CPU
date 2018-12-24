@@ -16,9 +16,9 @@ def bits(word, start, end=None, sign=False):
 
 def disassemble(insn, python=False):
     if python:
-        l, r = "()"
+        l, r = "(", ")"
     else:
-        l = r = ""
+        l, r = " ", ""
 
     i_class = bits(insn, 12, 16)
     i_code1 = bits(insn, 11, 12)
@@ -40,86 +40,86 @@ def disassemble(insn, python=False):
     i_cond  = bits(insn, 12, 15)
 
     if insn == 0x0000:
-        return "NOP  {}{}".format(l, r)
+        return "NOP {}{}".format(l, r)
 
     if i_code5 == OPCODE_LOGIC:
         if i_type2 == OPTYPE_AND:
-            return "AND  {}R{}, R{}, R{}{}".format(l, i_regZ, i_regY, i_regX, r)
+            return "AND {}R{}, R{}, R{}{}".format(l, i_regZ, i_regY, i_regX, r)
         if i_type2 == OPTYPE_OR:
-            return "OR   {}R{}, R{}, R{}{}".format(l, i_regZ, i_regY, i_regX, r)
+            return "OR  {}R{}, R{}, R{}{}".format(l, i_regZ, i_regY, i_regX, r)
         if i_type2 == OPTYPE_XOR:
-            return "XOR  {}R{}, R{}, R{}{}".format(l, i_regZ, i_regY, i_regX, r)
+            return "XOR {}R{}, R{}, R{}{}".format(l, i_regZ, i_regY, i_regX, r)
     if i_code5 == OPCODE_ARITH:
         if i_type2 == OPTYPE_ADD:
-            return "ADD  {}R{}, R{}, R{}{}".format(l, i_regZ, i_regY, i_regX, r)
+            return "ADD {}R{}, R{}, R{}{}".format(l, i_regZ, i_regY, i_regX, r)
         if i_type2 == OPTYPE_SUB:
-            return "SUB  {}R{}, R{}, R{}{}".format(l, i_regZ, i_regY, i_regX, r)
+            return "SUB {}R{}, R{}, R{}{}".format(l, i_regZ, i_regY, i_regX, r)
         if i_type2 == OPTYPE_CMP:
-            return "CMP  {}R{}, R{}{}".format(l, i_regY, i_regX, r)
+            return "CMP {}R{}, R{}{}".format(l, i_regY, i_regX, r)
     if i_code5 == OPCODE_SHIFT_L:
         if i_type1 == OPTYPE_SLL:
-            return "SLL  {}R{}, R{}, {}{}".format(l, i_regZ, i_regY, i_shift, r)
+            return "SLL {}R{}, R{}, {}{}".format(l, i_regZ, i_regY, i_shift, r)
         if i_type1 == OPTYPE_ROT:
-            return "ROT  {}R{}, R{}, {}{}".format(l, i_regZ, i_regY, i_shift, r)
+            return "ROT {}R{}, R{}, {}{}".format(l, i_regZ, i_regY, i_shift, r)
     if i_code5 == OPCODE_SHIFT_R:
         if i_type1 == OPTYPE_SRL:
-            return "SRL  {}R{}, R{}, {}{}".format(l, i_regZ, i_regY, i_shift, r)
+            return "SRL {}R{}, R{}, {}{}".format(l, i_regZ, i_regY, i_shift, r)
         if i_type1 == OPTYPE_SRA:
-            return "SRA  {}R{}, R{}, {}{}".format(l, i_regZ, i_regY, i_shift, r)
+            return "SRA {}R{}, R{}, {}{}".format(l, i_regZ, i_regY, i_shift, r)
     if i_code5 == OPCODE_LD:
-        return "LD   {}R{}, R{}, {:+}{}".format(l, i_regZ, i_regY, i_imm5, r)
+        return "LD  {}R{}, R{}, {:+}{}".format(l, i_regZ, i_regY, i_imm5, r)
     if i_code5 == OPCODE_ST:
-        return "ST   {}R{}, R{}, {:+}{}".format(l, i_regZ, i_regY, i_imm5, r)
+        return "ST  {}R{}, R{}, {:+}{}".format(l, i_regZ, i_regY, i_imm5, r)
     if i_code5 == OPCODE_LDX:
-        return "LDX  {}R{}, R{}, {:+}{}".format(l, i_regZ, i_regY, i_imm5, r)
+        return "LDX {}R{}, R{}, {:+}{}".format(l, i_regZ, i_regY, i_imm5, r)
     if i_code5 == OPCODE_STX:
-        return "STX  {}R{}, R{}, {:+}{}".format(l, i_regZ, i_regY, i_imm5, r)
+        return "STX {}R{}, R{}, {:+}{}".format(l, i_regZ, i_regY, i_imm5, r)
     if i_code5 == OPCODE_MOVL:
-        return "MOVL {}R{}, {}{}".format(l, i_regZ, i_imm8 & 0xff, r)
+        return "MOVL{}R{}, {}{}".format(l, i_regZ, i_imm8 & 0xff, r)
     if i_code5 == OPCODE_MOVH:
-        return "MOVH {}R{}, {}{}".format(l, i_regZ, i_imm8 & 0xff, r)
+        return "MOVH{}R{}, {}{}".format(l, i_regZ, i_imm8 & 0xff, r)
     if i_code5 == OPCODE_MOVA:
-        return "MOVA {}R{}, {:+}{}".format(l, i_regZ, i_imm8, r)
+        return "MOVA{}R{}, {:+}{}".format(l, i_regZ, i_imm8, r)
     if i_code5 == OPCODE_ADDI:
-        return "ADDI {}R{}, {}{}".format(l, i_regZ, i_imm8, r)
+        return "ADDI{}R{}, {}{}".format(l, i_regZ, i_imm8, r)
     if i_code5 == OPCODE_LDI:
-        return "LDI  {}R{}, {:+}{}".format(l, i_regZ, i_imm8, r)
+        return "LDI {}R{}, {:+}{}".format(l, i_regZ, i_imm8, r)
     if i_code5 == OPCODE_STI:
-        return "STI  {}R{}, {:+}{}".format(l, i_regZ, i_imm8, r)
+        return "STI {}R{}, {:+}{}".format(l, i_regZ, i_imm8, r)
     if i_code5 == OPCODE_JAL:
-        return "JAL  {}R{}, {:+}{}".format(l, i_regZ, i_imm8, r)
+        return "JAL {}R{}, {:+}{}".format(l, i_regZ, i_imm8, r)
     if i_code5 == OPCODE_JR:
-        return "JR   {}R{}, {:+}{}".format(l, i_regZ, i_imm8, r)
+        return "JR  {}R{}, {:+}{}".format(l, i_regZ, i_imm8, r)
     if i_code5 == OPCODE_J:
-        return "J    {}{:+}{}".format(l, i_imm11, r)
+        return "J   {}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JNZ:
-        return "JNZ  {}{:+}{}".format(l, i_imm11, r)
+        return "JNZ {}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JZ:
-        return "JZ   {}{:+}{}".format(l, i_imm11, r)
+        return "JZ  {}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JNS:
-        return "JNS  {}{:+}{}".format(l, i_imm11, r)
+        return "JNS {}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JS:
-        return "JS   {}{:+}{}".format(l, i_imm11, r)
+        return "JS  {}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JNO:
-        return "JNO  {}{:+}{}".format(l, i_imm11, r)
+        return "JNO {}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JO:
-        return "JO   {}{:+}{}".format(l, i_imm11, r)
+        return "JO  {}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JULT:
-        return "JULT {}{:+}{}".format(l, i_imm11, r)
+        return "JULT{}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JUGE:
-        return "JUGE {}{:+}{}".format(l, i_imm11, r)
+        return "JUGE{}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JUGT:
-        return "JUGT {}{:+}{}".format(l, i_imm11, r)
+        return "JUGT{}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JULE:
-        return "JULE {}{:+}{}".format(l, i_imm11, r)
+        return "JULE{}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JSGE:
-        return "JSGE {}{:+}{}".format(l, i_imm11, r)
+        return "JSGE{}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JSLT:
-        return "JSLT {}{:+}{}".format(l, i_imm11, r)
+        return "JSLT{}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JSGT:
-        return "JSGT {}{:+}{}".format(l, i_imm11, r)
+        return "JSGT{}{:+}{}".format(l, i_imm11, r)
     if i_code5 == OPCODE_JSLE:
-        return "JSLE {}{:+}{}".format(l, i_imm11, r)
+        return "JSLE{}{:+}{}".format(l, i_imm11, r)
 
     return "ILL  {}0x{:04x}{}".format(l, insn, r)
 
