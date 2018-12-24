@@ -435,11 +435,13 @@ class BonelessFSMTestbench(Module):
         self.mem.init = [
             0, 0, 0, 0, 0, 0, 0, 0,
             *assemble([
+                NOP (),
+                NOP (),
                 MOVL(R1, 1),
             "loop",
                 STX (R1, R0, 0),
                 ROT (R1, R1, 1),
-                MOVH(R2, 1),
+                MOVH(R2, 80),
             "delay",
                 SUBI(R2, 1),
                 JNZ ("delay"),
