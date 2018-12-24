@@ -1,14 +1,13 @@
 # Introduction
 # ------------
 #
-# _Boneless_ is a CPU architecture created specifically for Glasgow. It is designed for applet
-# control plane, with the goals being minimal FPGA resource (logic and timing) consumption while
-# still remaining easily programmable in hand-written assembly. It is not directly derived from
-# any major CPU architecture, but borrows ideas from cores such as 8051, MIPS and AVR.
+# _Boneless_ is a CPU architecture created specifically for FPGA control plane, with the goals
+# being minimal FPGA resource (logic and timing) consumption while still remaining easily
+# programmable in hand-written assembly. It is not directly derived from any major CPU
+# architecture, but borrows ideas from cores such as 8051, MIPS and AVR.
 #
 # This file is the primary document defining Boneless. Changing this file constitutes changing
-# the authoritative definition of the architecture. Boneless should only be used outside of
-# Glasgow if it is forked and renamed.
+# the authoritative definition of the architecture.
 #
 # Overview
 # --------

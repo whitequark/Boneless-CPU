@@ -1,6 +1,6 @@
 from nmigen.compat import *
 
-from ..arch.boneless.opcode import *
+from .opcode import *
 
 
 __all__ = ["BonelessCore"]
@@ -361,9 +361,20 @@ class BonelessCore(Module):
 # -------------------------------------------------------------------------------------------------
 
 import unittest
+import functools
+from nmigen.compat import run_simulation
 
-from . import simulation_test
-from ..arch.boneless.instr import *
+from .instr import *
+
+
+def simulation_test(**kwargs):
+    def configure_wrapper(case):
+        @functools.wraps(case)
+        def wrapper(self):
+            self.configure(self.tb, **kwargs)
+            run_simulation(self.tb, case(self, self.tb), vcd_name="test.vcd")
+        return wrapper
+    return configure_wrapper
 
 
 class BonelessSimulationTestbench(Module):
