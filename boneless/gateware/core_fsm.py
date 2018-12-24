@@ -219,7 +219,7 @@ class BonelessCoreFSM(Module):
         self.comb += [
             alu.s_a.eq(r_opA),
             alu.s_b.eq(s_opB),
-            Case(Cat(i_code1, C(OPCLASS_A, 4)), {
+            Case(Cat(i_code5), {
                 OPCODE_LOGIC: Case(i_type2, {
                     OPTYPE_AND:  alu.c_sel.eq(alu.SEL_AND),
                     OPTYPE_OR:   alu.c_sel.eq(alu.SEL_OR),
@@ -229,7 +229,8 @@ class BonelessCoreFSM(Module):
                     OPTYPE_ADD:  alu.c_sel.eq(alu.SEL_ADD),
                     OPTYPE_SUB: [alu.c_sel.eq(alu.SEL_SUB), s_sub.eq(1)],
                     OPTYPE_CMP: [alu.c_sel.eq(alu.SEL_SUB), s_cmp.eq(1)],
-                })
+                }),
+                OPCODE_ADDI:     alu.c_sel.eq(alu.SEL_ADD),
             }),
         ]
 
@@ -271,10 +272,10 @@ class BonelessCoreFSM(Module):
             ).Elif(i_clsI,
                 mem_r_a.eq(Cat(i_regZ, r_win)),
                 Case(Cat(i_code3, C(OPCLASS_I, 2)), {
-                    OPCODE_MOVL: NextState("I-EXECUTE-MOVx/ADDI"),
-                    OPCODE_MOVH: NextState("I-EXECUTE-MOVx/ADDI"),
-                    OPCODE_MOVA: NextState("I-EXECUTE-MOVx/ADDI"),
-                    OPCODE_ADDI: NextState("I-EXECUTE-MOVx/ADDI"),
+                    OPCODE_MOVL: NextState("I-EXECUTE-MOVx"),
+                    OPCODE_MOVH: NextState("I-EXECUTE-MOVx"),
+                    OPCODE_MOVA: NextState("I-EXECUTE-MOVx"),
+                    OPCODE_ADDI: NextState("I-EXECUTE-ADDI-1"),
                     OPCODE_LDI:  NextState("M/I-LOAD-1"),
                     OPCODE_STI:  NextState("M/I-STORE-1"),
                     OPCODE_JAL:  NextState("I-EXECUTE-JAL"),
@@ -367,15 +368,28 @@ class BonelessCoreFSM(Module):
             fi.stb.eq(1),
             NextState("FETCH")
         )
-        self.fsm.act("I-EXECUTE-MOVx/ADDI",
+        self.fsm.act("I-EXECUTE-MOVx",
             mem_w_a.eq(Cat(i_regZ, r_win)),
             Case(Cat(i_code2, C(0b0, 1), C(OPCLASS_I, 2)), {
-                OPCODE_MOVL: mem_w_d.eq(Cat(i_imm8, C(0, 8))),
-                OPCODE_MOVH: mem_w_d.eq(Cat(C(0, 8), i_imm8)),
-                OPCODE_MOVA: mem_w_d.eq(AddSignedImm(r_pc, i_imm8)),
-                OPCODE_ADDI: mem_w_d.eq(AddSignedImm(mem_r_d, i_imm8)),
+                OPCODE_MOVL:  mem_w_d.eq(Cat(i_imm8, C(0, 8))),
+                OPCODE_MOVH:  mem_w_d.eq(Cat(C(0, 8), i_imm8)),
+                OPCODE_MOVA:  mem_w_d.eq(AddSignedImm(r_pc, i_imm8)),
             }),
             mem_we.eq(1),
+            fi.stb.eq(1),
+            NextState("FETCH")
+        )
+        self.fsm.act("I-EXECUTE-ADDI-1",
+            NextValue(r_opA, mem_r_d),
+            NextState("I-EXECUTE-ADDI-2")
+        )
+        self.fsm.act("I-EXECUTE-ADDI-2",
+            s_opB.eq(Cat(i_imm8, Replicate(i_imm8[7], 8))),
+            s_res.eq(alu.s_o),
+            mem_w_a.eq(Cat(i_regZ, r_win)),
+            mem_w_d.eq(s_res),
+            mem_we.eq(1),
+            c_flags.eq(1),
             fi.stb.eq(1),
             NextState("FETCH")
         )

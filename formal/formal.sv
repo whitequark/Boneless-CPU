@@ -1,4 +1,4 @@
-`define sign(x) ($signed(x) >= 0)
+`define sign(x) ($signed(x) < 0)
 
 module boneless_formal(
     input clk,
@@ -207,19 +207,19 @@ module boneless_formal(
                         res = mem[a_regY] + mem[a_regX];
                         c   = res[16];
                         v   = (`sign(mem[a_regY]) == `sign(mem[a_regX])) &&
-                              (`sign(mem[a_regY]) != `sign(res[15]));
+                              (`sign(mem[a_regY]) != res[15]);
                     end
                     OPTYPE_SUB: begin
                         res = mem[a_regY] - mem[a_regX];
                         c   = ~res[16];
                         v   = (`sign(mem[a_regY]) == !`sign(mem[a_regX])) &&
-                              (`sign(mem[a_regY]) != `sign(res[15]));
+                              (`sign(mem[a_regY]) != res[15]);
                     end
                     OPTYPE_CMP: begin
                         res = mem[a_regY] - mem[a_regX];
                         c   = ~res[16];
                         v   = (`sign(mem[a_regY]) == !`sign(mem[a_regX])) &&
-                              (`sign(mem[a_regY]) != `sign(res[15]));
+                              (`sign(mem[a_regY]) != res[15]);
                     end
                 endcase
                 if (i_type2 != 2'b11) begin
@@ -301,19 +301,20 @@ module boneless_formal(
                 assert (fi_flags == $past(fi_flags));
             end
             if (i_code5 == OPCODE_ADDI) begin :addi
+                reg [15:0] tmp;
                 reg [16:0] res;
                 reg v;
-                res = $signed($signed(mem[a_regZ]) + $signed(i_imm8));
-                v   = (`sign(mem[a_regZ]) == `sign(i_imm8)) &&
-                      (`sign(mem[a_regZ]) != `sign(res));
+                tmp = $signed(i_imm8);
+                res = mem[a_regZ] + tmp;
+                v   = (`sign(mem[a_regZ]) == tmp[15]) &&
+                      (`sign(mem[a_regZ]) != res[15]);
                 assert (fi_mem_w_en);
                 assert (fi_mem_w_addr == a_regZ);
                 assert (fi_mem_w_data == res[15:0]);
-                // FIXME: true bug!
-                // assert (fi_z == (res[15:0] == 0));
-                // assert (fi_s == res[15]);
-                // assert (fi_c == res[16]);
-                // assert (fi_v == v)
+                assert (fi_z == (res[15:0] == 0));
+                assert (fi_s == res[15]);
+                assert (fi_c == res[16]);
+                assert (fi_v == v);
             end
             if (i_code5 == OPCODE_LDI) begin
                 assert (fi_mem_w_en);
