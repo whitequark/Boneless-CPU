@@ -71,8 +71,8 @@ class _SRU(Module):
 
         ###
 
-        # The following mux tree is optimized for 4-LUTs, and fits into the optimal 48 4-LUTs
-        # on iCE40 using synth_ice40.
+        # The following mux tree is optimized for 4-LUTs, and fits into the optimal 32 4-LUTs
+        # and 16 DFFs on iCE40 using synth_ice40.
         s_l  = Signal(width)
         s_r  = Signal(width)
         s_i1 = Signal(width)
@@ -212,14 +212,12 @@ class BonelessCore(Module):
         self.comb += mem_re.eq(1)
 
         self.submodules.fsm = FSM(reset_state="FETCH")
-        self.comb += [
-            s_insn.eq(Mux(self.fsm.ongoing("DECODE/LOAD/JUMP"), mem_r_d, r_insn)),
-        ]
         self.fsm.act("FETCH",
             mem_r_a.eq(r_pc),
             NextValue(r_pc, r_pc + 1),
             NextState("DECODE/LOAD/JUMP")
         )
+        self.comb += s_insn.eq(Mux(self.fsm.ongoing("DECODE/LOAD/JUMP"), mem_r_d, r_insn))
         self.fsm.act("DECODE/LOAD/JUMP",
             NextValue(r_insn, mem_r_d),
             If(i_clsA,
@@ -841,7 +839,7 @@ class BonelessTestbench(Module):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "type", metavar="TYPE", choices=["alu", "sru", "bus", "pins"], default="bus")
+        "type", choices=["alu", "sru", "bus", "pins"], default="bus")
     cli.main_parser(parser)
 
     args = parser.parse_args()
