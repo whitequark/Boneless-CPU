@@ -1,4 +1,4 @@
-from boneless_sim.test.common import *
+from boneless.simulator.test.common import *
 
 # Test common assembly-language idioms in this file.
 class Test32bMath(BonelessTestCase):

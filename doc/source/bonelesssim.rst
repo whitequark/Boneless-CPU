@@ -1,8 +1,8 @@
 Boneless Simulator Documentation
 ################################
 
-.. autoclass:: boneless_sim.BonelessSimulator
+.. autoclass:: boneless.simulator.BonelessSimulator
     :members:
 
-.. autoclass:: boneless_sim.BonelessError
+.. autoclass:: boneless.simulator.BonelessError
     :members:

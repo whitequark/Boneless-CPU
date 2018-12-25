@@ -1,4 +1,4 @@
-from boneless_sim.test.common import *
+from boneless.simulator.test.common import *
 
 class TestClassA(BonelessTestCase):
     def test_add(self):

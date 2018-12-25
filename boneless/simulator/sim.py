@@ -49,8 +49,8 @@ class BonelessSimulator:
     which Boneless CPU code runs, one instruction at a time. A
     sample simulation session looks similar to the following:
     ::
-        from boneless_sim import *
-        from glasgow.arch.boneless.instr import *
+        from boneless.simulator import *
+        from boneless.instr import *
 
         cpu = BonelessSimulator(start_pc=0x10, memsize=65536)
         program = assemble([MOVL(R0, 0xFF)])

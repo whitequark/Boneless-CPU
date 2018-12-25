@@ -1,4 +1,4 @@
-from boneless_sim.test.common import *
+from boneless.simulator.test.common import *
 
 class TestSimActive(BonelessTestCase):
     def test_set_pc(self):
