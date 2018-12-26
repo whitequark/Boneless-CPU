@@ -504,12 +504,5 @@ class BonelessSimulator:
 
 
 class BonelessError(Exception):
-    """Exception raised when the CPU simulator doesn't know what to do.
-
-    Attributes
-    ----------
-    reason: str
-        Short message indicating why the simulator was unable to continue.
-    """
-    def __init__(self, reason):
-        self.reason = reason
+    """Exception raised when the CPU simulator doesn't know what to do."""
+    pass
