@@ -46,16 +46,19 @@ class _ALU(Module):
         #  * 16 LUTs for A / A*B / A+B / A⊕B selector
         #  * 16 LUTs for B / ~B selector
         #  * 17 LUTs for adder / passthrough selector
-        s_i1 = Signal(width)
-        s_i2 = Signal(width)
-        s_i3 = Signal(width)
-        s_i4 = Signal(width)
+        # The mux tree is 3 levels deep.
+        s_m3n0 = Signal(width)
+        s_m3n1 = Signal(width)
+        s_m2n0 = Signal(width)
+        s_m2n1 = Signal(width)
+        s_m1n0 = Signal(width + 1)
         self.comb += [
-            s_i1.eq(Mux(self.c_sel[0], self.s_a | self.s_b, self.s_a & self.s_b)),
-            s_i2.eq(Mux(self.c_sel[0], self.s_a,            self.s_a ^ self.s_b)),
-            s_i3.eq(Mux(self.c_sel[1], s_i2, s_i1)),
-            s_i4.eq(Mux(self.c_sel[2], ~self.s_b, self.s_b)),
-            self.s_o.eq(Mux(self.c_sel[3], s_i3, s_i3 + s_i4 + self.c_sel[2])),
+            s_m3n0.eq(Mux(self.c_sel[0], self.s_a | self.s_b, self.s_a & self.s_b)),
+            s_m3n1.eq(Mux(self.c_sel[0], self.s_a,            self.s_a ^ self.s_b)),
+            s_m2n0.eq(Mux(self.c_sel[1], s_m3n1, s_m3n0)),
+            s_m2n1.eq(Mux(self.c_sel[2], ~self.s_b, self.s_b)),
+            s_m1n0.eq(Mux(self.c_sel[3], s_m2n0, s_m2n0 + s_m2n1 + self.c_sel[2])),
+            self.s_o.eq(s_m1n0),
         ]
 
 
@@ -75,17 +78,18 @@ class _SRU(Module):
 
         # The following mux tree is optimized for 4-LUTs, and fits into the optimal 32 4-LUTs
         # and 16 DFFs on iCE40 using synth_ice40.
-        s_l  = Signal(width)
-        s_r  = Signal(width)
-        s_i1 = Signal(width)
-        s_i2 = Signal(width)
+        # The mux tree is 2 levels deep.
+        s_l    = Signal(width)
+        s_r    = Signal(width)
+        s_m2n0 = Signal(width)
+        s_m1n0 = Signal(width)
         self.comb += [
             s_l.eq(Cat(self.s_c,     self.r_o[:-1])),
             s_r.eq(Cat(self.r_o[1:], self.s_c     )),
-            s_i1.eq(Mux(self.c_dir, s_r, s_l)),
-            s_i2.eq(Mux(self.c_ld, self.s_i, s_i1)),
+            s_m2n0.eq(Mux(self.c_dir, s_r, s_l)),
+            s_m1n0.eq(Mux(self.c_ld, self.s_i, s_m2n0)),
         ]
-        self.sync += self.r_o.eq(s_i2)
+        self.sync += self.r_o.eq(s_m1n0)
 
 
 class BonelessCoreFSM(Module):
