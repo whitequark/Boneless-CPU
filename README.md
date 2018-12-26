@@ -1,8 +1,8 @@
 # Boneless
 
-[![Build Status](https://travis-ci.org/whitequark/boneless.svg?branch=master)](https://travis-ci.org/whitequark/boneless)
-[![codecov](https://codecov.io/gh/whitequark/boneless/branch/master/graph/badge.svg)](https://codecov.io/gh/whitequark/boneless)
-[![Documentation Status](https://readthedocs.org/projects/boneless/badge/?version=latest)](https://boneless.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/whitequark/Boneless-CPU.svg?branch=master)](https://travis-ci.org/whitequark/Boneless-CPU)
+[![codecov](https://codecov.io/gh/whitequark/Boneless-CPU/branch/master/graph/badge.svg)](https://codecov.io/gh/whitequark/Boneless-CPU)
+[![Documentation Status](https://readthedocs.org/projects/Boneless-CPU/badge/?version=latest)](https://boneless-cpu.readthedocs.io/en/latest/?badge=latest)
 [![0-Clause BSD](https://img.shields.io/badge/license-0BSD-green.svg)](http://landley.net/toybox/license.html)
 
 ## Boneless CPU
