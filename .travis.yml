@@ -6,6 +6,7 @@ addons:
   apt:
     update: true
 before_install:
+  - pip install git+https://github.com/m-labs/nmigen
   - pip install codecov
 script:
   - coverage run -m unittest discover
