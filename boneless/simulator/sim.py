@@ -134,7 +134,7 @@ class BonelessSimulator:
         Parameters
         ----------
         reg: int
-            Register number to read. ``R[0-8]`` from the `glasgow` package
+            Register number to read. ``R[0-8]`` from :mod:`boneless.instr`
             is also acceptable.
 
         Returns
@@ -152,7 +152,7 @@ class BonelessSimulator:
         Parameters
         ----------
         offs: int
-            Register number to read. ``R[0-8]`` from the `glasgow` package
+            Register number to read. ``R[0-8]`` from :mod:`boneless.instr`
             is also acceptable.
 
         Returns
@@ -187,7 +187,7 @@ class BonelessSimulator:
         Parameters
         ----------
         reg: int
-            Register number to write. ``R[0-8]`` from the ``glasgow`` package
+            Register number to write. ``R[0-8]`` from :mod:`boneless.instr`
             is also acceptable.
         val: int
             16-bit (`treated as unsigned`) to write to a register. If the
@@ -208,8 +208,8 @@ class BonelessSimulator:
         ----------
         contents: list of ints
             Integer representation of opcodes to load into the memory space of
-            the simulated CPU. The ``assemble`` function from the ``glasgow``
-            package produces a list compatible with this input parameter.
+            the simulated CPU. The function :func:`boneless.instr.assemble`
+            produces a list compatible with this input parameter.
         start: int
             16-bit int offset representing the starting location in memory
             in which to load ``contents``.
