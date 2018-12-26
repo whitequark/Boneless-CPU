@@ -1,8 +1,8 @@
 import unittest
 from collections import defaultdict
 
-from boneless.simulator import *
-from boneless.instr import *
+from .. import *
+from ...instr import *
 
 # TODO: Simulate Undefined Regs and Memory? Fail if write to
 # undefined location occurs.
