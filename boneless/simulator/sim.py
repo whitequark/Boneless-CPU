@@ -66,7 +66,7 @@ class BonelessSimulator:
     start_pc: int, optional
         The Program Counter register is set to this value when instantiating
         an object of this class.
-    memsize: int, optional
+    mem_size: int, optional
         Number of 16-bit words that the simulated CPU can access, starting
         from address zero. Accessing out-of-bounds memory will cause an
         exception.
@@ -99,9 +99,9 @@ class BonelessSimulator:
     io_callback: function
         Reference to the current I/O callback function.
     """
-    def __init__(self, start_pc=0x10, memsize=1024, io_callback=None):
+    def __init__(self, start_pc=0x10, mem_size=1024, io_callback=None):
         def memset():
-            for i in range(memsize):
+            for i in range(mem_size):
                 yield 0
 
         self.sim_active = False
@@ -126,7 +126,7 @@ class BonelessSimulator:
         array
             Array of 16-bit ints representing registers.
         """
-        return self.mem[self.window:self.window+16]
+        return self.mem[self.window:self.window+8]
 
     def read_reg(self, reg):
         """Read the value of a single 16-bit register.

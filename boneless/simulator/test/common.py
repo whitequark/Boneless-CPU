@@ -8,7 +8,7 @@ from boneless.instr import *
 # undefined location occurs.
 class BonelessTestCase(unittest.TestCase):
     def setUp(self):
-        self.cpu = BonelessSimulator(start_pc=0x10, memsize=1024, io_callback=None)
+        self.cpu = BonelessSimulator(start_pc=0x10, mem_size=1024, io_callback=None)
         self.init_regs = defaultdict(lambda : 0)
         self.payload = None
 
