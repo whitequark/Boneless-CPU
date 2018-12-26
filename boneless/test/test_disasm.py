@@ -1,7 +1,7 @@
 import unittest
 
-from .disasm import disassemble
-from .instr import *
+from ..arch.instr import *
+from ..arch.disasm import disassemble
 
 
 class DisassemblerTestCase(unittest.TestCase):

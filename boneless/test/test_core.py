@@ -2,8 +2,8 @@ import unittest
 import functools
 from nmigen.compat import *
 
-from ..instr import *
-from .core_fsm import BonelessCoreFSM, _StubMemoryPort
+from ..arch.instr import *
+from ..gateware.core_fsm import BonelessCoreFSM, _StubMemoryPort
 
 
 def simulation_test(**kwargs):

@@ -1,7 +1,7 @@
 from nmigen.compat import *
 
-from ..opcode import *
-from ..instr import *
+from ..arch.opcode import *
+from ..arch.instr import *
 from .formal import *
 
 
