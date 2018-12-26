@@ -10,7 +10,7 @@ setup(
     #long_description="""TODO""",
     license="0-clause BSD License",
     install_requires=["nmigen"],
-    packages=find_packages(exclude=["tests"]),
+    packages=find_packages(),
     project_urls={
         #"Documentation": "https://glasgow.readthedocs.io/",
         "Source Code": "https://github.com/whitequark/Boneless-CPU",
