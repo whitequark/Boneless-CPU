@@ -32,3 +32,6 @@ class BonelessTestCase(unittest.TestCase):
                     break
             else:
                 self.fail("Emergency stop of CPU after {} insns.".format(fail_count))
+
+    def assertFlagsEqual(self, z=0, s=0, c=0, v=0):
+        self.assertEqual([self.cpu.z, self.cpu.s, self.cpu.c, self.cpu.v], [z, s, c, v])

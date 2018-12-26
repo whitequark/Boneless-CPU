@@ -83,19 +83,21 @@ class BonelessSimulator:
         are just memory locations.)
     pc: int
         Current program counter pointer.
-    flags: dict
-        Current value of the flags register. Each dictionary entry is either
-        ``1`` for ``True``, or ``0`` for ``False``. Valid keys are:
-
-        * "Z" : Zero bit
-        * "S" : Sign bit
-        * "C" : Carry bit
-        * "V" : OVerflow bit
-
+    z: int
+        Current value of the Zero flag, ``1`` for ``True``, or ``0`` for
+        ``False``.
+    s: int
+        Current value of the Sign flag, ``1`` for ``True``, or ``0`` for
+        ``False``.
+    c: int
+        Current value of the Carry flag, ``1`` for ``True``, or ``0`` for
+        ``False``.
+    v: int
+        Current value of the OVerflow flag, ``1`` for ``True``, or ``0`` for
+        ``False``.
     mem: array
         Contents of the primary address space seen by the simulated CPU. On
         object construction this is initialized to all zeroes.
-
     io_callback: function
         Reference to the current I/O callback function.
     """
@@ -107,7 +109,10 @@ class BonelessSimulator:
         self.sim_active = False
         self.window = 0
         self.pc = start_pc
-        self.flags = { "Z" : 0, "S" : 0, "C" : 0, "V" : 0}
+        self.z = 0
+        self.s = 0
+        self.c = 0
+        self.v = 0
         self.mem = array.array("H", memset())
         self.io_callback = io_callback
 
@@ -293,19 +298,19 @@ class BonelessSimulator:
             # ADD
             if typ == 0x00:
                 raw = val_a + val_b
-                self.flags["V"] = overflow(val_a, val_b, raw)
+                self.v = overflow(val_a, val_b, raw)
                 self._write_reg(dst, to_unsigned16b(raw))
             # SUB
             elif typ == 0x01:
                 raw = val_a + to_unsigned16b(~val_b) + 1
-                self.flags["V"] = overflow_sub(val_a, val_b, raw)
+                self.v = overflow_sub(val_a, val_b, raw)
                 self._write_reg(dst, to_unsigned16b(raw))
             # CMP
             else:
                 raw = val_a + to_unsigned16b(~val_b) + 1
-                self.flags["V"] = overflow_sub(val_a, val_b, raw)
+                self.v = overflow_sub(val_a, val_b, raw)
 
-            self.flags["C"] = carry(raw)
+            self.c = carry(raw)
         elif not code and typ in range(3):
             # AND
             if typ == 0x00:
@@ -320,8 +325,8 @@ class BonelessSimulator:
         else:
             raise BonelessError("A-class opcode with typ == 0x03 is a reserved instruction.")
 
-        self.flags["Z"] = zero(raw)
-        self.flags["S"] = sign(raw)
+        self.z = zero(raw)
+        self.s = sign(raw)
 
     def _do_s_class(self, opcode):
         dst = (0x0700 & opcode) >> 8
@@ -360,8 +365,8 @@ class BonelessSimulator:
                     raw = u_shift
 
         self._write_reg(dst, raw & 0x0FFFF)
-        self.flags["Z"] = zero(raw)
-        self.flags["S"] = sign(raw)
+        self.z = zero(raw)
+        self.s = sign(raw)
 
     def _do_m_class(self, opcode):
         def to_signed5b(val):
@@ -427,10 +432,10 @@ class BonelessSimulator:
 
             val = to_unsigned16b(raw)
 
-            self.flags["Z"] = zero(raw)
-            self.flags["S"] = sign(raw)
-            self.flags["C"] = carry(raw)
-            self.flags["V"] = overflow(op_a, op_b, raw)
+            self.z = zero(raw)
+            self.s = sign(raw)
+            self.c = carry(raw)
+            self.v = overflow(op_a, op_b, raw)
         # LDI
         elif opc == 0x04:
             val = self.mem[to_unsigned16b(self.pc + to_signed8b(imm))]
@@ -470,25 +475,25 @@ class BonelessSimulator:
 
         # JNZ/JNE, JZ/JE
         elif cond == 0x01:
-            cond_met = (self.flags["Z"]  == flag)
+            cond_met = (self.z  == flag)
         # JNS, JS
         elif cond == 0x02:
-            cond_met = (self.flags["S"]  == flag)
+            cond_met = (self.s  == flag)
         # JNC/JULT, JC/JUGE
         elif cond == 0x03:
-            cond_met = (self.flags["C"]  == flag)
+            cond_met = (self.c  == flag)
         # JNO, JO
         elif cond == 0x04:
-            cond_met = (self.flags["V"]  == flag)
+            cond_met = (self.v  == flag)
         # JULE, JUGT
         elif cond == 0x05:
-            cond_met = ((not self.flags["C"] or self.flags["Z"])  == flag)
+            cond_met = ((not self.c or self.z)  == flag)
         # JSGE, JSLT
         elif cond == 0x06:
-            cond_met = ((self.flags["S"] ^ self.flags["V"])  == flag)
+            cond_met = ((self.s ^ self.v)  == flag)
         # JSGT, JSLE
         elif cond == 0x07:
-            cond_met = (((self.flags["S"] ^ self.flags["V"]) or self.flags["Z"])  == flag)
+            cond_met = (((self.s ^ self.v) or self.z)  == flag)
 
         if cond_met:
             pc_incr = to_signed11b(offs) + 1

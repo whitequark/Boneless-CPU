@@ -22,14 +22,14 @@ class Test32bMath(BonelessTestCase):
         self.cpu.load_program(self.flatten())
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[5], 0xBFFF)
-        self.assertEqual(self.cpu.flags, { "Z" : 0, "S" : 1, "C" : 0, "V" : 1})
+        self.assertFlagsEqual(z=0, s=1, c=0, v=1)
         self.run_cpu(1)
         self.assertEqual(self.cpu.pc, 18)
         self.run_cpu(1)
-        self.assertEqual(self.cpu.flags, { "Z" : 0, "S" : 0, "C" : 1, "V" : 0})
+        self.assertFlagsEqual(z=0, s=0, c=1, v=0)
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[6], 0)
-        self.assertEqual(self.cpu.flags, { "Z" : 1, "S" : 0, "C" : 1, "V" : 0})
+        self.assertFlagsEqual(z=1, s=0, c=1, v=0)
 
 
 class TestLoop(BonelessTestCase):

@@ -22,7 +22,7 @@ class TestClassA(BonelessTestCase):
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[7], 0)
         # Only possible calculation where this can occur?
-        self.assertEqual(self.cpu.flags, { "Z" : 1, "S" : 0, "C" : 1, "V" : 1})
+        self.assertFlagsEqual(z=1, s=0, c=1, v=1)
 
     def test_sub(self):
         self.init_regs[R0] = 0x8000
@@ -36,11 +36,11 @@ class TestClassA(BonelessTestCase):
         self.cpu.load_program(self.flatten())
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[2], 0x7fff)
-        self.assertEqual(self.cpu.flags, { "Z" : 0, "S" : 0, "C" : 1, "V" : 1})
+        self.assertFlagsEqual(z=0, s=0, c=1, v=1)
 
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[2], 0)
-        self.assertEqual(self.cpu.flags, { "Z" : 1, "S" : 0, "C" : 1, "V" : 0})
+        self.assertFlagsEqual(z=1, s=0, c=1, v=0)
 
     def test_cmp(self):
         self.init_regs[R1] = 0x0001
@@ -56,19 +56,21 @@ class TestClassA(BonelessTestCase):
         # to test twelve possble combinations). Commented-out combinations
         # are not possible with subtraction or at all.
         for ra, rb, f in [
-            # (_, _, { "Z" : 0, "S" : 0, "C" : 0, "V" : 0}), # S=0, C=0 impossible
-            # (_, _, { "Z" : 0, "S" : 0, "C" : 0, "V" : 1}),
-            (R7, R1, { "Z" : 0, "S" : 0, "C" : 1, "V" : 0}),
-            (R5, R1, { "Z" : 0, "S" : 0, "C" : 1, "V" : 1}),
+            #          Z, S, C, V
+            # (_, _, [ 0, 0, 0, 0]), # S=0, C=0 impossible
+            # (_, _, [ 0, 0, 0, 1]),
+            (R7, R1, [ 0, 0, 1, 0]),
+            (R5, R1, [ 0, 0, 1, 1]),
 
-            (R1, R7, { "Z" : 0, "S" : 1, "C" : 0, "V" : 0}),
-            (R6, R2, { "Z" : 0, "S" : 1, "C" : 0, "V" : 1}),
-            (R2, R0, { "Z" : 0, "S" : 1, "C" : 1, "V" : 0}),
-            # (_, _, { "Z" : 0, "S" : 1, "C" : 1, "V" : 1}),
-            # (_, _, { "Z" : 1, "S" : 0, "C" : 0, "V" : 0}), # Z=1, C=0 impossible
-            # (_, _, { "Z" : 1, "S" : 0, "C" : 0, "V" : 1}),
-            (R1, R1, { "Z" : 1, "S" : 0, "C" : 1, "V" : 0}),
-            # (_, _, { "Z" : 1, "S" : 0, "C" : 1, "V" : 1}) # Only possible w/ ADD
+            (R1, R7, [ 0, 1, 0, 0]),
+            (R6, R2, [ 0, 1, 0, 1]),
+            (R2, R0, [ 0, 1, 1, 0]),
+            # (_, _, [ 0, 1, 1, 1]),
+
+            # (_, _, [ 1, 0, 0, 0]), # Z=1, C=0 impossible
+            # (_, _, [ 1, 0, 0, 1]),
+            (R1, R1, [ 1, 0, 1, 0]),
+            # (_, _, [ 1, 0, 1, 1]) # Only possible w/ ADD
         ]:
             with self.subTest(rb=rb, ra=ra, f=f):
                 self.payload = [
@@ -77,7 +79,7 @@ class TestClassA(BonelessTestCase):
                 self.cpu.pc = 16
                 self.cpu.load_program(self.flatten())
                 self.run_cpu(1)
-                self.assertEqual(self.cpu.flags, f)
+                self.assertFlagsEqual(*f)
 
     def test_logical(self):
         op_and = lambda x, y : x & y
@@ -96,7 +98,7 @@ class TestClassA(BonelessTestCase):
         self.cpu.load_program(self.flatten())
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[3], 0)
-        self.assertEqual(self.cpu.flags, { "Z" : 1, "S" : 0, "C" : 0, "V" : 0})
+        self.assertFlagsEqual(z=1, s=0, c=0, v=0)
 
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[4], 0xDEAD)
@@ -184,14 +186,14 @@ class TestClassS(BonelessTestCase):
 
         self.cpu.load_program(self.flatten())
         self.run_cpu(1)
-        self.assertEqual(self.cpu.flags, { "Z" : 0, "S" : 1, "C" : 0, "V" : 0})
+        self.assertFlagsEqual(z=0, s=1, c=0, v=0)
         self.run_cpu(1)
-        self.assertEqual(self.cpu.flags, { "Z" : 0, "S" : 0, "C" : 0, "V" : 0})
+        self.assertFlagsEqual(z=0, s=0, c=0, v=0)
         self.run_cpu(1)
-        self.assertEqual(self.cpu.flags, { "Z" : 1, "S" : 0, "C" : 0, "V" : 0})
+        self.assertFlagsEqual(z=1, s=0, c=0, v=0)
         self.run_cpu(1)
         self.assertEqual(self.cpu.regs()[1], 0xFFFF)
-        self.assertEqual(self.cpu.flags, { "Z" : 0, "S" : 1, "C" : 0, "V" : 0})
+        self.assertFlagsEqual(z=0, s=1, c=0, v=0)
 
 
 class TestClassM(BonelessTestCase):
