@@ -5,16 +5,8 @@ python:
 addons:
   apt:
     update: true
-env:
-  - SDAR='sdcclib r'
 before_install:
-  - sudo apt install sdcc
   - pip install codecov
-# command to install dependencies
-install:
-  - git clone --recurse-submodules https://github.com/whitequark/Glasgow.git
-  - "(cd Glasgow/software && python setup.py install)"
-# command to run tests
 script:
   - coverage run -m unittest discover
   - codecov
