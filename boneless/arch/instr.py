@@ -66,10 +66,6 @@ def AND (rd, ra, rb):  return [A_FORMAT(OPCODE_LOGIC,   OPTYPE_AND, rd, ra, rb)]
 def OR  (rd, ra, rb):  return [A_FORMAT(OPCODE_LOGIC,   OPTYPE_OR,  rd, ra, rb)]
 def XOR (rd, ra, rb):  return [A_FORMAT(OPCODE_LOGIC,   OPTYPE_XOR, rd, ra, rb)]
 
-def XCHG(rx, ry):      return [*XOR(rx, rx, ry),
-                               *XOR(ry, ry, rx),
-                               *XOR(rx, rx, ry)]
-
 def ADD (rd, ra, rb):  return [A_FORMAT(OPCODE_ARITH,   OPTYPE_ADD, rd, ra, rb)]
 def SUB (rd, ra, rb):  return [A_FORMAT(OPCODE_ARITH,   OPTYPE_SUB, rd, ra, rb)]
 def CMP (    ra, rb):  return [A_FORMAT(OPCODE_ARITH,   OPTYPE_CMP,  0, ra, rb)]
@@ -122,6 +118,8 @@ def JSLT(off):         return [C_FORMAT(OPCODE_JSLT, off)]
 def JSGT(off):         return [C_FORMAT(OPCODE_JSGT, off)]
 def JSLE(off):         return [C_FORMAT(OPCODE_JSLE, off)]
 
+def ILL(insn):         return [insn & 0xffff]
+
 def MOVI(rd, imm16):
     assert imm16 in range(65536)
     if imm16 in range(256):
@@ -130,7 +128,14 @@ def MOVI(rd, imm16):
         return MOVH(rd, (imm16 >> 8) + ((imm16 >> 7) & 1)) + \
                [I_FORMAT(OPCODE_ADDI, rd, imm16 & 0xff, u=True)]
 
-def ILL(insn):         return [insn & 0xffff]
+
+def XCHG(rx, ry):
+    assert rx != ry
+    return [
+        *XOR(rx, rx, ry),
+        *XOR(ry, ry, rx),
+        *XOR(rx, rx, ry)
+    ]
 
 
 def L(label): return label
