@@ -5,7 +5,10 @@ __all__ = ["BonelessFormalInterface"]
 
 
 class BonelessFormalInterface:
-    def __init__(self):
+    def __init__(self, mem_wrport=None, ext_port=None):
+        self.mem_wrport = mem_wrport
+        self.ext_port   = ext_port
+
         # Active when an instruction is retired.
         self.stb        = Signal(    name="fi_stb")
         # Retired instruction and its PC.
@@ -32,3 +35,21 @@ class BonelessFormalInterface:
             self.mem_w_en, self.mem_w_addr, self.mem_w_data,
             self.ext_addr, self.ext_r_data, self.ext_r_en, self.ext_w_data, self.ext_w_en
         ]
+
+    def get_fragment(self, platform):
+        m = Module()
+        if self.mem_wrport:
+            m.d.comb += [
+                self.mem_w_addr.eq(self.mem_wrport.addr),
+                self.mem_w_data.eq(self.mem_wrport.data),
+                self.mem_w_en  .eq(self.mem_wrport.en),
+            ]
+        if self.ext_port:
+            m.d.comb += [
+                self.ext_addr  .eq(self.ext_port.addr),
+                self.ext_r_data.eq(self.ext_port.r_data),
+                self.ext_r_en  .eq(self.ext_port.r_en),
+                self.ext_w_data.eq(self.ext_port.w_data),
+                self.ext_w_en  .eq(self.ext_port.w_en),
+            ]
+        return m.lower(platform)

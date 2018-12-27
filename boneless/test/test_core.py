@@ -1,9 +1,10 @@
 import unittest
 import functools
-from nmigen.compat import *
+from nmigen import *
+from nmigen.back.pysim import *
 
 from ..arch.instr import *
-from ..gateware.core_fsm import BonelessCoreFSM, _StubMemoryPort
+from ..gateware.core_fsm import BonelessCoreFSM, _ExternalPort
 
 
 def simulation_test(**kwargs):
@@ -11,7 +12,10 @@ def simulation_test(**kwargs):
         @functools.wraps(case)
         def wrapper(self):
             self.configure(self.tb, **kwargs)
-            run_simulation(self.tb, case(self, self.tb), vcd_name="test.vcd")
+            with Simulator(self.tb) as sim:
+                sim.add_clock(1e-6)
+                sim.add_sync_process(case(self, self.tb))
+                sim.run()
         return wrapper
     return configure_wrapper
 
@@ -21,29 +25,36 @@ class BonelessSimulationTestbench(Module):
         self.mem_init = []
         self.ext_init = []
 
-    def do_finalize(self):
-        self.mem = Memory(width=16, depth=len(self.mem_init), init=self.mem_init)
-        self.specials.mem = self.mem
+    def get_fragment(self, platform):
+        m = Module()
 
-        mem_rdport = self.mem.get_port(has_re=True, mode=READ_FIRST)
-        mem_wrport = self.mem.get_port(write_capable=True)
-        self.specials.mem_r = mem_rdport
-        self.specials.mem_w = mem_wrport
+        mem = self.mem = Memory(width=16, depth=len(self.mem_init), init=self.mem_init)
+        m.submodules.mem_rdport = mem_rdport = mem.read_port(transparent=False)
+        m.submodules.mem_wrport = mem_wrport = mem.write_port()
 
         if self.ext_init:
-            self.ext = Memory(width=16, depth=len(self.ext_init), init=self.ext_init)
-            self.specials.ext = self.ext
+            ext = self.ext = Memory(width=16, depth=len(self.ext_init), init=self.ext_init)
+            m.submodules.ext_rdport = ext_rdport = ext.read_port(transparent=False)
+            m.submodules.ext_wrport = ext_wrport = ext.write_port()
 
-            ext_port = self.ext.get_port(has_re=True, write_capable=True)
-            self.specials.ext_rw = ext_port
+            ext_port = _ExternalPort()
+            m.d.comb += [
+                ext_rdport.addr.eq(ext_port.addr),
+                ext_port.r_data.eq(ext_rdport.data),
+                ext_rdport.en.eq(ext_port.r_en),
+                ext_wrport.addr.eq(ext_port.addr),
+                ext_wrport.data.eq(ext_port.w_data),
+                ext_wrport.en.eq(ext_port.w_en),
+            ]
         else:
-            ext_port = _StubMemoryPort("ext")
-            self.submodules.ext_rw = ext_port
+            ext_port = None
 
-        self.submodules.dut = BonelessCoreFSM(reset_addr=8,
+        m.submodules.dut = self.dut = BonelessCoreFSM(reset_addr=8,
             mem_rdport=mem_rdport,
             mem_wrport=mem_wrport,
-            ext_port=ext_port)
+            ext_port  =ext_port)
+
+        return m.lower(platform)
 
 
 class BonelessTestCase(unittest.TestCase):
@@ -55,7 +66,7 @@ class BonelessTestCase(unittest.TestCase):
         tb.ext_init = extr
 
     def run_core(self, tb):
-        while (yield tb.dut.s_insn) != J(-1)[0]:
+        while not (yield tb.dut.halted):
             yield
 
     def assertMemory(self, tb, addr, value):
