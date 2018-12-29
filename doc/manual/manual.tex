@@ -1,0 +1,57 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[hmargin=3cm,vmargin=2.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{import}
+\usepackage{parskip}
+\usepackage{color}
+\usepackage[color,leftbars]{changebar}
+\usepackage{ragged2e}
+\usepackage{changepage}
+\usepackage{alltt}
+\renewcommand{\ttdefault}{txtt}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  pdfstartview=Fit,
+  pdfpagemode=UseOutlines,
+}
+
+\newcommand{\undefined}{\textbf{UNDEFINED}}
+\newcommand{\unpredictable}{\textbf{UNPREDICTABLE}}
+\uchyph=0
+
+\begin{document}
+
+\begin{titlepage}
+  \centering
+  \vspace*{6cm}
+  \par{\Huge Boneless-III}
+  \vspace{1cm}
+  \par{\Huge Architecture Reference Manual}
+\end{titlepage}
+
+\tableofcontents
+\addcontentsline{toc}{section}{Table of Contents}
+\pagebreak
+
+\setcounter{tocdepth}{2}
+
+\section{Guide to Instruction Set}
+TBD
+\pagebreak
+
+\section{List of Instructions}
+
+The following pages provide a detailed description of instructions, arranged in alphabetical order.
+
+Executing any instruction with an encoding not present on the following pages has \unpredictable{} behavior.
+\pagebreak
+
+\import{insns/}{index.tex}
+
+\end{document}

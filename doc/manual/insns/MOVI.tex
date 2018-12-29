@@ -1,0 +1,18 @@
+\begin{instruction}{MOVI}{Move Immediate}
+  \begin{encoding*}{short}
+    \mnemonic & \op{3}{100} & \op{2}{01} & \reg{d} & \imm{8} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{3}{100} & \op{2}{01} & \reg{d} & \imm{8} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} Rd, imm}
+  \purpose{To load a register with a constant.}
+  \restrictions{If the long form is used, and \texttt{off8[8:3]} are non-zero, the behavior is \unpredictable.}
+  \begin{operation}
+\K{if} (has\_ext13)
+\K{then} imm ← ext13|imm8[3:0]
+\K{else} imm ← sign\_extend(imm8)
+mem[W|Rd] ← imm
+  \end{operation}
+\end{instruction}

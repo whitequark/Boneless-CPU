@@ -1,0 +1,13 @@
+\begin{instruction}{JR}{Jump to Register}
+  \begin{encoding}
+    \mnemonic & \op{3}{101} & \op{2}{11} & \reg{a} & \bits{8}{00000000} \\
+  \end{encoding}
+  \assembly{\mnemonic{} Rd}
+  \purpose{To transfer control to an absolute address contained in a register.}
+  \restrictions{None.}
+\begin{operation}
+addr ← mem[W|Ra]
+PC ← addr
+\end{operation}
+  \begin{notice}The exact encoding of this instruction is not final.\end{notice}
+\end{instruction}

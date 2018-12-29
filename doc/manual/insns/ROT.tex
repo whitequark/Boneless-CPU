@@ -1,0 +1,9 @@
+\begin{instruction}{ROT}{Rotate}
+  \begin{encoding}
+    \mnemonic & \op{3}{000} & \op{2}{10} & \reg{d} & \reg{a} & \op{2}{01} & \reg{b} \\
+  \end{encoding}
+  \assembly{\mnemonic{} Rd, Ra, Rb}
+  \purpose{To perform a left rotate of a 16-bit integer in a register by a variable bit amount.}
+  \input{shift-restrictions.tex}
+  \begin{operation}\aluRR{opA[16-opB:0]|opA[16:16-opB]}\wb\flagZS\end{operation}
+\end{instruction}

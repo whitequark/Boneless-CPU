@@ -1,0 +1,17 @@
+\begin{instruction}{SBB}{Subtract Register with Borrow}
+  \begin{encoding}
+    \mnemonic & \op{3}{000} & \op{2}{01} & \reg{d} & \reg{a} & \op{2}{11} & \reg{b} \\
+  \end{encoding}
+  \assembly{\mnemonic{} Rd, Ra, Rb}
+  \purpose{To subtract 16-bit integers in registers, with borrow input.}
+  \restrictions{None.}
+  \begin{operation}\aluRR{opA - opB - \K{not} C}\wb\flagZSBV\end{operation}
+  \begin{remarks}
+  A 32-bit subtraction with both operands in registers can be performed as follows:
+  \begin{alltt}
+  ; Perform (R1|R0) ← (R3|R2) - (R5|R4)
+  SUB  R0, R2, R4
+  SBB  R1, R3, R5
+  \end{alltt}
+  \end{remarks}
+\end{instruction}

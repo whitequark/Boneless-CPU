@@ -1,0 +1,13 @@
+\begin{instruction}{JS}{Jump if Sign}
+  \begin{encoding*}{short}
+    \mnemonic & \op{3}{101} & \op{1}{1} & \op{4}{1001} & \off{8} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{3}{101} & \op{1}{1} & \op{4}{1001} & \off{8} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} label}
+  \purpose{To transfer control if an arithmetic or shift operation produced a negative result.}
+  \input{jump-restrictions.tex}
+  \begin{operation}\off{8}\jump{S}\end{operation}
+\end{instruction}

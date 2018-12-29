@@ -1,0 +1,16 @@
+\begin{instruction}{LDXI}{Load External with Immediate Address}
+  \begin{encoding*}{short}
+    \mnemonic & \op{3}{011} & \op{2}{10} & \reg{d} & \off{8} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{3}{011} & \op{2}{10} & \reg{d} & \off{8} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} Rd, off}
+  \purpose{To complete a load cycle on external bus at a constant absolute address.}
+  \input{memi-restrictions.tex}
+\begin{operation}\off{8}
+temp ← ext[off]
+mem[W|Rd] ← temp
+\end{operation}
+\end{instruction}

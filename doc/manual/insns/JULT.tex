@@ -1,0 +1,14 @@
+\begin{instruction}{JULT}{Jump if Unsigned Less Than}
+  \begin{encoding*}{short}
+    \mnemonic & \op{3}{101} & \op{1}{1} & \op{4}{0010} & \off{8} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{3}{101} & \op{1}{1} & \op{4}{0010} & \off{8} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} label}
+  \purpose{To transfer control after a \texttt{\insnref{CMP} Ra, Rb} instruction if \texttt{Ra} is less than \texttt{Rb} when interpreted as unsigned integer.}
+  \input{jump-restrictions.tex}
+  \begin{operation}\off{8}\jump{\K{not} C}\end{operation}
+  \begin{remarks}This instruction has the same encoding as \insnref{JNC}.\end{remarks}
+\end{instruction}

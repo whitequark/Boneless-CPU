@@ -1,0 +1,12 @@
+\begin{instruction}{MOV}{Move}
+  \assembly{\mnemonic{} Rd, Rs}
+  \purpose{To move a value from register to register.}
+  \restrictions{None.}
+  \begin{remarks}
+The assembler does not translate any instructions for \texttt{\mnemonic} with identical \texttt{Rd} and \texttt{Rs}, and translates \texttt{\mnemonic} with any other register combination to
+\begin{alltt}
+  ANDI Rd, Rs, Rs
+\end{alltt}
+  \end{remarks}
+  \begin{notice}The exact translation of this mnemonic is not final.\end{notice}
+\end{instruction}

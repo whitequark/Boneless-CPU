@@ -1,0 +1,13 @@
+\begin{instruction}{XORI}{Bitwise XOR with Immediate}
+  \begin{encoding*}{short}
+    \mnemonic & \op{3}{001} & \op{2}{00} & \reg{d} & \reg{a} & \op{2}{10} & \imm{3} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{3}{001} & \op{2}{00} & \reg{d} & \reg{a} & \op{2}{10} & \imm{3} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} Rd, Ra, imm}
+  \purpose{To perform bitwise XOR between a constant and a 16-bit integer in a register.}
+  \restrictions{None.}
+  \begin{operation}\aluRI{opA \K{xor} opB}\wb\flagZS\end{operation}
+\end{instruction}

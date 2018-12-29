@@ -1,0 +1,14 @@
+\begin{instruction}{JE}{Jump if Equal}
+  \begin{encoding*}{short}
+    \mnemonic & \op{3}{101} & \op{1}{1} & \op{4}{1000} & \off{8} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{3}{101} & \op{1}{1} & \op{4}{1000} & \off{8} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} label}
+  \purpose{To transfer control after a \texttt{\insnref{CMP} Ra, Rb} instruction if \texttt{Ra} is equal to \texttt{Rb}.}
+  \input{jump-restrictions.tex}
+  \begin{operation}\off{8}\jump{Z}\end{operation}
+  \begin{remarks}This instruction has the same encoding as \insnref{JZ}.\end{remarks}
+\end{instruction}

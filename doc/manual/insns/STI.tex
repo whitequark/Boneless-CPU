@@ -1,0 +1,17 @@
+\begin{instruction}{STI}{Store PC-relative with Immediate Offset}
+  \begin{encoding*}{short}
+    \mnemonic & \op{3}{011} & \op{2}{01} & \reg{s} & \off{8} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{3}{011} & \op{2}{01} & \reg{s} & \off{8} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} Rs, off}
+  \purpose{To store a word to memory at an address relative to PC with a constant offset.}
+  \input{memi-restrictions.tex}
+\begin{operation}\off{8}
+addr ← PC + off
+temp ← mem[W|Rs]
+mem[addr] ← temp
+\end{operation}
+\end{instruction}

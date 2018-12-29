@@ -1,0 +1,15 @@
+\begin{instruction}{MOVA}{Move Address PC-relative}
+  \begin{encoding*}{short}
+    \mnemonic & \op{3}{100} & \op{2}{00} & \reg{d} & \off{8} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{3}{100} & \op{2}{00} & \reg{d} & \off{8} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} Rd, off}
+  \purpose{To load a register with an address relative to PC with a constant offset..}
+  \restrictions{If the long form is used, and \texttt{off8[8:3]} are non-zero, the behavior is \unpredictable.}
+  \begin{operation}\off{8}
+mem[W|Rd] ← PC + 1 + off
+  \end{operation}
+\end{instruction}

@@ -1,0 +1,13 @@
+\begin{instruction}{EXTI}{Extend Immediate}
+  \begin{encoding}
+    \mnemonic & \op{3}{110} & \imm{13} \\
+  \end{encoding}
+  \assembly{\mnemonic{} Rd, Ra, Rb}
+  \purpose{To extend the range of immediate in the next executed instruction.}
+  \restrictions{None.}
+\begin{operation}
+ext13 ← imm13
+has_ext13 ← 1
+\end{operation}
+  \begin{remarks}This instruction is exclusively emitted by the assembler while translating other instructions. As it changes both the meaning of and the constraints placed on the immediate field in the following instruction, the assembler does not accept a mnemonic for \texttt{EXTI}.\end{remarks}
+\end{instruction}

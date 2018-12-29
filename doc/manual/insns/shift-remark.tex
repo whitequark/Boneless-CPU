@@ -1,0 +1,11 @@
+\begin{remarks}
+The instruction encoding allows directly representing any \texttt{amount} between 1 and 8, inclusive. The assembler translates \texttt{\mnemonic} with \texttt{amount} of 0 to
+\begin{alltt}
+  MOV  Rd, Ra
+\end{alltt}
+and \texttt{\mnemonic} with \texttt{amount} greater than 8 to
+\begin{alltt}
+  \mnemonic Rd, Ra, 8
+  \mnemonic Rd, Rd, (amount - 8)
+\end{alltt}
+\end{remarks}

@@ -1,0 +1,10 @@
+\begin{instruction}{SLLI}{Shift Left Logical Immediate}
+  \begin{encoding}
+    \mnemonic & \op{3}{001} & \op{2}{10} & \reg{d} & \reg{a} & \op{2}{00} & \imm{3} \\
+  \end{encoding}
+  \assembly{\mnemonic{} Rd, Ra, amount}
+  \purpose{To perform a left logical shift of a 16-bit integer in a register by a constant bit amount.}
+  \restrictions{The \texttt{amount} may be between 0 and 15, inclusive.}
+  \begin{operation}\aluR{opA[15-imm3:0]|0\string{imm3+1\string}}\wb\flagZS\end{operation}
+  \input{shift-remark.tex}
+\end{instruction}

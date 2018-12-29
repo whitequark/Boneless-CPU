@@ -1,0 +1,17 @@
+\begin{instruction}{LDX}{Load External with Address in Register}
+  \begin{encoding*}{short}
+    \mnemonic & \op{3}{010} & \op{2}{10} & \reg{d} & \reg{a} & \off{5} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{3}{010} & \op{2}{10} & \reg{d} & \reg{a} & \off{5} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} Rd, Ra, off}
+  \purpose{To complete a load cycle on external bus at an absolute address contained in a register, with a constant offset.}
+  \input{mem-restrictions.tex}
+\begin{operation}\off{5}
+addr ← mem[W|Ra] + off
+temp ← ext[addr]
+mem[W|Rd] ← temp
+\end{operation}
+\end{instruction}

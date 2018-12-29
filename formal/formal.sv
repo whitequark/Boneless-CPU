@@ -246,7 +246,7 @@ module boneless_formal(
                         assert (fi_mem_w_data == (mem[a_regY] << i_shift));
                     OPCODE_SHIFT_L, OPTYPE_ROT:
                         assert (fi_mem_w_data == (mem[a_regY] << i_shift) |
-                                             (mem[a_regY] >> (16 - i_shift)));
+                                                 (mem[a_regY] >> (16 - i_shift)));
                     OPCODE_SHIFT_R, OPTYPE_SRL:
                         assert (fi_mem_w_data == (mem[a_regY] >> i_shift));
                     OPCODE_SHIFT_R, OPTYPE_SRA:

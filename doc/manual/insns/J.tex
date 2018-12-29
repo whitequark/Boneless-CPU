@@ -1,0 +1,13 @@
+\begin{instruction}{J}{Jump}
+  \begin{encoding*}{short}
+    \mnemonic & \op{3}{101} & \op{1}{1} & \op{4}{1111} & \off{8} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{3}{101} & \op{1}{1} & \op{4}{1111} & \off{8} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} label}
+  \purpose{To unconditionally transfer control.}
+  \input{jump-restrictions.tex}
+  \begin{operation}\off{8}PC ← PC + 1 + off\end{operation}
+\end{instruction}
