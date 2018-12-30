@@ -7,7 +7,7 @@
   \label{insn:#1}
   \vspace{0.5cm}
 
-  \newcommand{\mnemonic}{#1}
+  \newcommand{\mnemonic}{\texttt{#1}{}}
 
   \newcommand{\field}[1]{\par\textbf{##1:}\par}
   \newcommand{\fieldindent}[2]{\field{##1}\begin{adjustwidth}{10pt}{0pt}##2\end{adjustwidth}}
@@ -18,7 +18,7 @@
     \newcommand{\reg}[1]{\bits{3}{R####1}}
     \newcommand{\imm}[1]{\bits{####1}{imm####1}}
     \newcommand{\off}[1]{\bits{####1}{off####1}}
-    \newcommand{\exti}{EXTI & \op{3}{110} & \bits{13}{ext13} \\ \cline{2-17}}
+    \newcommand{\exti}{\texttt{EXTI} & \op{3}{110} & \bits{13}{ext13} \\ \cline{2-17}}
 
     \field{##1}
     \begin{adjustwidth}{10pt}{0pt}
