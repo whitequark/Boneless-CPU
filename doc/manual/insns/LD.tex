@@ -1,4 +1,4 @@
-\begin{instruction}{LD}{Load with Address in Register}
+\begin{instruction}{LD}{Load}
   \begin{encoding*}{short}
     \mnemonic & \op{3}{010} & \op{2}{00} & \reg{d} & \reg{a} & \off{5} \\
   \end{encoding*}
@@ -7,8 +7,8 @@
     \mnemonic & \op{3}{010} & \op{2}{00} & \reg{d} & \reg{a} & \off{5} \\
   \end{encoding*}
   \assembly{\mnemonic{} Rd, Ra, off}
-  \purpose{To load a word from memory at an absolute address contained in a register, with a constant offset.}
-  \input{mem-restrictions.tex}
+  \purpose{To load a word from memory at a variable address, with a constant offset.}
+  \input{mem5-restrictions.tex}
 \begin{operation}\off{5}
 addr ← mem[W|Ra] + off
 temp ← mem[addr]

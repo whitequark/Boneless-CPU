@@ -1,16 +1,16 @@
-\begin{instruction}{LDI}{Load PC-relative with Immediate Offset}
+\begin{instruction}{LDI}{Load Indexed}
   \begin{encoding*}{short}
-    \mnemonic & \op{3}{011} & \op{2}{00} & \reg{d} & \off{8} \\
+    \mnemonic & \op{3}{011} & \op{2}{00} & \reg{d} & \reg{a} & \off{5} \\
   \end{encoding*}
   \begin{encoding*}{long}
     \exti
-    \mnemonic & \op{3}{011} & \op{2}{00} & \reg{d} & \off{8} \\
+    \mnemonic & \op{3}{011} & \op{2}{00} & \reg{d} & \reg{a} & \off{5} \\
   \end{encoding*}
-  \assembly{\mnemonic{} Rd, off}
-  \purpose{To load a word from memory at an address relative to PC with a constant offset.}
-  \input{memi-restrictions.tex}
+  \assembly{\mnemonic{} Rd, Ra, off}
+  \purpose{To load a word from memory at a constant PC-relative address, with a variable offset.}
+  \input{mem5-restrictions.tex}
 \begin{operation}\off{8}
-addr ← PC + off
+addr ← PC + mem[W|Ra] + off
 temp ← mem[addr]
 mem[W|Rd] ← temp
 \end{operation}

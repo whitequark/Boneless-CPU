@@ -1,4 +1,4 @@
-\begin{instruction}{ST}{Store with Address in Register}
+\begin{instruction}{ST}{Store}
   \begin{encoding*}{short}
     \mnemonic & \op{3}{010} & \op{2}{01} & \reg{s} & \reg{a} & \off{5} \\
   \end{encoding*}
@@ -7,8 +7,8 @@
     \mnemonic & \op{3}{010} & \op{2}{01} & \reg{s} & \reg{a} & \off{5} \\
   \end{encoding*}
   \assembly{\mnemonic{} Rs, Ra, off}
-  \purpose{To store a word to memory at an absolute address contained in a register, with a constant offset.}
-  \input{mem-restrictions.tex}
+  \purpose{To store a word to memory at a variable address, with a constant offset.}
+  \input{mem5-restrictions.tex}
 \begin{operation}\off{5}
 addr ← mem[W|Ra] + off
 temp ← mem[W|Rs]

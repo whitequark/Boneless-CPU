@@ -25,6 +25,13 @@
 \newcommand{\unpredictable}{\textbf{UNPREDICTABLE}}
 \uchyph=0
 
+\newenvironment{notice}{
+  \cbcolor{red}
+  \par\textbf{Notice:}\cbstart\par
+}{
+  \cbend
+}
+
 \begin{document}
 
 \begin{titlepage}
@@ -34,6 +41,12 @@
   \vspace{1cm}
   \par{\Huge Architecture Reference Manual}
 \end{titlepage}
+
+\begin{notice}
+This document is a work in progress and subject to change without warning. However, the parts that are \textit{especially} subject to change carry a notice similar to this one.
+\end{notice}
+
+\pagebreak
 
 \tableofcontents
 \addcontentsline{toc}{section}{Table of Contents}

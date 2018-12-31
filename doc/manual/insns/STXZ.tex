@@ -1,4 +1,4 @@
-\begin{instruction}{STXI}{Store External with Immediate Address}
+\begin{instruction}{STXZ}{Store External Absolute}
   \begin{encoding*}{short}
     \mnemonic & \op{3}{011} & \op{2}{11} & \reg{s} & \off{8} \\
   \end{encoding*}
@@ -8,7 +8,7 @@
   \end{encoding*}
   \assembly{\mnemonic{} Rs, off}
   \purpose{To complete a store cycle on external bus at a constant absolute address.}
-  \input{mem-restrictions.tex}
+  \input{mem8-restrictions.tex}
 \begin{operation}\off{8}
 temp ← mem[W|Rs]
 ext[off] ← temp
