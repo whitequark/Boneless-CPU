@@ -30,7 +30,7 @@ class ALSRUTestCase:
 
             with Simulator(self.dut) as sim:
                 def process():
-                    yield self.dut.ctrl_eq(ctrl)
+                    yield self.dut.ctrl.eq(ctrl)
                     yield self.dut.a.eq(rand_a)
                     yield self.dut.b.eq(rand_b)
                     yield self.dut.r.eq(rand_r)

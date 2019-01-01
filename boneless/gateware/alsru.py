@@ -8,6 +8,8 @@ class ALSRU:
     """Arithmetical, logical, shift, and rotate unit."""
 
     # defined by subclasses
+    CTRL_BITS = None
+
     CTRL_A    = None
     CTRL_B    = None
     CTRL_nB   = None
@@ -32,10 +34,31 @@ class ALSRU:
         self.si = Signal() # shift in
         self.so = Signal() # shift out
 
-        self.ctrl  = None  # defined by subclasses
+        self.ctrl = None  # defined by subclasses
 
-    def ctrl_eq(self, word):
-        raise NotImplementedError
+    @classmethod
+    def ctrl_decoder(cls, word):
+        if word == cls.CTRL_A._as_const():
+            return "A"
+        if word == cls.CTRL_B._as_const():
+            return "B"
+        if word == cls.CTRL_nB._as_const():
+            return "~B"
+        if word == cls.CTRL_AaB._as_const():
+            return "A&B"
+        if word == cls.CTRL_AoB._as_const():
+            return "A|B"
+        if word == cls.CTRL_AxB._as_const():
+            return "A^B"
+        if word == cls.CTRL_ApB._as_const():
+            return "A+B"
+        if word == cls.CTRL_AmB._as_const():
+            return "A-B"
+        if word == cls.CTRL_SL._as_const():
+            return "R<<1"
+        if word == cls.CTRL_SR._as_const():
+            return "R>>1"
+        return "? {:0{}b}".format(word, cls.CTRL_BITS)
 
 
 class ALSRU_4LUT(ALSRU):
@@ -90,16 +113,18 @@ class ALSRU_4LUT(ALSRU):
     MUX_O_XpY =      0b0
     MUX_O_Y   =      0b1
 
-    CTRL_A    = (MUX_S_x, MUX_X_A,   MUX_Y_0,  MUX_O_XpY)
-    CTRL_B    = (MUX_S_x, MUX_X_x,   MUX_Y_B,  MUX_O_Y)
-    CTRL_nB   = (MUX_S_x, MUX_X_x,   MUX_Y_nB, MUX_O_Y)
-    CTRL_AaB  = (MUX_S_x, MUX_X_AaB, MUX_Y_0,  MUX_O_XpY)
-    CTRL_AoB  = (MUX_S_x, MUX_X_AoB, MUX_Y_0,  MUX_O_XpY)
-    CTRL_AxB  = (MUX_S_x, MUX_X_AxB, MUX_Y_0,  MUX_O_XpY)
-    CTRL_ApB  = (MUX_S_x, MUX_X_A,   MUX_Y_B,  MUX_O_XpY)
-    CTRL_AmB  = (MUX_S_x, MUX_X_A,   MUX_Y_nB, MUX_O_XpY)
-    CTRL_SL   = (MUX_S_L, MUX_X_x,   MUX_Y_S,  MUX_O_Y)
-    CTRL_SR   = (MUX_S_R, MUX_X_x,   MUX_Y_S,  MUX_O_Y)
+    CTRL_BITS = 6
+
+    CTRL_A    = Cat(C(MUX_S_x, 1), C(MUX_X_A,   2), C(MUX_Y_0,  2), C(MUX_O_XpY, 1))
+    CTRL_B    = Cat(C(MUX_S_x, 1), C(MUX_X_x,   2), C(MUX_Y_B,  2), C(MUX_O_Y,   1))
+    CTRL_nB   = Cat(C(MUX_S_x, 1), C(MUX_X_x,   2), C(MUX_Y_nB, 2), C(MUX_O_Y,   1))
+    CTRL_AaB  = Cat(C(MUX_S_x, 1), C(MUX_X_AaB, 2), C(MUX_Y_0,  2), C(MUX_O_XpY, 1))
+    CTRL_AoB  = Cat(C(MUX_S_x, 1), C(MUX_X_AoB, 2), C(MUX_Y_0,  2), C(MUX_O_XpY, 1))
+    CTRL_AxB  = Cat(C(MUX_S_x, 1), C(MUX_X_AxB, 2), C(MUX_Y_0,  2), C(MUX_O_XpY, 1))
+    CTRL_ApB  = Cat(C(MUX_S_x, 1), C(MUX_X_A,   2), C(MUX_Y_B,  2), C(MUX_O_XpY, 1))
+    CTRL_AmB  = Cat(C(MUX_S_x, 1), C(MUX_X_A,   2), C(MUX_Y_nB, 2), C(MUX_O_XpY, 1))
+    CTRL_SL   = Cat(C(MUX_S_L, 1), C(MUX_X_x,   2), C(MUX_Y_S,  2), C(MUX_O_Y,   1))
+    CTRL_SR   = Cat(C(MUX_S_R, 1), C(MUX_X_x,   2), C(MUX_Y_S,  2), C(MUX_O_Y,   1))
 
     def __init__(self, width):
         super().__init__(width)
@@ -114,10 +139,6 @@ class ALSRU_4LUT(ALSRU):
             ("y", 2),
             ("o", 1),
         ])
-
-    def ctrl_eq(self, word):
-        s, x, y, o = word
-        return self.ctrl.eq(Cat(C(s, 1), C(x, 2), C(y, 2), C(o, 1)))
 
     def get_fragment(self, platform):
         m = Module()
