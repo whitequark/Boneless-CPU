@@ -1,10 +1,10 @@
 \begin{instruction}{SBBI}{Subtract Immediate with Borrow}
   \begin{encoding*}{short}
-    \mnemonic & \op{3}{001} & \op{2}{01} & \reg{d} & \reg{a} & \op{2}{11} & \imm{3} \\
+    \mnemonic & \op{5}{00011} & \reg{d} & \reg{a} & \op{2}{11} & \imm{3} \\
   \end{encoding*}
   \begin{encoding*}{long}
     \exti
-    \mnemonic & \op{3}{001} & \op{2}{01} & \reg{d} & \reg{a} & \op{2}{11} & \imm{3} \\
+    \mnemonic & \op{5}{00011} & \reg{d} & \reg{a} & \op{2}{11} & \imm{3} \\
   \end{encoding*}
   \assembly{\mnemonic{} Rd, Ra, imm}
   \purpose{To subtract a constant from a 16-bit integer in a register, with borrow input.}

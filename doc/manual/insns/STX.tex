@@ -1,10 +1,10 @@
 \begin{instruction}{STX}{Store External with Address in Register}
   \begin{encoding*}{short}
-    \mnemonic & \op{3}{010} & \op{2}{11} & \reg{s} & \reg{a} & \off{5} \\
+    \mnemonic & \op{5}{01110} & \reg{s} & \reg{a} & \off{5} \\
   \end{encoding*}
   \begin{encoding*}{long}
     \exti
-    \mnemonic & \op{3}{010} & \op{2}{11} & \reg{s} & \reg{a} & \off{5} \\
+    \mnemonic & \op{5}{01110} & \reg{s} & \reg{a} & \off{5} \\
   \end{encoding*}
   \assembly{\mnemonic{} Rs, Ra, off}
   \purpose{To complete a store cycle on external bus at a variable address, with a constant offset.}

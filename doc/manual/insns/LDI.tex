@@ -1,10 +1,10 @@
 \begin{instruction}{LDI}{Load Indexed}
   \begin{encoding*}{short}
-    \mnemonic & \op{3}{011} & \op{2}{00} & \reg{d} & \reg{a} & \off{5} \\
+    \mnemonic & \op{5}{01001} & \reg{d} & \reg{a} & \off{5} \\
   \end{encoding*}
   \begin{encoding*}{long}
     \exti
-    \mnemonic & \op{3}{011} & \op{2}{00} & \reg{d} & \reg{a} & \off{5} \\
+    \mnemonic & \op{5}{01001} & \reg{d} & \reg{a} & \off{5} \\
   \end{encoding*}
   \assembly{\mnemonic{} Rd, Ra, off}
   \purpose{To load a word from memory at a constant PC-relative address, with a variable offset.}

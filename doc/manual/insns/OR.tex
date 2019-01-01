@@ -1,6 +1,6 @@
 \begin{instruction}{OR}{Bitwise OR with Register}
   \begin{encoding}
-    \mnemonic & \op{3}{000} & \op{2}{00} & \reg{d} & \reg{a} & \op{2}{01} & \reg{b} \\
+    \mnemonic & \op{5}{00000} & \reg{d} & \reg{a} & \op{2}{01} & \reg{b} \\
   \end{encoding}
   \assembly{\mnemonic{} Rd, Ra, Rb}
   \purpose{To perform bitwise OR between 16-bit integers in registers.}

@@ -1,10 +1,10 @@
 \begin{instruction}{LDXZ}{Load External Absolute}
   \begin{encoding*}{short}
-    \mnemonic & \op{3}{011} & \op{2}{10} & \reg{d} & \off{8} \\
+    \mnemonic & \op{5}{01101} & \reg{d} & \off{8} \\
   \end{encoding*}
   \begin{encoding*}{long}
     \exti
-    \mnemonic & \op{3}{011} & \op{2}{10} & \reg{d} & \off{8} \\
+    \mnemonic & \op{5}{01101} & \reg{d} & \off{8} \\
   \end{encoding*}
   \assembly{\mnemonic{} Rd, off}
   \purpose{To complete a load cycle on external bus at a constant absolute address.}

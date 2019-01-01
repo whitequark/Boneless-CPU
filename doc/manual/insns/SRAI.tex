@@ -1,6 +1,6 @@
 \begin{instruction}{SRAI}{Shift Right Arithmetical Immediate}
   \begin{encoding}
-    \mnemonic & \op{3}{000} & \op{2}{10} & \reg{d} & \reg{a} & \op{2}{11} & \imm{3} \\
+    \mnemonic & \op{5}{00100} & \reg{d} & \reg{a} & \op{2}{11} & \imm{3} \\
   \end{encoding}
   \assembly{\mnemonic{} Rd, Ra, amount}
   \purpose{To perform a right arithmetical shift of a 16-bit integer in a register by a constant bit amount.}
