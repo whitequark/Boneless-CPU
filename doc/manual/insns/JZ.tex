@@ -1,10 +1,10 @@
 \begin{instruction}{JZ}{Jump if Zero}
   \begin{encoding*}{short}
-    \mnemonic & \op{3}{101} & \op{1}{1} & \op{4}{1000} & \off{8} \\
+    \mnemonic & \op{4}{1011} & \op{4}{1000} & \off{8} \\
   \end{encoding*}
   \begin{encoding*}{long}
     \exti
-    \mnemonic & \op{3}{101} & \op{1}{1} & \op{4}{1000} & \off{8} \\
+    \mnemonic & \op{4}{1011} & \op{4}{1000} & \off{8} \\
   \end{encoding*}
   \assembly{\mnemonic{} label}
   \purpose{To transfer control if an arithmetic or shift operation produced a zero result.}

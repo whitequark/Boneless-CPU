@@ -1,6 +1,6 @@
 \begin{instruction}{CMP}{Compare to Register}
   \begin{encoding}
-    \mnemonic & \op{3}{000} & \op{2}{00} & \op{3}{000} & \reg{a} & \op{2}{11} & \reg{b} \\
+    \mnemonic & \op{5}{00000} & \op{3}{000} & \reg{a} & \op{2}{11} & \reg{b} \\
   \end{encoding}
   \assembly{\mnemonic{} Rd, Ra, Rb}
   \purpose{To compare 16-bit integers in registers.}

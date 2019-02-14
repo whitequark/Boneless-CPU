@@ -1,10 +1,10 @@
 \begin{instruction}{JSGE}{Jump if Signed Greater or Equal}
   \begin{encoding*}{short}
-    \mnemonic & \op{3}{101} & \op{1}{1} & \op{4}{0101} & \off{8} \\
+    \mnemonic & \op{4}{1011} & \op{4}{0101} & \off{8} \\
   \end{encoding*}
   \begin{encoding*}{long}
     \exti
-    \mnemonic & \op{3}{101} & \op{1}{1} & \op{4}{0101} & \off{8} \\
+    \mnemonic & \op{4}{1011} & \op{4}{0101} & \off{8} \\
   \end{encoding*}
   \assembly{\mnemonic{} label}
   \purpose{To transfer control after a \texttt{\insnref{CMP} Ra, Rb} instruction if \texttt{Ra} is greater than or equal to \texttt{Rb} when interpreted as signed integer.}
