@@ -12,8 +12,10 @@ from macro import Macro
 class UnknownInstruction(Exception):
     pass
 
+
 class BadParameterCount(Exception):
     pass
+
 
 class Register:
     def __init__(self, val):
@@ -24,6 +26,7 @@ class Register:
 
     def __call__(self):
         return int(self.val)
+
 
 class Assembler:
     def __init__(self, debug=False):
@@ -63,12 +66,12 @@ class Assembler:
 
         # set up commands system
         commands.bind(self)
-        for i,j in commands.commands.items():
+        for i, j in commands.commands.items():
             self.commands[i] = j
 
         macro.bind(self)
 
-    def load_file(self,file_name):
+    def load_file(self, file_name):
         f = open(file_name)
         li = f.readlines()
         f.close()
@@ -88,22 +91,22 @@ class Assembler:
             t = i.split()
             token_lines.append(t)
 
-        #use while loop so more instructions can be prepended inside
+        # use while loop so more instructions can be prepended inside
         while len(token_lines) > 0:
             i = token_lines.pop(0)
             # empty line
-            if len(i) <1:
+            if len(i) < 1:
                 continue
             if self.debug:
                 print(i)
-            command  = i[0]
+            command = i[0]
             # include files
             if command == ".include":
                 lines = self.load_file(i[1])
                 # prepend the data
                 token_lines = lines + token_lines
             # macros
-            elif command  == ".macro":
+            elif command == ".macro":
                 in_macro = True
                 the_macro = Macro(i[1], i[2:])
                 current_macro = the_macro
@@ -121,7 +124,7 @@ class Assembler:
                 print("RUN", str(command))
                 mc = self.commands[command]
                 lines = mc(i[1:])
-                if isinstance(lines,list):
+                if isinstance(lines, list):
                     print("add macro stuff")
                     print(lines)
                     token_lines = lines + token_lines
@@ -130,7 +133,10 @@ class Assembler:
                 if self.debug:
                     print("command " + command)
                     print(
-                        "param " + str(self.instr_count[command]) + "," + str(len(i) - 1)
+                        "param "
+                        + str(self.instr_count[command])
+                        + ","
+                        + str(len(i) - 1)
                     )
                     print("params" + str(self.instr_param[command]))
                 comm = self.instr_set[command]
@@ -157,7 +163,7 @@ class Assembler:
             # labels
             elif i[0].endswith(":"):
                 if self.debug:
-                    print("adding label : "+command)
+                    print("adding label : " + command)
                 self.labels[command[:-1]] = self.pos
             else:
                 raise UnknownInstruction(command)
@@ -178,7 +184,7 @@ class Assembler:
             l = ""
             if offset in self.rev_labels:
                 l = self.rev_labels[offset]
-            print(l.ljust(10),offset, disassemble(code))
+            print(l.ljust(10), offset, disassemble(code))
 
     def assemble(self, code):
         self.parse(code)
@@ -200,5 +206,4 @@ if __name__ == "__main__":
     code = Assembler(debug=False)
     code.assemble(li)
     code.display()
-    #code.info()
-
+    # code.info()
