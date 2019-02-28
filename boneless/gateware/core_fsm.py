@@ -22,7 +22,7 @@ class _MemoryPort:
         self.en   = Signal(1,  name=name + "_en")
         self.data = Signal(16, name=name + "_data")
 
-    def get_fragment(self, platform):
+    def elaborate(self, platform):
         return Fragment()
 
 
@@ -34,7 +34,7 @@ class _ExternalPort:
         self.w_en   = Signal(1,  name="ext_w_en")
         self.w_data = Signal(16, name="ext_w_data")
 
-    def get_fragment(self, platform):
+    def elaborate(self, platform):
         return Fragment()
 
 
@@ -54,7 +54,7 @@ class _ALU:
 
         self.c_sel = Signal(4)
 
-    def get_fragment(self, platform):
+    def elaborate(self, platform):
         # The following mux tree is optimized for 4-LUTs, and fits into the optimal 49 4-LUTs
         # on iCE40 using synth_ice40 with -relut:
         #  * 16 LUTs for A / A*B / A+B / A⊕B selector
@@ -92,7 +92,7 @@ class _SRU:
         self.c_ld  = Signal()
         self.c_dir = Signal()
 
-    def get_fragment(self, platform):
+    def elaborate(self, platform):
         # The following mux tree is optimized for 4-LUTs, and fits into the optimal 32 4-LUTs
         # and 16 DFFs on iCE40 using synth_ice40.
         # The mux tree is 2 levels deep.
@@ -123,7 +123,7 @@ class BonelessCoreFSM:
 
         self.halted     = Signal()
 
-    def get_fragment(self, platform):
+    def elaborate(self, platform):
         m = Module()
         m.submodules.formal = self.formal
 
@@ -494,7 +494,7 @@ class BonelessFSMTestbench:
             ])
         ]
 
-    def get_fragment(self, platform):
+    def elaborate(self, platform):
         m = Module()
 
         if self.pins is not None:
@@ -523,7 +523,7 @@ class BonelessFSMFormal:
             mem_wrport=self.mem_wrport,
             ext_port  =self.ext_port)
 
-    def get_fragment(self, platform):
+    def elaborate(self, platform):
         m = Module()
         m.submodules += self.mem_rdport, self.mem_wrport, self.core
         return m.lower(platform)

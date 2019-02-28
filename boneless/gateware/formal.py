@@ -36,7 +36,7 @@ class BonelessFormalInterface:
             self.ext_addr, self.ext_r_data, self.ext_r_en, self.ext_w_data, self.ext_w_en
         ]
 
-    def get_fragment(self, platform):
+    def elaborate(self, platform):
         m = Module()
         if self.mem_wrport:
             m.d.comb += [
