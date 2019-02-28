@@ -43,7 +43,7 @@ class Assembler:
         self.variables = {}
 
         # current  code pos
-        self.pos = 0
+        self.pos = 8
         # blank out the registers
         self.code = [0 for i in range(8)]
 
