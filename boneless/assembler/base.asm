@@ -14,7 +14,7 @@ breathe:
     AND R4 R2 R7
     MOVH R7 0x80
     AND R7 R7 R2
-    JNZ pwmoff
+    JNZ pwm
     XCHG R3 R4
 pwm:
     CMP R3 R4

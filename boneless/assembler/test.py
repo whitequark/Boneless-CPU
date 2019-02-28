@@ -1,4 +1,5 @@
 from boneless.arch.instr import *
+from boneless.arch.disasm import disassemble
 from asm import Assembler
 
 f = open("base.asm")
@@ -56,5 +57,7 @@ original = [
     ),
 ]
 
-print(original)
-print(assembled)
+for i,j in enumerate(original):
+    if original[i] != assembled[i]:
+        print("----------------- error ----------------")
+    print(disassemble(original[i]).ljust(30),'-',disassemble(assembled[i]).ljust(30))

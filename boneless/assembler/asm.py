@@ -39,6 +39,8 @@ class Assembler:
 
         self.variables = {}
 
+        # current  code pos
+        self.pos = 0
         # blank out the registers
         self.code = [0 for i in range(8)]
 
@@ -95,13 +97,8 @@ class Assembler:
             if self.debug:
                 print(i)
             command  = i[0]
-            # labels
-            if i[0].endswith(":"):
-                if self.debug:
-                    print("adding label : "+command)
-                self.labels[command[:-1]] = len(self.code)
             # include files
-            elif command == ".include":
+            if command == ".include":
                 lines = self.load_file(i[1])
                 # prepend the data
                 token_lines = lines + token_lines
@@ -156,6 +153,12 @@ class Assembler:
                 if self.debug:
                     print(pval)
                 self.code += comm(**pval)
+                self.pos = len(self.code)
+            # labels
+            elif i[0].endswith(":"):
+                if self.debug:
+                    print("adding label : "+command)
+                self.labels[command[:-1]] = self.pos
             else:
                 raise UnknownInstruction(command)
 
@@ -189,12 +192,13 @@ class Assembler:
         print(self.commands)
 
 
-f = open("test.asm")
-li = f.readlines()
-f.close()
+if __name__ == "__main__":
+    f = open("test.asm")
+    li = f.readlines()
+    f.close()
 
-code = Assembler(debug=False)
-code.assemble(li)
-code.display()
-#code.info()
+    code = Assembler(debug=False)
+    code.assemble(li)
+    code.display()
+    #code.info()
 
