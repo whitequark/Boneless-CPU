@@ -140,7 +140,7 @@ class ALSRU_4LUT(ALSRU):
             ("o", 1),
         ])
 
-    def get_fragment(self, platform):
+    def elaborate(self, platform):
         m = Module()
 
         with m.Switch(self.ctrl.s):

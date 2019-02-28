@@ -30,7 +30,7 @@ class Arbiter:
             ("we",  1),
         ])
 
-    def get_fragment(self, platform):
+    def elaborate(self, platform):
         m = Module()
 
         m.submodules.rdport = self.rdport
