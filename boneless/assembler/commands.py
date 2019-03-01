@@ -27,6 +27,7 @@ def pos(s):
 
 @register(".label")
 def label(name):
+    " create a label , useful inside macros"
     return [[name[0] + ":"]]
 
 

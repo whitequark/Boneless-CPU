@@ -7,10 +7,11 @@ def bind(assembler_object):
     global assembler
     assembler = assembler_object
 
+class BadParameterCount(Exception):
+    pass
 
 class Macro:
-    " macros would be cool "
-    " need to pass variables through to macro"
+    "Simple substitution macro processor"
 
     def __init__(self, name, params):
         self.name = name
@@ -19,14 +20,17 @@ class Macro:
         self.params = params
 
     def __call__(self, params):
-        print("parse with params")
-        print(params)
+        if assembler.debug:
+            print("parse with params")
+            print(params)
         if len(params) != len(self.params):
-            raise BaseException
+            raise BadParameterCount
+        # map parameters to passed values
         pmap = {}
         for i, j in enumerate(self.params):
             pmap[j] = params[i]
         parsed_lines = []
+        # find $ vaules and replace with passed string
         for i in self.token_lines:
             line = []
             for j in i:
@@ -36,9 +40,10 @@ class Macro:
                         j = pmap[j[1:]]
                 line.append(j)
             parsed_lines.append(line)
-
-        print("from ", str(self.token_lines))
-        print("becomes ", str(parsed_lines))
+        if assembler.debug:
+            print("from ", str(self.token_lines))
+            print("becomes ", str(parsed_lines))
+        # return string lists back to the parser
         return parsed_lines
 
     def __repr__(self):

@@ -121,12 +121,11 @@ class Assembler:
                 current_macro.token_lines.append(i)
             # commands
             elif command in self.commands:
-                print("RUN", str(command))
+                if self.debug:
+                    print("RUN", str(command))
                 mc = self.commands[command]
                 lines = mc(i[1:])
                 if isinstance(lines, list):
-                    print("add macro stuff")
-                    print(lines)
                     token_lines = lines + token_lines
             # check if it is an instruction
             elif command in self.instr_set:
@@ -199,11 +198,11 @@ class Assembler:
 
 
 if __name__ == "__main__":
-    f = open("test.asm")
+    f = open("base.asm")
     li = f.readlines()
     f.close()
 
-    code = Assembler(debug=False)
+    code = Assembler(debug=True)
     code.assemble(li)
     code.display()
     # code.info()
