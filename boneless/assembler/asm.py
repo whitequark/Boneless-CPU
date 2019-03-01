@@ -29,7 +29,7 @@ class Register:
 
 
 class Assembler:
-    def __init__(self, debug=False):
+    def __init__(self, debug=False,data="",file_name=""):
         self.debug = debug
         self.labels = {}
         self.rev_labels = {}
@@ -41,7 +41,8 @@ class Assembler:
         self.commands = {}
 
         self.variables = {}
-
+        # stored token lines
+        self.token_lines = []
         # current  code pos
         self.pos = 8
         # blank out the registers
@@ -71,6 +72,12 @@ class Assembler:
 
         macro.bind(self)
 
+        # put the code into place
+        if data != "":
+            self.token_lines = data.splitlines()
+        elif file_name != "":
+            self.token_lines = self.load_file(file_name)
+
     def load_file(self, file_name):
         f = open(file_name)
         li = f.readlines()
@@ -80,20 +87,16 @@ class Assembler:
             tokl.append(i.split())
         return tokl
 
-    def parse(self, lines):
+    def parse(self):
         # line based assembler , break into lines and then tokens
         token_lines = []
         counter = 0
         in_macro = False
         current_macro = None
 
-        for i in lines:
-            t = i.split()
-            token_lines.append(t)
-
         # use while loop so more instructions can be prepended inside
-        while len(token_lines) > 0:
-            i = token_lines.pop(0)
+        while len(self.token_lines) > 0:
+            i = self.token_lines.pop(0)
             # empty line
             if len(i) < 1:
                 continue
@@ -104,7 +107,7 @@ class Assembler:
             if command == ".include":
                 lines = self.load_file(i[1])
                 # prepend the data
-                token_lines = lines + token_lines
+                self.token_lines = lines + self.token_lines
             # macros
             elif command == ".macro":
                 in_macro = True
@@ -126,7 +129,7 @@ class Assembler:
                 mc = self.commands[command]
                 lines = mc(i[1:])
                 if isinstance(lines, list):
-                    token_lines = lines + token_lines
+                    self.token_lines = lines + self.token_lines
             # check if it is an instruction
             elif command in self.instr_set:
                 if self.debug:
@@ -185,8 +188,8 @@ class Assembler:
                 l = self.rev_labels[offset]
             print(l.ljust(10), offset, disassemble(code))
 
-    def assemble(self, code):
-        self.parse(code)
+    def assemble(self):
+        self.parse()
         self.resolve()
 
     def info(self):
@@ -198,11 +201,7 @@ class Assembler:
 
 
 if __name__ == "__main__":
-    f = open("base.asm")
-    li = f.readlines()
-    f.close()
-
-    code = Assembler(debug=True)
-    code.assemble(li)
+    code = Assembler(debug=True,file_name="test.asm")
+    code.assemble()
     code.display()
     # code.info()
