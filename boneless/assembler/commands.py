@@ -1,4 +1,5 @@
 " system commands for the assembler"
+from ast import literal_eval
 
 __all__ = []
 
@@ -44,14 +45,31 @@ def stringer(s):
 
 @register(".equ")
 def equ(s):
-    pass
+    name = s[0]
+    val = literal_eval(s[1])
+    assembler.variables[name] = val 
 
+# rebind a exisiting command
+@register(".def")
+def defn(s):
+    dst = s[0]
+    src = s[1]
+    assembler.instr_set[dst] =   assembler.instr_set[src]
+    assembler.instr_param[dst] =   assembler.instr_param[src]
+    assembler.instr_count[dst] =   assembler.instr_count[src]
+
+
+@register(".alloc")
+def alloc(s):
+    name = s[0]
+    cmds = [[name+":"]]
+    v = literal_eval(s[1])
+    if isinstance(v,int):
+        for i in range(v):
+            cmds.append(["NOP"])
+    return cmds
 
 @register(".global")
 def glob(s):
     pass
 
-
-@register(".multi")
-def multi(a, b, c, d):
-    print(a, b, c, d)

@@ -1,35 +1,22 @@
 .include inc.asm
+.equ BOB 200 
+.equ A 1000
+
 fnord:
     .string blah
     .equ TIME 0xffff
-    HEADER bob bob
 init:
-
-    HEADER RPOP RPOP
-    POP
-    NEXT
-
-    HEADER test bob
     NOP
-    NEXT
-
-    HEADER DUP DUP
+middle:
     NOP
-    NOP
-    NEXT
-
-    HEADER < <
-    NOP
-    NEXT
-
-    HEADER DOCOL DOCOL
-    NOP
-    NEXT
-
-    HEADER ; col
+    .call pop
+    .call push
+    J middle 
+borf:
+    JR TOS 0 
+gorf:
     NOP
     NOP
-    NEXT
+    NOP
 
-    .int DOCOL
-    .int DUP
+.alloc hello 10

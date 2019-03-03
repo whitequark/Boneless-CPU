@@ -35,8 +35,8 @@ pwmdone:
     J loop
 """
 
-code = Assembler(debug=False)
-code.assemble(as_string.splitlines())
+code = Assembler(debug=True,data=as_string)
+code.assemble()
 print("---------- display ---------")
 code.display()
 print("---------- display end  ---------")

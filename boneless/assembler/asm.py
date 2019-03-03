@@ -34,12 +34,14 @@ class Assembler:
         self.labels = {}
         self.rev_labels = {}
 
+        # instruction set data
         self.instr_set = {}
         self.instr_count = {}
         self.instr_param = {}
 
+        # inbuilt commands 
         self.commands = {}
-
+        # asm variables 
         self.variables = {}
         # stored token lines
         self.token_lines = []
@@ -74,7 +76,11 @@ class Assembler:
 
         # put the code into place
         if data != "":
-            self.token_lines = data.splitlines()
+            li = data.splitlines()
+            tokl = []
+            for i in li:
+                tokl.append(i.split())
+            self.token_lines = tokl
         elif file_name != "":
             self.token_lines = self.load_file(file_name)
 
@@ -86,6 +92,27 @@ class Assembler:
         for i in li:
             tokl.append(i.split())
         return tokl
+
+    def resolve_symbol(self,symbol):
+        # resolves literals, variables , registers
+        # instructiosn
+        if symbol in self.instr_set:
+            val = self.instr_set[symbol]()
+        # labels , deferenced by hash
+        elif symbol.startswith("#"):
+            print("hashed symbol")
+            if symbol[1:] in self.labels:
+                val = self.labels[symbol[1:]]
+        # symbols
+        elif symbol in self.variables:
+            val = self.variables[symbol]
+        # try a literal , or just hand back the string
+        else:
+            try:
+                val = literal_eval(symbol)
+            except:
+                val = symbol 
+        return val 
 
     def parse(self):
         # line based assembler , break into lines and then tokens
@@ -129,7 +156,14 @@ class Assembler:
                 mc = self.commands[command]
                 lines = mc(i[1:])
                 if isinstance(lines, list):
+                    if self.debug:
+                        print("\t"+str(lines))
                     self.token_lines = lines + self.token_lines
+            # labels
+            elif i[0].endswith(":"):
+                if self.debug:
+                    print("adding label : " + command)
+                self.labels[command[:-1]] = self.pos
             # check if it is an instruction
             elif command in self.instr_set:
                 if self.debug:
@@ -149,24 +183,12 @@ class Assembler:
                 pval = {}
                 for j, k in enumerate(self.instr_param[command]):
                     par = i[1 + j]
-                    # registers
-                    if par in self.instr_set:
-                        val = self.instr_set[par]()
-                    else:
-                        try:
-                            val = literal_eval(par)
-                        except:
-                            val = par
+                    val = self.resolve_symbol(par)
                     pval[k] = val
                 if self.debug:
                     print(pval)
                 self.code += comm(**pval)
                 self.pos = len(self.code)
-            # labels
-            elif i[0].endswith(":"):
-                if self.debug:
-                    print("adding label : " + command)
-                self.labels[command[:-1]] = self.pos
             else:
                 raise UnknownInstruction(command)
 
@@ -193,15 +215,24 @@ class Assembler:
         self.resolve()
 
     def info(self):
+        print("Labels")
         print(self.labels)
-        print(self.instr_count)
-        print(self.instr_param)
+        print("Variables")
+        print(self.variables)
+        print("Instructions")
+        for i in self.instr_set:
+            print(i)
         print(self.instr_set)
+        print("")
+        print(self.instr_count)
+        print("Labels")
+        print(self.instr_param)
+        print("Labels")
         print(self.commands)
 
 
 if __name__ == "__main__":
     code = Assembler(debug=True,file_name="test.asm")
     code.assemble()
+    code.info()
     code.display()
-    # code.info()
