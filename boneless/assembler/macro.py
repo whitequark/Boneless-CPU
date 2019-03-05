@@ -7,8 +7,14 @@ def bind(assembler_object):
     global assembler
     assembler = assembler_object
 
+
 class BadParameterCount(Exception):
-    pass
+
+    def __init__(self,tk,params):
+        self.source = tk.source 
+        self.line = tk.line
+        self.items = tk.items
+        self.params = params 
 
 class Macro:
     "Simple substitution macro processor"
@@ -19,12 +25,13 @@ class Macro:
         self.token_lines = []
         self.params = params
 
-    def __call__(self, params):
+    def __call__(self,tok):
+        params = tok[1:]
         if assembler.debug:
             print("parse with params")
             print(params)
         if len(params) != len(self.params):
-            raise BadParameterCount
+            raise BadParameterCount(tok,params)
         # map parameters to passed values
         pmap = {}
         for i, j in enumerate(self.params):

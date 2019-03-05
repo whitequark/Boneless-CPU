@@ -9,8 +9,8 @@ init:
     NOP
 middle:
     NOP
-    .call pop
-    .call push
+    pop
+    push 
     J middle 
 borf:
     JR TOS 0 

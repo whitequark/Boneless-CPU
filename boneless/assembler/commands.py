@@ -29,7 +29,7 @@ def pos(s):
 @register(".label")
 def label(name):
     " create a label , useful inside macros"
-    return [[name[0] + ":"]]
+    return [[name[1] + ":"]]
 
 
 @register(".string")
@@ -45,15 +45,15 @@ def stringer(s):
 
 @register(".equ")
 def equ(s):
-    name = s[0]
-    val = literal_eval(s[1])
+    name = s[1]
+    val = literal_eval(s[2])
     assembler.variables[name] = val 
 
 # rebind a exisiting command
 @register(".def")
 def defn(s):
-    dst = s[0]
-    src = s[1]
+    dst = s[1]
+    src = s[2]
     assembler.instr_set[dst] =   assembler.instr_set[src]
     assembler.instr_param[dst] =   assembler.instr_param[src]
     assembler.instr_count[dst] =   assembler.instr_count[src]
@@ -61,9 +61,9 @@ def defn(s):
 
 @register(".alloc")
 def alloc(s):
-    name = s[0]
+    name = s[1]
     cmds = [[name+":"]]
-    v = literal_eval(s[1])
+    v = assembler.resolve_symbol(s[2])
     if isinstance(v,int):
         for i in range(v):
             cmds.append(["NOP"])

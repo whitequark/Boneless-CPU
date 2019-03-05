@@ -14,9 +14,10 @@
 .def STP R4
 .def TOS R3
 .def RTN R7
+.def WRK R2
 
 MOVL STP #stack 
-.macro .call name
+.macro _call name
     JAL RTN $name 
 .endm
 
@@ -24,12 +25,22 @@ MOVL STP #stack
     JR RTN 0
 .endm
 
-.label push
+.macro pop
+    _call POP 
+.endm
+
+.macro push
+    _call PUSH
+.endm
+
+.label PUSH 
     ST TOS STP 0
     ADDI STP 1
+    MOV WRK TOS
     RET
  
-.label pop
+.label POP 
+    MOV WRK TOS
     LD STP TOS 0
     SUBI STP 1 
     RET

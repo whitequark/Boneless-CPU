@@ -10,11 +10,20 @@ from macro import Macro
 
 
 class UnknownInstruction(Exception):
-    pass
+    
+    def __init__(self,tk):
+        self.source = tk.source 
+        self.line = tk.line
+        self.items = tk.items
 
 
 class BadParameterCount(Exception):
-    pass
+
+    def __init__(self,tk,params):
+        self.source = tk.source 
+        self.line = tk.line
+        self.items = tk.items
+        self.params = params 
 
 
 class Register:
@@ -26,6 +35,26 @@ class Register:
 
     def __call__(self):
         return int(self.val)
+
+
+class TokenLine:
+    " Wrap the token lines for debug"
+    def __init__(self,source,line,items):
+        self.source = source 
+        self.line = line 
+        self.items = items 
+
+    def __repr__(self):
+        return "<"+self.source+","+str(self.line)+","+str(self.items)+">"
+
+    def __len__(self):
+        return len(self.items)
+
+    def __getitem__(self,i):
+        return self.items[i]
+
+    def parse(self):
+        pass
 
 
 class Assembler:
@@ -50,7 +79,7 @@ class Assembler:
         # blank out the registers
         self.code = [0 for i in range(8)]
 
-        # add the registers
+        # add the register functions
         for i in range(8):
             self.instr_set["R" + str(i)] = Register(i)
         # build instruction set map
@@ -59,6 +88,7 @@ class Assembler:
         for i in ins:
             if i[0] in instr.__all__:
                 self.instr_set[i[0]] = i[1]
+
         # get parameter sets
         for i, j in self.instr_set.items():
             s = signature(j).parameters
@@ -78,8 +108,9 @@ class Assembler:
         if data != "":
             li = data.splitlines()
             tokl = []
-            for i in li:
-                tokl.append(i.split())
+            for i,j in enumerate(li):
+                items = j.split()
+                tokl.append(TokenLine('string',i,items))
             self.token_lines = tokl
         elif file_name != "":
             self.token_lines = self.load_file(file_name)
@@ -89,13 +120,16 @@ class Assembler:
         li = f.readlines()
         f.close()
         tokl = []
-        for i in li:
-            tokl.append(i.split())
+        for i,j in enumerate(li):
+            items = j.split() 
+            tokl.append(TokenLine(file_name,i,items))
         return tokl
 
     def resolve_symbol(self,symbol):
         # resolves literals, variables , registers
-        # instructiosn
+        # instructions 
+        if self.debug:
+            print("find :"+symbol)
         if symbol in self.instr_set:
             val = self.instr_set[symbol]()
         # labels , deferenced by hash
@@ -116,8 +150,6 @@ class Assembler:
 
     def parse(self):
         # line based assembler , break into lines and then tokens
-        token_lines = []
-        counter = 0
         in_macro = False
         current_macro = None
 
@@ -130,11 +162,13 @@ class Assembler:
             if self.debug:
                 print(i)
             command = i[0]
+
             # include files
             if command == ".include":
                 lines = self.load_file(i[1])
                 # prepend the data
                 self.token_lines = lines + self.token_lines
+
             # macros
             elif command == ".macro":
                 in_macro = True
@@ -149,21 +183,24 @@ class Assembler:
                     print("END MACRO")
             elif in_macro:
                 current_macro.token_lines.append(i)
+
             # commands
             elif command in self.commands:
                 if self.debug:
                     print("RUN", str(command))
                 mc = self.commands[command]
-                lines = mc(i[1:])
+                lines = mc(i)
                 if isinstance(lines, list):
                     if self.debug:
                         print("\t"+str(lines))
                     self.token_lines = lines + self.token_lines
+
             # labels
             elif i[0].endswith(":"):
                 if self.debug:
                     print("adding label : " + command)
                 self.labels[command[:-1]] = self.pos
+
             # check if it is an instruction
             elif command in self.instr_set:
                 if self.debug:
@@ -179,7 +216,7 @@ class Assembler:
                 params = self.instr_count[command]
                 if len(i) != params + 1:
                     print("for " + command + " params should be " + str(params))
-                    raise BadParameterCount(command)
+                    raise BadParameterCount(i,params)
                 pval = {}
                 for j, k in enumerate(self.instr_param[command]):
                     par = i[1 + j]
@@ -190,7 +227,7 @@ class Assembler:
                 self.code += comm(**pval)
                 self.pos = len(self.code)
             else:
-                raise UnknownInstruction(command)
+                raise UnknownInstruction(i)
 
         # reverse labels for disasm listing
         for i, j in self.labels.items():
@@ -234,5 +271,5 @@ class Assembler:
 if __name__ == "__main__":
     code = Assembler(debug=True,file_name="test.asm")
     code.assemble()
-    code.info()
+    #code.info()
     code.display()
