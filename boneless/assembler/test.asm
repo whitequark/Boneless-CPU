@@ -1,10 +1,8 @@
 .include inc.asm
 .equ BOB 200 
 .equ A 1000
+.equ TIME 0xffff
 
-fnord:
-    .string blah
-    .equ TIME 0xffff
 init:
     NOP
 middle:
@@ -19,4 +17,6 @@ gorf:
     NOP
     NOP
 
-.alloc hello 10
+.section .data
+    .string hello hello
+    .string Wrapped, "This is a longer  test"

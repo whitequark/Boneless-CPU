@@ -1,22 +1,14 @@
-.alloc bork 10
-.alloc stack 16
-.macro HEADER name label
-    .label $label
-    .string $name
-    .equ $name 100
-.endm
-
-.macro NEXT
-    JAL R1 0
-.endm
-
+.alloc stack 8 
 
 .def STP R4
 .def TOS R3
 .def RTN R7
 .def WRK R2
 
+.section .text
+
 MOVL STP #stack 
+
 .macro _call name
     JAL RTN $name 
 .endm
@@ -44,3 +36,11 @@ MOVL STP #stack
     LD STP TOS 0
     SUBI STP 1 
     RET
+
+.section .data 
+
+.string welcome Boneless 0.1
+.string stack_overflow Stack Overflow
+.string stack_underflow Stack Underflow
+
+.section .text

@@ -121,6 +121,7 @@ def JSLE(off):         return [C_FORMAT(OPCODE_JSLE, off)]
 def ILL(insn):         return [insn & 0xffff]
 
 def MOVI(rd, imm16):
+    # does not deal with symbolic jumps
     assert imm16 in range(65536)
     if imm16 in range(256):
         return MOVL(rd, imm16)

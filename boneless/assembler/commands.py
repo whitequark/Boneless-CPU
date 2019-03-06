@@ -19,6 +19,9 @@ def register(cls):
 
     return func_wrapper
 
+@register(".section")
+def section(s):
+    assembler.set_section(s[1])
 
 @register(".int")
 def pos(s):
@@ -36,7 +39,7 @@ def label(name):
 def stringer(s):
     print(s)
     print("|")
-    for i in s[0]:
+    for i in s[1]:
         print(ord(i))
     print("|")
     print(assembler)

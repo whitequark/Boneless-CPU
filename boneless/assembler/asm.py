@@ -7,7 +7,8 @@ import types
 import commands
 import macro
 from macro import Macro
-
+from linker import Linker
+from fixture import Register , TokenLine , CodeSection
 
 class UnknownInstruction(Exception):
     
@@ -24,39 +25,8 @@ class BadParameterCount(Exception):
         self.line = tk.line
         self.items = tk.items
         self.params = params 
-
-
-class Register:
-    def __init__(self, val):
-        self.val = val
-
-    def __repr__(self):
-        return "<register R" + str(self.val) + ">"
-
-    def __call__(self):
-        return int(self.val)
-
-
-class TokenLine:
-    " Wrap the token lines for debug"
-    def __init__(self,source,line,items):
-        self.source = source 
-        self.line = line 
-        self.items = items 
-
-    def __repr__(self):
-        return "<"+self.source+","+str(self.line)+","+str(self.items)+">"
-
-    def __len__(self):
-        return len(self.items)
-
-    def __getitem__(self,i):
-        return self.items[i]
-
-    def parse(self):
-        pass
-
-
+        
+        
 class Assembler:
     def __init__(self, debug=False,data="",file_name=""):
         self.debug = debug
@@ -74,6 +44,8 @@ class Assembler:
         self.variables = {}
         # stored token lines
         self.token_lines = []
+        # section data 
+        self.sections = {}
         # current  code pos
         self.pos = 8
         # blank out the registers
@@ -114,6 +86,16 @@ class Assembler:
             self.token_lines = tokl
         elif file_name != "":
             self.token_lines = self.load_file(file_name)
+
+        # default to .text section
+        self.set_section(".text")
+        # ref to the linker 
+        self.linker = Linker(self)
+
+    def set_section(self,name):
+        if name not in self.sections:
+            self.sections[name] = CodeSection(name) 
+        self.current_section = self.sections[name]
 
     def load_file(self, file_name):
         f = open(file_name)
@@ -204,14 +186,7 @@ class Assembler:
             # check if it is an instruction
             elif command in self.instr_set:
                 if self.debug:
-                    print("command " + command)
-                    print(
-                        "param "
-                        + str(self.instr_count[command])
-                        + ","
-                        + str(len(i) - 1)
-                    )
-                    print("params" + str(self.instr_param[command]))
+                    print(str(i) + "--> " + str(self.instr_param[command]))
                 comm = self.instr_set[command]
                 params = self.instr_count[command]
                 if len(i) != params + 1:
@@ -234,10 +209,15 @@ class Assembler:
             self.rev_labels[j] = i
 
     def resolve(self):
+        " simple resolver "
+        #TODO move resolver into the linker
+        #TODO need to deal with larger offsets
+        #TODO need to integrate into the linker
         for offset, code in enumerate(self.code):
             if self.debug:
                 print(offset, code)
             if isinstance(code, types.LambdaType):
+                #TODO if label - offset > +-127 , an extended code needs to be inserted.
                 self.code[offset] = code(lambda label: self.labels[label] - offset - 1)
 
     def display(self):
@@ -245,10 +225,14 @@ class Assembler:
             l = ""
             if offset in self.rev_labels:
                 l = self.rev_labels[offset]
-            print(l.ljust(10), offset, disassemble(code))
+            o = "{:04X} | ".format(offset)
+            b = "| {:05b}".format(code>>11)
+            lb  = "{0:016b}".format(code)
+            print(o,l.ljust(10)," | ", disassemble(code).ljust(16),b,lb)
 
     def assemble(self):
         self.parse()
+        self.linker.link()
         self.resolve()
 
     def info(self):
