@@ -10,45 +10,41 @@ def bind(assembler_object):
 
 
 class BadParameterCount(Exception):
-
-    def __init__(self,tk,params):
+    def __init__(self, tk, params):
         self.source = tk.source
         self.line = tk.line
         self.items = tk.items
         self.params = params
+
 
 class Macro:
     "Simple substitution macro processor"
 
     def __init__(self, tk):
         self.name = tk.params[0]
-        self.source = tk.source+"-macro"
+        self.source = tk.source + "-macro"
         self.line = tk.line
         self.token_lines = []
         self.params = tk.params[1:]
 
-    def __call__(self,tok):
+    def __call__(self, tok):
         if assembler.debug:
-
-            print(self.name,"parse with params")
+            print(self.name, "parse with params")
             print(tok.params)
         if len(tok.params) != len(self.params):
-            raise BadParameterCount(tok,params)
+            raise BadParameterCount(tok, params)
         # map parameters to passed values
         pmap = {}
         for i, j in enumerate(self.params):
             pmap[j] = tok.params[i]
-        print(pmap)
         parsed_lines = []
         # find $ vaules and replace with passed string
         for i in self.token_lines:
             line = []
-            c = i.copy('macro')
-            for j,k in enumerate(c.params):
-                print("--",j,k)
+            c = i.copy("macro")
+            for j, k in enumerate(c.params):
                 if k.startswith("$"):
-                    print("match on ",k)
-                    c.params[j]= pmap[k[1:]]
+                    c.params[j] = pmap[k[1:]]
             parsed_lines.append(c)
         if assembler.debug:
             print("from ", str(self.token_lines))

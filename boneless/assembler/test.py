@@ -35,7 +35,7 @@ pwmdone:
     J loop
 """
 
-code = Assembler(debug=True,data=as_string)
+code = Assembler(debug=True, data=as_string)
 code.assemble()
 print("---------- display ---------")
 code.display()
@@ -97,12 +97,12 @@ for i, j in enumerate(original):
         disassemble(original[i]).ljust(30),
         "|",
         disassemble(assembled[i]).ljust(30),
-        "|"
+        "|",
     )
 
 circular = ""
 for i in original:
-    circular+=disassemble(i)+'\n'
+    circular += disassemble(i) + "\n"
 
 print(circular)
 code2 = Assembler(data=circular)

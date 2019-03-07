@@ -7,11 +7,21 @@
 .def WRK, R2
 
 .section .text
+.label reset
+    MOVL STP,%stack
+    J init
 
-MOVL STP,%stack
+.label abort
+    J init
 
 .macro _call, name
     JAL RTN, $name
+.endm
+
+.macro long, a, b, c, d
+    MOV $a, $b
+    MOV $b, $c
+    MOV $d, $a
 .endm
 
 .macro RET
@@ -26,13 +36,13 @@ MOVL STP,%stack
     _call PUSH
 .endm
 
-PUSH:
+.label PUSH
     ST TOS, STP, 0
     ADDI STP, 1
     MOV WRK, TOS
     RET
 
-POP:
+.label POP
     MOV WRK, TOS
     LD STP, TOS, 0
     SUBI STP, 1
@@ -45,3 +55,4 @@ POP:
 .string stack_underflow, "Stack Underflow"
 
 .section .text
+
