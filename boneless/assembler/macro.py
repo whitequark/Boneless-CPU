@@ -37,18 +37,22 @@ class Macro:
         pmap = {}
         for i, j in enumerate(self.params):
             pmap[j] = tok.params[i]
+        print(pmap)
         parsed_lines = []
         # find $ vaules and replace with passed string
-        print("macro_line:",tok)
         for i in self.token_lines:
             line = []
-            for j in i.params:
-                if j.startswith("$"):
-                    if j[1:] in pmap:
-                        print("has " + j)
-                        j = pmap[j[1:]]
-                line.append(j)
-            #parsed_lines.append(TokenLine(self.source,self.line,line))
+            c = i.copy('macro')
+            print(c.params)
+            # TODO fix the parameter replacement
+            for j,k in enumerate(self.params):
+                print("parrams",j,k,pmap[k])
+                if pmap[k].startswith("$"):
+                    print("match")
+            #        if j[1:] in pmap:
+            #            print("has " + j)
+            #            j = pmap[j[1:]]
+            parsed_lines.append(c)
         if assembler.debug:
             print("from ", str(self.token_lines))
             print("becomes ", str(parsed_lines))

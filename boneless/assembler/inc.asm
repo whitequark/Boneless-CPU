@@ -8,7 +8,7 @@
 
 .section .text
 
-MOVL STP,$stack
+MOVL STP,%stack
 
 .macro _call, name
     JAL RTN, $name
@@ -16,6 +16,9 @@ MOVL STP,$stack
 
 .macro RET
     JR RTN, 0
+    NOP
+    NOP
+    MOV R1,R2
 .endm
 
 .macro pop

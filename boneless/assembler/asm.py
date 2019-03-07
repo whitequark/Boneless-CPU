@@ -89,7 +89,7 @@ class Assembler:
             self.token_lines = self.load_file(file_name)
 
         # default to .header section
-        self.set_section(".heaser")
+        self.set_section(".header")
         # ref to the linker
         self.linker = Linker(self)
 
@@ -116,7 +116,7 @@ class Assembler:
         if symbol in self.instr_set:
             val = self.instr_set[symbol]()
         # labels , deferenced by hash
-        elif symbol.startswith("$"):
+        elif symbol.startswith("%"):
             print("referenced symbol")
             if symbol[1:] in self.labels:
                 val = self.labels[symbol[1:]]
@@ -173,8 +173,6 @@ class Assembler:
                     print("RUN", str(command))
                 mc = self.commands[command]
                 lines = mc(i)
-                if self.debug:
-                    print("\t"+str(lines))
                 if isinstance(lines,list):
                     self.token_lines = lines + self.token_lines
                 elif lines == None:
