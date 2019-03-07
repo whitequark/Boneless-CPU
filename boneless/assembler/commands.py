@@ -50,7 +50,7 @@ def stringer(s):
 def equ(s):
     name = s[1]
     val = literal_eval(s[2])
-    assembler.variables[name] = val 
+    assembler.variables[name] = val
 
 # rebind a exisiting command
 @register(".def")

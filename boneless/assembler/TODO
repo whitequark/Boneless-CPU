@@ -1,0 +1,2 @@
+- need to go full circular, use whitequarks dissasembly output as canonical input
+- rewrite token line parser to do command , params that are comma seperated

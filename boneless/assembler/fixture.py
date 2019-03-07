@@ -12,9 +12,15 @@ class Register:
 class TokenLine:
     " Wrap the token lines for debug"
     def __init__(self,source,line,items):
-        self.source = source 
-        self.line = line 
-        self.items = items 
+        self.source = source
+        self.line = line
+        self.items = items
+
+        self.command = ""
+        self.params = [] # comma seperated values
+
+    def parse(self):
+        pass
 
     def __repr__(self):
         return "<"+self.source+","+str(self.line)+","+str(self.items)+">"
@@ -32,9 +38,9 @@ class CodeSection:
     " Code is broken into sections and linked after "
     def __init__(self,name):
         self.name = name
-        self.labels = {} 
+        self.labels = {}
         self.code = []
-        self.counter = 0 
+        self.counter = 0
         self.offset = 0
         self.length = 0
 

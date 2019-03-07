@@ -1,4 +1,5 @@
-.alloc stack 8 
+.equ stack_size 8 
+.alloc stack stack_size 
 
 .def STP R4
 .def TOS R3
@@ -7,7 +8,7 @@
 
 .section .text
 
-MOVL STP #stack 
+MOVL STP $stack 
 
 .macro _call name
     JAL RTN $name 

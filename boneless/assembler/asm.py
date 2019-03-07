@@ -11,9 +11,9 @@ from linker import Linker
 from fixture import Register , TokenLine , CodeSection
 
 class UnknownInstruction(Exception):
-    
+
     def __init__(self,tk):
-        self.source = tk.source 
+        self.source = tk.source
         self.line = tk.line
         self.items = tk.items
 
@@ -21,12 +21,12 @@ class UnknownInstruction(Exception):
 class BadParameterCount(Exception):
 
     def __init__(self,tk,params):
-        self.source = tk.source 
+        self.source = tk.source
         self.line = tk.line
         self.items = tk.items
-        self.params = params 
-        
-        
+        self.params = params
+
+
 class Assembler:
     def __init__(self, debug=False,data="",file_name=""):
         self.debug = debug
@@ -38,13 +38,13 @@ class Assembler:
         self.instr_count = {}
         self.instr_param = {}
 
-        # inbuilt commands 
+        # inbuilt commands
         self.commands = {}
-        # asm variables 
+        # asm variables
         self.variables = {}
         # stored token lines
         self.token_lines = []
-        # section data 
+        # section data
         self.sections = {}
         # current  code pos
         self.pos = 8
@@ -89,12 +89,12 @@ class Assembler:
 
         # default to .text section
         self.set_section(".text")
-        # ref to the linker 
+        # ref to the linker
         self.linker = Linker(self)
 
     def set_section(self,name):
         if name not in self.sections:
-            self.sections[name] = CodeSection(name) 
+            self.sections[name] = CodeSection(name)
         self.current_section = self.sections[name]
 
     def load_file(self, file_name):
@@ -103,20 +103,20 @@ class Assembler:
         f.close()
         tokl = []
         for i,j in enumerate(li):
-            items = j.split() 
+            items = j.split()
             tokl.append(TokenLine(file_name,i,items))
         return tokl
 
     def resolve_symbol(self,symbol):
         # resolves literals, variables , registers
-        # instructions 
+        # instructions
         if self.debug:
             print("find :"+symbol)
         if symbol in self.instr_set:
             val = self.instr_set[symbol]()
         # labels , deferenced by hash
-        elif symbol.startswith("#"):
-            print("hashed symbol")
+        elif symbol.startswith("$"):
+            print("referenced symbol")
             if symbol[1:] in self.labels:
                 val = self.labels[symbol[1:]]
         # symbols
@@ -127,8 +127,8 @@ class Assembler:
             try:
                 val = literal_eval(symbol)
             except:
-                val = symbol 
-        return val 
+                val = symbol
+        return val
 
     def parse(self):
         # line based assembler , break into lines and then tokens
