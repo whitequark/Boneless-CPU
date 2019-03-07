@@ -46,6 +46,7 @@ def stringer(l):
     txt = literal_eval(l.params[1])
     for i in txt:
         assembler.current_section.add_code([int(ord(i))])
+    assembler.current_section.add_code([0])
 
 
 @register(".equ")

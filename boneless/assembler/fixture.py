@@ -70,8 +70,10 @@ class CodeSection:
 
     # shift the labels down
     def offset(self, n):
+        offset_labels = {}
         for i in self.labels:
-            self.labels[i] = self.labels[i] + offset
+            offset_labels[i] = self.labels[i] + offset
+        return offset_labels
 
     # insert an item and shift trailing labels down
     # for calculations of longer jumps
