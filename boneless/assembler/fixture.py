@@ -15,23 +15,27 @@ class TokenLine:
         self.source = source
         self.line = line
         self.val = val
-        self.items = val.split()
+        #self.items = val.split()
         part = val.strip().partition(" ")
         self.command = part[0]
         self.params = [] # comma seperated values
         p = part[2].split(',')
         for i in p:
-            self.params.append(i.strip())
-        print(self.command,self.params)
+            if i != '':
+                self.params.append(i.strip())
+
+    def copy(self,postfix):
+        c = self.__init__(self.source+"-"+postfix,self.lines,self.command,self.params)
+        return c
 
     def __repr__(self):
-        return "<"+self.source+","+str(self.line)+","+str(self.items)+">"
+        return "<"+self.source+","+str(self.line)+","+str(self.command)+"|"+str(self.params)+">"
 
-    def __len__(self):
-        return len(self.items)
+    #def __len__(self):
+    #    return len(self.items)
 
-    def __getitem__(self,i):
-        return self.items[i]
+    #def __getitem__(self,i):
+    #   return self.items[i]
 
     def parse(self):
         pass

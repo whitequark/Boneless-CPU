@@ -1,5 +1,5 @@
 .equ stack_size, 8 
-.alloc stack,stack_size 
+.alloc stack, stack_size 
 
 .def STP, R4
 .def TOS, R3
@@ -10,12 +10,12 @@
 
 MOVL STP,$stack
 
-.macro _call name
+.macro _call, name
     JAL RTN, $name
 .endm
 
 .macro RET
-    JR RTN,0
+    JR RTN, 0
 .endm
 
 .macro pop
@@ -29,7 +29,7 @@ MOVL STP,$stack
 .label PUSH
     ST TOS, STP, 0
     ADDI STP, 1
-    MOV WRK, TOS,
+    MOV WRK, TOS
     RET
 
 .label POP

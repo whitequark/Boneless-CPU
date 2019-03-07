@@ -1,2 +1,6 @@
+- macros are not returning TokenLines directly
 - need to go full circular, use whitequarks dissasembly output as canonical input
 - rewrite token line parser to do command , params that are comma seperated
+- need to handle comments
+- need to add param counts to commands
+- covert returns from macros and commands to all be TokenLines

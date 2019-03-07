@@ -15,7 +15,8 @@ class UnknownInstruction(Exception):
     def __init__(self,tk):
         self.source = tk.source
         self.line = tk.line
-        self.items = tk.items
+        self.command = tk.command
+        self.params = tk.params
 
 
 class BadParameterCount(Exception):
@@ -81,13 +82,14 @@ class Assembler:
             li = data.splitlines()
             tokl = []
             for i,j in enumerate(li):
-                tokl.append(TokenLine('string',i,j))
+                if len(j) > 1:
+                    tokl.append(TokenLine('string',i,j))
             self.token_lines = tokl
         elif file_name != "":
             self.token_lines = self.load_file(file_name)
 
-        # default to .text section
-        self.set_section(".text")
+        # default to .header section
+        self.set_section(".heaser")
         # ref to the linker
         self.linker = Linker(self)
 
@@ -102,7 +104,8 @@ class Assembler:
         f.close()
         tokl = []
         for i,j in enumerate(li):
-            tokl.append(TokenLine(file_name,i,j))
+            if len(j) > 1:
+                tokl.append(TokenLine(file_name,i,j))
         return tokl
 
     def resolve_symbol(self,symbol):
@@ -137,46 +140,50 @@ class Assembler:
         while len(self.token_lines) > 0:
             i = self.token_lines.pop(0)
             # empty line
-            if len(i) < 1:
-                continue
+            #if len(i) < 1:
+            #    continue
             if self.debug:
                 print(i)
-            command = i[0]
+            command = i.command
+            params = i.params
 
             # include files
             if command == ".include":
-                lines = self.load_file(i[1])
+                lines = self.load_file(params[0])
                 # prepend the data
                 self.token_lines = lines + self.token_lines
 
             # macros
             elif command == ".macro":
                 in_macro = True
-                the_macro = Macro(i[1], i[2:])
+                the_macro = Macro(i)
                 current_macro = the_macro
-                self.commands[i[1]] = the_macro
+                self.commands[params[0]] = the_macro
                 if self.debug:
-                    print("STARTING MACRO")
+                    print("start macro create")
             elif command == ".endm":
                 in_macro = False
                 if self.debug:
-                    print("END MACRO")
+                    print("end macro create")
             elif in_macro:
                 current_macro.token_lines.append(i)
-
             # commands
             elif command in self.commands:
                 if self.debug:
                     print("RUN", str(command))
                 mc = self.commands[command]
                 lines = mc(i)
-                if isinstance(lines, list):
-                    if self.debug:
-                        print("\t"+str(lines))
+                if self.debug:
+                    print("\t"+str(lines))
+                if isinstance(lines,list):
                     self.token_lines = lines + self.token_lines
+                elif lines == None:
+                    pass
+                else:
+                    print("bad return"+str(i))
 
             # labels
-            elif i[0].endswith(":"):
+            elif command.endswith(":"):
                 if self.debug:
                     print("adding label : " + command)
                 self.labels[command[:-1]] = self.pos
@@ -186,13 +193,13 @@ class Assembler:
                 if self.debug:
                     print(str(i) + "--> " + str(self.instr_param[command]))
                 comm = self.instr_set[command]
-                params = self.instr_count[command]
-                if len(i) != params + 1:
-                    print("for " + command + " params should be " + str(params))
+                i_params = self.instr_count[command]
+                if len(params) != i_params :
+                    print("for " + command + " params should be " + str(i_params))
                     raise BadParameterCount(i,params)
                 pval = {}
                 for j, k in enumerate(self.instr_param[command]):
-                    par = i[1 + j]
+                    par = params[j]
                     val = self.resolve_symbol(par)
                     pval[k] = val
                 if self.debug:
@@ -251,7 +258,7 @@ class Assembler:
 
 
 if __name__ == "__main__":
-    code = Assembler(debug=False,file_name="test.asm")
+    code = Assembler(debug=True,file_name="test.asm")
     code.assemble()
-    #code.info()
+    code.info()
     code.display()
