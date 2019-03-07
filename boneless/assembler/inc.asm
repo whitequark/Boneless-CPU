@@ -16,9 +16,6 @@ MOVL STP,%stack
 
 .macro RET
     JR RTN, 0
-    NOP
-    NOP
-    MOV R1,R2
 .endm
 
 .macro pop
@@ -29,13 +26,13 @@ MOVL STP,%stack
     _call PUSH
 .endm
 
-.label PUSH
+PUSH:
     ST TOS, STP, 0
     ADDI STP, 1
     MOV WRK, TOS
     RET
 
-.label POP
+POP:
     MOV WRK, TOS
     LD STP, TOS, 0
     SUBI STP, 1

@@ -7,8 +7,10 @@ init:
     NOP
 middle:
     NOP
-    pop
     push 
+    NOP
+    pop
+    NOP
     J middle 
 borf:
     JR TOS, 0 

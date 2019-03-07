@@ -27,7 +27,7 @@ class TokenLine:
     def copy(self,postfix):
         c = TokenLine(self.source+"-"+postfix,self.line,'')
         c.command = self.command
-        c.params = self.params
+        c.params = self.params.copy()
         return c
 
     def __repr__(self):

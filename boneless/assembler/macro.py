@@ -29,7 +29,8 @@ class Macro:
 
     def __call__(self,tok):
         if assembler.debug:
-            print("parse with params")
+
+            print(self.name,"parse with params")
             print(tok.params)
         if len(tok.params) != len(self.params):
             raise BadParameterCount(tok,params)
@@ -43,15 +44,11 @@ class Macro:
         for i in self.token_lines:
             line = []
             c = i.copy('macro')
-            print(c.params)
-            # TODO fix the parameter replacement
-            for j,k in enumerate(self.params):
-                print("parrams",j,k,pmap[k])
-                if pmap[k].startswith("$"):
-                    print("match")
-            #        if j[1:] in pmap:
-            #            print("has " + j)
-            #            j = pmap[j[1:]]
+            for j,k in enumerate(c.params):
+                print("--",j,k)
+                if k.startswith("$"):
+                    print("match on ",k)
+                    c.params[j]= pmap[k[1:]]
             parsed_lines.append(c)
         if assembler.debug:
             print("from ", str(self.token_lines))
