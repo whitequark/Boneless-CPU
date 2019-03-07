@@ -28,7 +28,6 @@ def pos(s):
     v = assembler.labels[s[0]]
     print(v)
 
-
 @register(".label")
 def label(name):
     " create a label , useful inside macros"

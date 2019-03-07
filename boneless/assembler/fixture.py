@@ -11,16 +11,18 @@ class Register:
 
 class TokenLine:
     " Wrap the token lines for debug"
-    def __init__(self,source,line,items):
+    def __init__(self,source,line,val):
         self.source = source
         self.line = line
-        self.items = items
-
-        self.command = ""
+        self.val = val
+        self.items = val.split()
+        part = val.strip().partition(" ")
+        self.command = part[0]
         self.params = [] # comma seperated values
-
-    def parse(self):
-        pass
+        p = part[2].split(',')
+        for i in p:
+            self.params.append(i.strip())
+        print(self.command,self.params)
 
     def __repr__(self):
         return "<"+self.source+","+str(self.line)+","+str(self.items)+">"

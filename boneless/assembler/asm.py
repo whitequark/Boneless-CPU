@@ -81,8 +81,7 @@ class Assembler:
             li = data.splitlines()
             tokl = []
             for i,j in enumerate(li):
-                items = j.split()
-                tokl.append(TokenLine('string',i,items))
+                tokl.append(TokenLine('string',i,j))
             self.token_lines = tokl
         elif file_name != "":
             self.token_lines = self.load_file(file_name)
@@ -103,8 +102,7 @@ class Assembler:
         f.close()
         tokl = []
         for i,j in enumerate(li):
-            items = j.split()
-            tokl.append(TokenLine(file_name,i,items))
+            tokl.append(TokenLine(file_name,i,j))
         return tokl
 
     def resolve_symbol(self,symbol):
@@ -253,7 +251,7 @@ class Assembler:
 
 
 if __name__ == "__main__":
-    code = Assembler(debug=True,file_name="test.asm")
+    code = Assembler(debug=False,file_name="test.asm")
     code.assemble()
     #code.info()
     code.display()
