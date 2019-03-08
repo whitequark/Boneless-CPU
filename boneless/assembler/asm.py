@@ -49,15 +49,11 @@ class Assembler:
         # default to .header section
         self.current_section = None
         self.set_section(".header")
-        # current  code pos
-        self.code = []
         self.pos = 8
-        # blank out the registers
-
         # add the register functions
         for i in range(8):
+            self.current_section.add_label("r_R" + str(i))
             self.current_section.add_code([0])
-            self.current_section.add_label("R" + str(i))
             self.instr_set["R" + str(i)] = Register(i)
         # build instruction set map
         ins = getmembers(instr, isfunction)
@@ -207,42 +203,13 @@ class Assembler:
                     pval[k] = val
                 if self.debug:
                     print(pval)
-                self.code += comm(**pval)
-                self.pos = len(self.code)
                 self.current_section.add_code(comm(**pval))
             else:
                 raise UnknownInstruction(i)
 
-        # reverse labels for disasm listing
-        for i, j in self.labels.items():
-            self.rev_labels[j] = i
-
-    def resolve(self):
-        " simple resolver "
-        # TODO move resolver into the linker
-        # TODO need to deal with larger offsets
-        # TODO need to integrate into the linker
-        for offset, code in enumerate(self.code):
-            if self.debug:
-                print(offset, code)
-            if isinstance(code, types.LambdaType):
-                # TODO if label - offset > +-127 , an extended code needs to be inserted.
-                self.code[offset] = code(lambda label: self.labels[label] - offset - 1)
-
-    def display(self):
-        for offset, code in enumerate(self.code):
-            l = ""
-            if offset in self.rev_labels:
-                l = self.rev_labels[offset]
-            o = "{:04X} | ".format(offset)
-            b = "| {:05b}".format(code >> 11)
-            lb = "{0:016b}".format(code)
-            print(o, l.ljust(10), " | ", disassemble(code).ljust(16), b, lb)
-
     def assemble(self):
         self.parse()
         self.linker.link()
-        self.resolve()
 
     def info(self):
         print("Labels")
@@ -265,4 +232,3 @@ if __name__ == "__main__":
     code = Assembler(debug=False, file_name="test.asm")
     code.assemble()
     # code.info()
-    code.display()

@@ -1,3 +1,6 @@
+from boneless.arch.disasm import disassemble
+
+
 class Register:
     def __init__(self, val):
         self.val = val
@@ -54,10 +57,15 @@ class CodeSection:
         self.code = []
         self.counter = 0
         self.offset = 0
+        self.rev_labels = {}
 
     def add_label(self, label):
         assert label not in self.labels
         self.labels[label] = self.counter
+
+    def set_label(self, label, pos):
+        #        assert label not in self.labels
+        self.labels[label] = pos
 
     def add_code(self, code):
         " insert a code item"
@@ -69,7 +77,7 @@ class CodeSection:
         return len(self.code)
 
     # shift the labels down
-    def offset(self, n):
+    def offset_labels(self, offset):
         offset_labels = {}
         for i in self.labels:
             offset_labels[i] = self.labels[i] + offset
@@ -80,6 +88,22 @@ class CodeSection:
     def insert(self, pos, val):
         print("INSERT FAIL")
         raise
+
+    def display(self):
+        # reverse labels for disasm listing
+        for i, j in self.labels.items():
+            self.rev_labels[j] = i
+        for offset, code in enumerate(self.code):
+            l = ""
+            if offset in self.rev_labels:
+                l = self.rev_labels[offset]
+            o = "{:04X} | ".format(offset)
+            if isinstance(code, int):
+                b = "| {:05b}".format(code >> 11)
+            else:
+                b = 0
+                code = 0
+            print(o, l.ljust(10), " | ", disassemble(code).ljust(16), b)
 
     def __repr__(self):
         return str({"name": self.name, "labels": self.labels, "length": self.length})

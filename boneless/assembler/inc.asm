@@ -51,8 +51,8 @@
 .section .data
 
 .string welcome, "Boneless 0.1"
-.string stack_overflow, "Stack Overflow"
-.string stack_underflow, "Stack Underflow"
+.string overflow, "Stack Overflow"
+.string underflow, "Stack Underflow"
 
 .section .text
 

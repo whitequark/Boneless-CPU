@@ -66,7 +66,7 @@ original = [
             MOVH(R2, 255),
             "breathe",
             SRL(R3, R2, 8),
-            MOVL(R7, 0xff),
+            MOVL(R7, 0xFF),
             AND(R4, R2, R7),
             MOVH(R7, 0x80),
             AND(R7, R7, R2),
