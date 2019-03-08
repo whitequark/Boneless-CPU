@@ -211,6 +211,13 @@ class Assembler:
         self.parse()
         self.code = self.linker.link()
 
+    def show_instruction_set(self):
+        for i in self.instr_set:
+            l = i.ljust(4) + " - "
+            for j in self.instr_param[i]:
+                l += j + " "
+            print(l)
+
     def info(self):
         print("Labels")
         print(self.labels)
@@ -238,9 +245,8 @@ if __name__ == "__main__":
 
     args = p.parse_args()
 
-    print(args)
     code = Assembler(debug=False, file_name="test.asm")
     if args.action == "info":
-        code.info()
+        code.show_instruction_set()
     if args.action == None:
         code.assemble()
