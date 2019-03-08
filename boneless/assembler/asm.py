@@ -209,7 +209,7 @@ class Assembler:
 
     def assemble(self):
         self.parse()
-        self.linker.link()
+        self.code = self.linker.link()
 
     def info(self):
         print("Labels")

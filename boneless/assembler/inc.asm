@@ -1,4 +1,4 @@
-.equ stack_size, 8 
+.equ stack_size, 8
 .alloc stack, stack_size 
 
 .def STP, R4

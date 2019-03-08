@@ -51,3 +51,4 @@ class Linker:
         self.built.display()
         print(self.built.labels)
         print(self.section_labels)
+        return self.built.code
