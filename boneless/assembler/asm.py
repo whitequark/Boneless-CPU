@@ -229,6 +229,18 @@ class Assembler:
 
 
 if __name__ == "__main__":
+    import argparse
+    p = argparse.ArgumentParser()
+    action = p.add_subparsers(dest="action")
+
+    action.add_parser("info")
+    action.add_parser("compile")
+
+    args = p.parse_args()
+
+    print(args)
     code = Assembler(debug=False, file_name="test.asm")
-    code.assemble()
-    # code.info()
+    if args.action == "info":
+        code.info()
+    if args.action == None:
+        code.assemble()
