@@ -18,9 +18,9 @@ class Linker:
     def __init__(self, assem):
         self.assem = assem
         self.sections = assem.sections
-        self.built = CodeSection("complete")
         self.counter = 0
         self.section_labels = {}
+        self.built = assem.final
 
     def resolve(self):
         " simple resolver "

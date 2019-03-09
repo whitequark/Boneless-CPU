@@ -15,32 +15,33 @@ def bind(assembler_object):
     assembler = assembler_object
 
 
-def register(cls):
+def register(cls, count):
     def func_wrapper(name):
         commands[cls] = name
+        commands_params[cls] = count
 
     return func_wrapper
 
 
-@register(".section")
+@register(".section", 1)
 def section(l):
     assembler.set_section(l.params[0])
 
 
-@register(".int")
+@register(".int", 1)
 def pos(l):
     v = assembler.labels[l.params[0]]
     print(v)
 
 
-@register(".label")
+@register(".label", 1)
 def label(l):
     " create a label , useful inside macros"
     val = TokenLine(l.source, l.line, l.params[0] + ": ")
     return [val]
 
 
-@register(".string")
+@register(".string", 2)
 def stringer(l):
     assembler.current_section.add_label(l.params[0])
     txt = literal_eval(l.params[1])
@@ -49,7 +50,7 @@ def stringer(l):
     assembler.current_section.add_code([0])
 
 
-@register(".equ")
+@register(".equ", 2)
 def equ(l):
     name = l.params[0]
     val = literal_eval(l.params[1])
@@ -57,7 +58,7 @@ def equ(l):
 
 
 # rebind a exisiting command
-@register(".def")
+@register(".def", 2)
 def defn(l):
     dst = l.params[0]
     src = l.params[1]
@@ -66,7 +67,7 @@ def defn(l):
     assembler.instr_count[dst] = assembler.instr_count[src]
 
 
-@register(".alloc")
+@register(".alloc", 2)
 def alloc(l):
     name = l.params[0]
     cmds = [TokenLine(l.source + "-comm", l.line, name + ":")]
@@ -77,6 +78,6 @@ def alloc(l):
     return cmds
 
 
-@register(".global")
+@register(".global", 0)
 def glob(l):
     pass

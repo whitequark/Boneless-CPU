@@ -2,5 +2,5 @@
 [done]- need to go full circular, use whitequarks dissasembly output as canonical input
 [done]- rewrite token line parser to do command , params that are comma seperated
 - need to handle comments
-- need to add param counts to commands
-- covert returns from macros and commands to all be TokenLines
+[done]- need to add param counts to commands
+[done]- covert returns from macros and commands to all be TokenLines

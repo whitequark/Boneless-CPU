@@ -70,7 +70,7 @@ class CodeSection:
     def add_code(self, code):
         " insert a code item"
         self.code += code
-        self.counter += 1
+        self.counter += len(code)
 
     @property
     def length(self):
@@ -97,7 +97,7 @@ class CodeSection:
             l = ""
             if offset in self.rev_labels:
                 l = self.rev_labels[offset]
-            o = "{:04X} | ".format(offset)
+            o = "{:05d} | ".format(offset)
             if isinstance(code, int):
                 b = "| {:05b}".format(code >> 11)
             else:

@@ -2,7 +2,7 @@ from inspect import getmembers, isfunction, signature
 from ast import literal_eval
 from boneless.arch import instr
 from boneless.arch.disasm import disassemble
-import types
+import types, array, base64
 
 import commands
 import macro
@@ -39,11 +39,13 @@ class Assembler:
 
         # inbuilt commands
         self.commands = {}
+        self.commands_params = {}
         # asm variables
         self.variables = {}
         # stored token lines
         self.token_lines = []
-
+        # the code
+        self.final = CodeSection("final")
         # section data
         self.sections = {}
         # default to .header section
@@ -74,6 +76,7 @@ class Assembler:
         commands.bind(self)
         for i, j in commands.commands.items():
             self.commands[i] = j
+            self.commands_params[i] = commands.commands_params[i]
 
         macro.bind(self)
 
@@ -152,12 +155,14 @@ class Assembler:
                 lines = self.load_file(params[0])
                 # prepend the data
                 self.prepend(lines)
+
             # macros
             elif command == ".macro":
                 in_macro = True
                 the_macro = Macro(i)
                 current_macro = the_macro
                 self.commands[params[0]] = the_macro
+                self.commands_params[params[0]] = len(params) - 1
                 if self.debug:
                     print("start macro create")
             elif command == ".endm":
@@ -169,6 +174,8 @@ class Assembler:
 
             # commands and macros
             elif command in self.commands:
+                if len(params) != self.commands_params[command]:
+                    raise BadParameterCount(i)
                 if self.debug:
                     print("RUN", str(command))
                 mc = self.commands[command]
@@ -207,6 +214,21 @@ class Assembler:
             else:
                 raise UnknownInstruction(i)
 
+    def packer(self):
+        data = array.array("H", self.code)
+        print(data.tobytes())
+        s = base64.b16encode(data.tobytes())
+        print(s)
+        f = open("code.hex", "wb")
+        f.write(s)
+        f.close()
+        return s
+
+    def unpacker(self, data):
+        packed_array = base64.b16decode(data)
+        data = array.array("H", packed_array)
+        print(data)
+
     def assemble(self):
         self.parse()
         self.code = self.linker.link()
@@ -217,6 +239,9 @@ class Assembler:
             for j in self.instr_param[i]:
                 l += j + " "
             print(l)
+
+    def display(self):
+        self.final.display()
 
     def info(self):
         print("Labels")
@@ -237,7 +262,9 @@ class Assembler:
 
 if __name__ == "__main__":
     import argparse
+
     p = argparse.ArgumentParser()
+
     action = p.add_subparsers(dest="action")
 
     action.add_parser("info")
@@ -250,3 +277,6 @@ if __name__ == "__main__":
         code.show_instruction_set()
     if args.action == None:
         code.assemble()
+        code.display()
+        # c = code.packer()
+        # code.unpacker(c)

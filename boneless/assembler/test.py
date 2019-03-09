@@ -100,11 +100,13 @@ for i, j in enumerate(original):
         "|",
     )
 
-circular = ""
-for i in original:
-    circular += disassemble(i) + "\n"
 
-print(circular)
-code2 = Assembler(data=circular)
-code2.assemble()
-code2.display()
+def test_circular():
+    circular = ""
+    for i in original:
+        circular += disassemble(i) + "\n"
+
+    print(circular)
+    code2 = Assembler(data=circular)
+    code2.assemble()
+    code2.display()
