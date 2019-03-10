@@ -1,6 +1,6 @@
 " system commands for the assembler"
 from ast import literal_eval
-from fixture import TokenLine
+from boneless.assembler.fixture import TokenLine
 
 __all__ = []
 
@@ -45,9 +45,9 @@ def label(l):
 def stringer(l):
     assembler.current_section.add_label(l.params[0])
     txt = literal_eval(l.params[1])
+    assembler.current_section.add_code([len(txt)])
     for i in txt:
         assembler.current_section.add_code([int(ord(i))])
-    assembler.current_section.add_code([0])
 
 
 @register(".equ", 2)

@@ -1,5 +1,5 @@
 " macros for the assembler"
-from fixture import TokenLine
+from boneless.assembler.fixture import TokenLine
 
 assembler = None
 

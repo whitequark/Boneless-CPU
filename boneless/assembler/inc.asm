@@ -7,11 +7,12 @@
 .def WRK, R2
 
 .section .text
-.label reset
-    MOVL STP,%stack
+
+reset:
+    MOVL STP,8 
     J init
 
-.label abort
+abort:
     J init
 
 .macro _call, name

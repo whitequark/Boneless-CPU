@@ -8,7 +8,7 @@
     end of memory
 """
 
-from fixture import CodeSection
+from boneless.assembler.fixture import CodeSection
 import types
 
 

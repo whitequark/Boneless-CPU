@@ -4,11 +4,11 @@ from boneless.arch import instr
 from boneless.arch.disasm import disassemble
 import types, array, base64
 
-import commands
-import macro
-from macro import Macro
-from linker import Linker
-from fixture import Register, TokenLine, CodeSection
+from boneless.assembler import commands
+from boneless.assembler import macro
+from boneless.assembler.macro import Macro
+from boneless.assembler.linker import Linker
+from boneless.assembler.fixture import Register, TokenLine, CodeSection
 
 
 class UnknownInstruction(Exception):
@@ -109,19 +109,29 @@ class Assembler:
                 tokl.append(TokenLine(file_name, i, j))
         return tokl
 
+    def add_label(self):
+        pass
+
     def resolve_symbol(self, symbol):
         # resolves literals, variables , registers
         # instructions
         if self.debug:
             print("find :" + symbol)
         if symbol in self.instr_set:
+            if self.debug:
+                print("is symbol")
             val = self.instr_set[symbol]()
-        # labels , deferenced by hash
-        elif symbol.startswith("%"):
-            if symbol[1:] in self.labels:
-                val = self.labels[symbol[1:]]
+        # labels , deferenced by at
+        elif symbol.startswith("@"):
+            if self.debug:
+                print("reference :" + symbol)
+            print(self.current_section.labels)
+            if symbol[1:] in self.current_section.labels:
+                val = -self.current_section.labels[symbol[1:]]
         # symbols
         elif symbol in self.variables:
+            if self.debug:
+                print("variable" + symbol)
             val = self.variables[symbol]
         # try a literal , or just hand back the string
         else:
@@ -212,6 +222,7 @@ class Assembler:
                     print(pval)
                 self.current_section.add_code(comm(**pval))
             else:
+                self.info()
                 raise UnknownInstruction(i)
 
     def packer(self):
@@ -245,18 +256,14 @@ class Assembler:
 
     def info(self):
         print("Labels")
-        print(self.labels)
+        print(self.current_section.labels)
         print("Variables")
         print(self.variables)
         print("Instructions")
-        for i in self.instr_set:
-            print(i)
         print(self.instr_set)
-        print("")
-        print(self.instr_count)
-        print("Labels")
+        print("Parameters")
         print(self.instr_param)
-        print("Labels")
+        print("Commands")
         print(self.commands)
 
 
