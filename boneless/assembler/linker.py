@@ -46,9 +46,10 @@ class Linker:
             self.counter += j.length
             self.section_labels[i] = self.counter
 
-        print(self.built)
         self.resolve()
-        self.built.display()
-        print(self.built.labels)
-        print(self.section_labels)
+        if self.assem.debug:
+            print(self.built)
+            self.built.display()
+            print(self.built.labels)
+            print(self.section_labels)
         return self.built.code
