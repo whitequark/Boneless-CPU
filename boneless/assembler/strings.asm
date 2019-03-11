@@ -1,9 +1,6 @@
-.def CTR, R1
 .def MAX, R2 
 .def ADDR, R3
-.def LEN, R4
-.def VAL, R5
-.def OP, R6
+.def VAL,R1
 .def RTN, R7
 J init
 
@@ -21,10 +18,10 @@ J init
 .endm
 
 PRINT:
-    LD LEN, ADDR,0 
+    LD MAX, ADDR,0 
     ADDI ADDR,1
-    SUBI LEN, 1
-    ADD MAX, ADDR,LEN
+    SUBI MAX, 1
+    ADD MAX, ADDR,MAX
 _next_char:
     LD VAL,ADDR,0
     STX VAL,R0,0
@@ -36,8 +33,6 @@ _out_print:
     RET
 
 init:
-    _print clear
-    _print home
     _print hello 
     _print cr
     _print bl0
