@@ -36,14 +36,22 @@ _out_print:
     RET
 
 init:
+    _print clear
+    _print home
     _print hello 
     _print cr
     _print bl0
     _print cr
+    MOVL VAL, 0x00
+    MOVH VAL, 0x00
 spin:
-    ILL 0
     J spin
+    STX VAL,R0,0
+    ADDI VAL,1
 
 .string hello,"hello i am a program"
 .string cr, " \n"
 .string bl0, "╔═╦═╗╓─╥─╖╒═╤═╕┌─┬─┐"
+.string red,"\u001b[31m"
+.string clear,"\u001b[2J"
+.string home,"\u001b[f"

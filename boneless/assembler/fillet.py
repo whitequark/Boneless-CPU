@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import sys
 from boneless_sim import *
 from boneless.arch.instr import *
@@ -24,7 +24,7 @@ def io(addr, data=None):
 #            print("spin")
 
 cpu = BonelessSimulator(start_pc=0, memsize=1024)
-code = Assembler(debug=True, file_name="strings.asm")
+code = Assembler(debug=False, file_name="strings.asm")
 code.assemble()
 cpu.load_program(code.code)
 cpu.register_io(io)
@@ -37,6 +37,6 @@ def line():
     print(pc, "|", code, "|", reg)
 
 
-for i in range(1000):
+for i in range(30000):
     cpu.stepi()
-    line()
+    #line()
