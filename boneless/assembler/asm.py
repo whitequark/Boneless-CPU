@@ -152,9 +152,9 @@ class Assembler:
         # use while loop so more instructions can be prepended inside
         while len(self.token_lines) > 0:
             i = self.token_lines.pop(0)
-            # empty line
-            # if len(i) < 1:
-            #    continue
+            # comments line
+            if i.comment:
+                continue
             if self.debug:
                 print(" ", i)
             command = i.command

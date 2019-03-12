@@ -1,4 +1,6 @@
-.def MAX, R2 
+; basic string interaction
+; testing comment
+.def MAX, R2 ; redfine a register 
 .def ADDR, R3
 .def VAL,R1
 .def RTN, R7
@@ -41,8 +43,8 @@ init:
     MOVH VAL, 0x00
 spin:
     J spin
-    STX VAL,R0,0
-    ADDI VAL,1
+;    STX VAL,R0,0
+;    ADDI VAL,1
 
 .string hello,"hello i am a program"
 .string cr, " \n"

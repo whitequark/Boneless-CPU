@@ -19,6 +19,14 @@ class TokenLine:
         self.source = source
         self.line = line
         self.val = val
+        self.comment = False
+        if val.startswith(';'):
+            self.comment = True
+            return
+        comment_pos = val.find(';')
+        if comment_pos != -1:
+            val = val[:-comment_pos]
+            print(val)
         # self.items = val.split()
         part = val.strip().partition(" ")
         self.command = part[0]

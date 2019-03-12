@@ -24,8 +24,13 @@ def io(addr, data=None):
 #            print("spin")
 
 cpu = BonelessSimulator(start_pc=0, memsize=1024)
-code = Assembler(debug=False, file_name="strings.asm")
+if len(sys.argv) > 1 :
+    file_name = sys.argv[1]
+else:
+    file_name = "strings.asm"
+code = Assembler(debug=True, file_name=file_name)
 code.assemble()
+code.display()
 cpu.load_program(code.code)
 cpu.register_io(io)
 
