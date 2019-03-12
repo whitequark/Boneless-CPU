@@ -9,7 +9,7 @@ exit = False
 strin = ""
 
 def io(addr, data=None):
-    global strin
+    global strin,exit
     if data == None:
         if addr == 0:
             if len(strin) > 0:
@@ -18,13 +18,13 @@ def io(addr, data=None):
                 return ord(c)
             else:
                 return 0 # return null char on read
-        if addr == 255:
-            print("exiter")
-            exit = True
         return 0
     else:
         if addr == 0:
             print(chr(data), end="")
+        if addr == 1:
+            print("")
+            exit = True
 
 
 #        elif addr == 1:
@@ -60,6 +60,9 @@ def line():
 
 while(1):
     get_line()
-    for i in range(30000):
+    while(1):
         cpu.stepi()
-        line()
+        #line()
+        if exit:
+            exit = False
+            break
