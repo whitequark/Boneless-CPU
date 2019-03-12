@@ -42,9 +42,9 @@ init:
     MOVL VAL, 0x00
     MOVH VAL, 0x00
 spin:
+;   STX VAL,R0,0
+;   ADDI VAL,1
     J spin
-;    STX VAL,R0,0
-;    ADDI VAL,1
 
 .string hello,"hello i am a program"
 .string cr, " \n"

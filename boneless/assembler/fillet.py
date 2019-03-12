@@ -5,10 +5,23 @@ from boneless.arch.instr import *
 from boneless.assembler.asm import Assembler
 from boneless.arch.disasm import disassemble
 
+exit = False
+strin = ""
 
 def io(addr, data=None):
+    global strin
     if data == None:
-        print("Read-", addr, "{0:016b}".format(data))
+        if addr == 0:
+            if len(strin) > 0:
+                c = strin[0]
+                strin = strin[1:]
+                return ord(c)
+            else:
+                return 0 # return null char on read
+        if addr == 255:
+            print("exiter")
+            exit = True
+        return 0
     else:
         if addr == 0:
             print(chr(data), end="")
@@ -35,13 +48,18 @@ cpu.load_program(code.code)
 cpu.register_io(io)
 
 
+def get_line():
+    global strin
+    strin = input(">")
+
 def line():
     pc = str(cpu.pc).ljust(10)
     code = disassemble(cpu.mem[cpu.pc]).ljust(20)
     reg = cpu.regs()
     print(pc, "|", code, "|", reg)
 
-
-for i in range(30000):
-    cpu.stepi()
-    #line()
+while(1):
+    get_line()
+    for i in range(30000):
+        cpu.stepi()
+        line()
