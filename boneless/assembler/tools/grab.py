@@ -2,7 +2,7 @@ import os
 
 base = "../../../doc/manual/insns/"
 li = os.listdir(base)
-print(li)
+data = {} 
 for i in li:
     f = open(base+i)
     d = f.readlines()
@@ -15,4 +15,11 @@ for i in li:
         if j.find("\\assembly") > 0:
             val = j.strip().split("}")
             reg = val[1].strip()
-    print(name,' ', reg , ";" ,descr)
+    #print(name,' ', reg , ";" ,descr)
+    data[name] = [name,reg,descr]
+
+s = 'descriptions ='+str(data)
+print(s)
+f = open('descriptions.py','w')
+f.write(s)
+f.close()
