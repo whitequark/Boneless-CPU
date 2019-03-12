@@ -25,7 +25,7 @@ class TokenLine:
             return
         comment_pos = val.find(';')
         if comment_pos != -1:
-            val = val[:-comment_pos]
+            val = val[:comment_pos]
             print(val)
         # self.items = val.split()
         part = val.strip().partition(" ")
