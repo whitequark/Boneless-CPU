@@ -40,7 +40,7 @@ cpu = BonelessSimulator(start_pc=0, memsize=1024)
 if len(sys.argv) > 1 :
     file_name = sys.argv[1]
 else:
-    file_name = "strings.asm"
+    file_name = "asm/echo.asm"
 code = Assembler(debug=True, file_name=file_name)
 code.assemble()
 code.display()
@@ -59,10 +59,9 @@ def line():
     print(pc, "|", code, "|", reg)
 
 while(1):
-    get_line()
     while(1):
         cpu.stepi()
-        #line()
+        line()
         if exit:
             exit = False
             break
