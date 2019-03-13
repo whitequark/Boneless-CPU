@@ -78,8 +78,7 @@ abort:
 .endm
 
 .macro HEADER, name
-    .int pos ; add current pos to code
-    .pos pos ; save old pos
+    .pos $name ; add current pos to code
     .string $name, $name
 .endm
 

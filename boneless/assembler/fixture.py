@@ -115,3 +115,14 @@ class CodeSection:
 
     def __repr__(self):
         return str({"name": self.name, "labels": self.labels, "length": self.length})
+
+
+class resolver():
+    def __init__(self,name):
+        self.name = name
+        self.command = ""
+        self.params = []
+        self.comment = ""
+
+    def __call__(self):
+        return self.name

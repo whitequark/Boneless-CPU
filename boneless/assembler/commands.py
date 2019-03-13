@@ -1,6 +1,6 @@
 " system commands for the assembler"
 from ast import literal_eval
-from boneless.assembler.fixture import TokenLine
+from boneless.assembler.fixture import TokenLine, resolver
 
 __all__ = []
 
@@ -33,11 +33,12 @@ def pos(l):
     v = assembler.variables[l.params[0]]
     assembler.current_section.add_code([int(v)])
 
+
 @register(".pos",1) # name , value
 def set_pos(l):
-    # save value into the name
-    assembler.variables[l.params[0]] = assembler.current_section.counter
-    pass
+    v = [resolver(l.params[0])]
+    assembler.current_section.add_code(v)
+
 
 @register(".label", 1)
 def label(l):
