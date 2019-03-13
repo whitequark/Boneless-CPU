@@ -34,10 +34,6 @@ def pos(l):
     assembler.current_section.add_code([int(v)])
 
 
-@register(".pos",1) # name , value
-def set_pos(l):
-    v = [resolver(l.params[0])]
-    assembler.current_section.add_code(v)
 
 
 @register(".ulstring",1)
@@ -68,8 +64,19 @@ def stringer(l):
 @register(".equ", 2)
 def equ(l):
     name = l.params[0]
-    val = literal_eval(l.params[1])
+    val = l.params[1]
     assembler.variables[name] = val
+
+" absolute refs via variables "
+@register(".pos",1) # name , value
+def get_pos(l):
+    v = assembler.variables[l.params[0]]
+    assembler.current_section.add_code([resolver(v)])
+
+@register(".set",2)
+def set_pos(l):
+    assembler.variables[l.params[0]] = l.params[1]
+ 
 
 # rebind a exisiting command
 @register(".def", 2)

@@ -1,6 +1,12 @@
+; \Build a forth in Assembly
+; Simon Kirkby
+; obetgiantrobot@gmail.com
+; 20190319
+
 .equ stack_size, 8
 .alloc stack, stack_size 
 .alloc rstack, stack_size
+; redifine the registers
 
 .def W, R0 ; working register
 .def IP, R1 ; interpreter pointer
@@ -46,6 +52,8 @@ abort:
     _call RPUSH
 .endm
 
+; unprotected stack functions
+
 .label PUSH
     ST TOS, PSP, 0
     ADDI PSP, 1
@@ -75,16 +83,24 @@ abort:
     J W
 .endm
 
+.equ latest, reset 
+
 .macro HEADER, name
     .label $name
-    .pos $name ; add current pos to code
+    .pos latest ; add current pos to code
+    .set latest, $name
     .ulstring $name
 .endm
 
 HEADER docol
 NEXT
 
-HEADER test_header
+HEADER drop
+    pop
+NEXT 
+
+HEADER swap
+    NOP
 NEXT
 
 init:
