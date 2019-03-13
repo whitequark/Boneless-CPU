@@ -30,9 +30,14 @@ def section(l):
 
 @register(".int", 1)
 def pos(l):
-    v = assembler.labels[l.params[0]]
-    print(v)
+    v = assembler.variables[l.params[0]]
+    assembler.current_section.add_code([int(v)])
 
+@register(".pos",1) # name , value
+def set_pos(l):
+    # save value into the name
+    assembler.variables[l.params[0]] = assembler.current_section.counter
+    pass
 
 @register(".label", 1)
 def label(l):
@@ -44,18 +49,19 @@ def label(l):
 @register(".string", 2)
 def stringer(l):
     assembler.current_section.add_label(l.params[0])
-    txt = literal_eval(l.params[1])
+    try:
+        txt = literal_eval(l.params[1])
+    except:
+        txt = str(l.params[1])
     assembler.current_section.add_code([len(txt)])
     for i in txt:
         assembler.current_section.add_code([int(ord(i))])
-
 
 @register(".equ", 2)
 def equ(l):
     name = l.params[0]
     val = literal_eval(l.params[1])
     assembler.variables[name] = val
-
 
 # rebind a exisiting command
 @register(".def", 2)

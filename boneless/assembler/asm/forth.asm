@@ -69,10 +69,25 @@ abort:
     RET
 
 ; start of low level forth words
+.equ pos, 0
+.pos pos
+
 .macro NEXT
     LD W,IP,0
     J W
 .endm
+
+.macro HEADER, name
+    .int pos ; add current pos to code
+    .pos pos ; save old pos
+    .string $name, $name
+.endm
+
+HEADER docol
+NEXT
+
+HEADER test_header
+NEXT
 
 init:
     NOP
