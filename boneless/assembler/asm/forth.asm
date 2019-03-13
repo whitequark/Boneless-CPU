@@ -5,17 +5,17 @@
 .def W, R0 ; working register
 .def IP, R1 ; interpreter pointer
 .def PSP, R2 ; parameter stack pointer 
-.def TOS, R3 ; top of parameter stack
+.def TOS, R7 ; top of parameter stack
 .def RSP, R4 ; return stack pointer 
 .def JUMP, R5 ; jump saver , no direct access to PC
 .def SP, R6 ; spare register 2
-.def RTN, R7 ; cpu jump store
+.def RTN, R3 ; cpu jump store
 
 J reset
 .section .text
 
 reset:
-    MOVL PSP,8 
+    MOVL PSP,7 
     MOVL RSP,16
     J init
 
@@ -54,8 +54,8 @@ abort:
 
 .label POP
     MOV W, TOS
-    LD TOS,PSP, 0
     SUBI PSP, 1
+    LD TOS,PSP, 0
     RET
 
 .label RPUSH
@@ -80,6 +80,10 @@ init:
     push
     MOVI W, 101
     push
+    MOVI W, 102
+    push
+    pop
+    pop
     pop
 J init
 
