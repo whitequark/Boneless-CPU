@@ -69,8 +69,6 @@ abort:
     RET
 
 ; start of low level forth words
-.equ pos, 0
-.pos pos
 
 .macro NEXT
     LD W,IP,0
@@ -78,8 +76,9 @@ abort:
 .endm
 
 .macro HEADER, name
+    .label $name
     .pos $name ; add current pos to code
-    .string $name, $name
+    .ulstring $name
 .endm
 
 HEADER docol

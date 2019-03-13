@@ -29,7 +29,6 @@ class Linker:
             if self.assem.debug:
                 print(offset, code)
             if isinstance(code,resolver):
-                print(code)
                 self.built.code[offset] = self.built.labels[code()]
             if isinstance(code, types.LambdaType):
                 # TODO if label - offset > +-127 , an extended code needs to be inserted.

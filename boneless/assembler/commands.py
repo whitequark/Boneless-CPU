@@ -40,6 +40,13 @@ def set_pos(l):
     assembler.current_section.add_code(v)
 
 
+@register(".ulstring",1)
+def ulstringer(l):
+    txt = l.params[0]
+    assembler.current_section.add_code([len(txt)])
+    for i in txt:
+        assembler.current_section.add_code([int(ord(i))])
+
 @register(".label", 1)
 def label(l):
     " create a label , useful inside macros"

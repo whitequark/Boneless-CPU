@@ -4,3 +4,4 @@
 [done]- need to handle comments
 [done]- need to add param counts to commands
 [done]- covert returns from macros and commands to all be TokenLines
+- need get and set variable , and cross check the absolute resolver
