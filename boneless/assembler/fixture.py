@@ -107,7 +107,10 @@ class CodeSection:
                 l = self.rev_labels[offset]
             o = "{:05d} | ".format(offset)
             if isinstance(code, int):
-                b = " | " + chr(code) + "," + str(int(code))
+                if (code < 31) or code == 128 :
+                    b = " | _ ," + str(int(code))
+                else:
+                    b = " | " + chr(code) + "," + str(int(code))
             else:
                 b = 0
                 code = 0

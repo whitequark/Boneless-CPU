@@ -83,27 +83,42 @@ abort:
     J W
 .endm
 
-.equ latest, reset 
+.equ latest, r_R0 
 
 .macro HEADER, name
     .label $name
     .pos latest ; add current pos to code
-    .set latest, $name
-    .ulstring $name
+    .set latest, $name ; copy this ref for next header
+    .ulstring $name ; string length then characters
 .endm
 
-HEADER docol
+; do colon 
+HEADER DOCOL 
 NEXT
 
-HEADER drop
-    pop
-NEXT 
-
-HEADER swap
-    NOP
+; from address find the first code word
+HEADER >CFA
+    LD W,PSP,1 ; load the value after the current pointer
+    ADD W,PSP,W ; add the offset
+    MOV PSP,W    
 NEXT
+
+HEADER DUP
+    MOV W,TOS
+    push 
+NEXT
+
+HEADER [
+NEXT
+
+HEADER ]
+NEXT
+
+; MAIN LOOP
+QUIT:
 
 init:
+    MOVA PSP, QUIT
     NOP
     MOVI W, 100
     push

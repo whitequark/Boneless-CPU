@@ -279,7 +279,7 @@ if __name__ == "__main__":
 
     args = p.parse_args()
 
-    code = Assembler(debug=False, file_name="base.asm")
+    code = Assembler(debug=False, file_name="asm/forth.asm")
     if args.action == "info":
         code.show_instruction_set()
     if args.action == None:
