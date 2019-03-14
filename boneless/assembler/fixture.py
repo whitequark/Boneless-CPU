@@ -20,10 +20,10 @@ class TokenLine:
         self.line = line
         self.val = val
         self.comment = False
-        if val.startswith(';'):
+        if val.startswith(";"):
             self.comment = True
             return
-        comment_pos = val.find(';')
+        comment_pos = val.find(";")
         if comment_pos != -1:
             val = val[:comment_pos]
             print(val)
@@ -107,7 +107,7 @@ class CodeSection:
                 l = self.rev_labels[offset]
             o = "{:05d} | ".format(offset)
             if isinstance(code, int):
-                if (code < 31) or code == 128 :
+                if (code < 31) or code == 128:
                     b = " | _ ," + str(int(code))
                 else:
                     b = " | " + chr(code) + "," + str(int(code))
@@ -120,8 +120,8 @@ class CodeSection:
         return str({"name": self.name, "labels": self.labels, "length": self.length})
 
 
-class resolver():
-    def __init__(self,name):
+class resolver:
+    def __init__(self, name):
         self.name = name
 
     def __call__(self):

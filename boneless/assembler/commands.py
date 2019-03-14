@@ -34,20 +34,20 @@ def pos(l):
     assembler.current_section.add_code([int(v)])
 
 
-
-
-@register(".ulstring",1)
+@register(".ulstring", 1)
 def ulstringer(l):
     txt = l.params[0]
     assembler.current_section.add_code([len(txt)])
     for i in txt:
         assembler.current_section.add_code([int(ord(i))])
 
+
 @register(".plabel", 2)
 def plabel(l):
     " create a label with a prefix"
     val = TokenLine(l.source, l.line, l.params[1] + "_" + l.params[0] + ": ")
     return [val]
+
 
 @register(".label", 1)
 def label(l):
@@ -67,32 +67,42 @@ def stringer(l):
     for i in txt:
         assembler.current_section.add_code([int(ord(i))])
 
+
 @register(".equ", 2)
 def equ(l):
     name = l.params[0]
     val = l.params[1]
     assembler.variables[name] = val
 
+
 " prefixed variable"
+
+
 @register(".pequ", 3)
 def pequ(l):
-    name = l.params[2] + "_" +l.params[0] 
+    name = l.params[2] + "_" + l.params[0]
     val = l.params[1]
     assembler.variables[name] = val
 
+
 " absolute refs via variables "
-@register(".pos",1) # name , value
+
+
+@register(".pos", 1)  # name , value
 def get_pos(l):
     v = assembler.variables[l.params[0]]
     assembler.current_section.add_code([resolver(v)])
 
-@register(".set",2)
+
+@register(".set", 2)
 def set_pos(l):
     assembler.variables[l.params[0]] = l.params[1]
- 
-@register(".pset",3)
+
+
+@register(".pset", 3)
 def pset_pos(l):
     assembler.variables[l.params[0]] = l.params[2] + "_" + l.params[1]
+
 
 # rebind a exisiting command
 @register(".def", 2)

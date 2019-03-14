@@ -8,7 +8,7 @@
     end of memory
 """
 
-from boneless.assembler.fixture import CodeSection,resolver
+from boneless.assembler.fixture import CodeSection, resolver
 import types
 
 
@@ -28,7 +28,7 @@ class Linker:
         for offset, code in enumerate(self.built.code):
             if self.assem.debug:
                 print(offset, code)
-            if isinstance(code,resolver):
+            if isinstance(code, resolver):
                 self.built.code[offset] = self.built.labels[code()]
             if isinstance(code, types.LambdaType):
                 # TODO if label - offset > +-127 , an extended code needs to be inserted.
