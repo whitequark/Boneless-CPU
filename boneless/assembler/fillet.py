@@ -40,11 +40,12 @@ cpu = BonelessSimulator(start_pc=0, memsize=1024)
 if len(sys.argv) > 1 :
     file_name = sys.argv[1]
 else:
-    file_name = "asm/echo.asm"
-code = Assembler(debug=False, file_name=file_name)
-code.assemble()
-code.display()
-cpu.load_program(code.code)
+    file_name = "asm/forth.asm"
+asmblr = Assembler(debug=False, file_name=file_name)
+asmblr.assemble()
+asmblr.display()
+print(asmblr.rev_labels)
+cpu.load_program(asmblr.code)
 cpu.register_io(io)
 
 
@@ -52,16 +53,20 @@ def get_line():
     global strin
     strin = input(">")
 
-def line():
+def line(asmblr):
     pc = str(cpu.pc).ljust(10)
     code = disassemble(cpu.mem[cpu.pc]).ljust(20)
     reg = cpu.regs()
-    print(pc, "|", code, "|", reg)
+    if cpu.pc in asmblr.rev_labels:
+       label = asmblr.rev_labels[cpu.pc]
+    else:
+        label = ""
+    print(pc, "|", code, "|", reg, "->",label)
 
 while(1):
     while(1):
         cpu.stepi()
-        line()
+        line(asmblr)
         if exit:
             exit = False
             break

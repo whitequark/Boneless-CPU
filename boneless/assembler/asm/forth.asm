@@ -133,7 +133,12 @@ init:
     push
     MOVI R0, 50
     push
+    MOVI R0, 75
+    push
+    NOP
+    NOP
     _fcall +
+    NOP
     _fcall +
 J init
 

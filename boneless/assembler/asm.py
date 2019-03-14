@@ -253,6 +253,7 @@ class Assembler:
 
     def display(self):
         self.final.display()
+        self.rev_labels = self.final.rev_labels
 
     def info(self):
         print("Labels")
