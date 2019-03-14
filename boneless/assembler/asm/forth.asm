@@ -3,8 +3,8 @@
 ; obetgiantrobot@gmail.com
 ; 20190319
 
-.alloc stack, 4
-.alloc rstack, 4
+.alloc stack, 8
+.alloc rstack, 8
 ; redifine the registers
 
 .def W, R0 ; working register
@@ -18,7 +18,7 @@
 
 reset:
     MOVL PSP,8 
-    MOVL RSP,12
+    MOVL RSP,17
     J init
 
 abort:
@@ -94,6 +94,7 @@ abort:
 
 .macro ENTER
     MOV W,IP
+    rpush
 .endm
 
 .macro EXECUTE
@@ -124,6 +125,7 @@ init:
     push
     MOVI R0, 17 
     push
+    ENTER
     @ +
     @ +
 

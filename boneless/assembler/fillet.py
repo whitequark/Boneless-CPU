@@ -58,12 +58,13 @@ def line(asmblr):
     pc = str(cpu.pc).ljust(10)
     code = disassemble(cpu.mem[cpu.pc]).ljust(20)
     reg = cpu.regs()[0:8].tolist()
-    stack = cpu.regs()[9:16].tolist()
+    stack = cpu.mem[9:16].tolist()
+    rstack = cpu.mem[17:25].tolist()
     if cpu.pc in asmblr.rev_labels:
         label = asmblr.rev_labels[cpu.pc]
     else:
         label = ""
-    print(pc, "|", code, "|", reg, "|", stack, "->", label)
+    print(pc, "|", code, "|", reg, "|", stack,"|",rstack, "->", label)
 
 
 while 1:
