@@ -90,7 +90,8 @@ abort:
 
 .macro _fcall, addr ; call forth word from assembly.
     MOVA W,$addr
-    LD SP,W,0
+    LD SP,W,1
+    ADDI SP,2
     ADD W,W,SP
     JR W,0
 .endm
@@ -119,6 +120,11 @@ NEXT
 
 ; MAIN LOOP
 init:
+    MOVI R0, 100
+    push
+    MOVI R0, 200
+    push
+    _fcall DUP
     _fcall DUP
 J init
 
