@@ -75,8 +75,8 @@ abort:
 ; start of low level forth words
 
 .macro NEXT
-    LD W,IP,0
-    J W
+    ADDI IP,1
+    JR IP,0
 .endm
 
 .equ latest, r_R0 
@@ -90,6 +90,7 @@ abort:
 
 .macro _fcall, addr ; call forth word from assembly.
     MOVA W,$addr
+    MOV IP,W
     LD SP,W,1
     ADDI SP,2
     ADD W,W,SP
