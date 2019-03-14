@@ -17,8 +17,8 @@
 .def RTN, R3 ; cpu jump store
 
 reset:
-    MOVL PSP,4 
-    MOVL RSP,8
+    MOVL PSP,7 
+    MOVL RSP,11
     J init
 
 abort:
@@ -113,6 +113,12 @@ HEADER DUP
     push 
 NEXT
 
+HEADER +
+    pop
+    ADD W,TOS,W
+    push
+NEXT
+
 HEADER [
 NEXT
 
@@ -121,11 +127,13 @@ NEXT
 
 ; MAIN LOOP
 init:
-    MOVI R0, 100
+    MOVI R0, 200
     push
     MOVI R0, 200
     push
-    _fcall DUP
-    _fcall DUP
+    MOVI R0, 50
+    push
+    _fcall +
+    _fcall +
 J init
 
