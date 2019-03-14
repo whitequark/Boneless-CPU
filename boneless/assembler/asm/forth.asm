@@ -63,12 +63,12 @@ abort:
     RET
 
 .label RPUSH
-    ST W , RSP, 0
+    ST IP, RSP, 0
     ADDI RSP, 1
     RET
 
 .label RPOP
-    LD W , RSP, 0
+    LD IP, RSP, 0
     SUBI RSP, 1
     RET
 
@@ -89,12 +89,11 @@ abort:
 .endm
 
 .macro _fcall, addr ; call forth word from assembly.
-    MOVA W,$addr
-    MOV IP,W
-    LD SP,W,1
-    ADDI SP,2
-    ADD W,W,SP
-    JR W,0
+    MOVA IP,$addr
+    LD W,IP,1
+    ADDI IP,2
+    ADD IP,IP,W
+    JR IP,0
 .endm
 
 ; do colon 
@@ -129,16 +128,13 @@ NEXT
 init:
     MOVI R0, 200
     push
-    MOVI R0, 200
-    push
+    _fcall DUP
     MOVI R0, 50
     push
     MOVI R0, 75
     push
-    NOP
-    NOP
     _fcall +
-    NOP
+    _fcall +
     _fcall +
 J init
 
