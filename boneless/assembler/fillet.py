@@ -41,7 +41,7 @@ if len(sys.argv) > 1 :
     file_name = sys.argv[1]
 else:
     file_name = "asm/echo.asm"
-code = Assembler(debug=True, file_name=file_name)
+code = Assembler(debug=False, file_name=file_name)
 code.assemble()
 code.display()
 cpu.load_program(code.code)

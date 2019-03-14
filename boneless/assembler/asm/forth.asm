@@ -3,9 +3,8 @@
 ; obetgiantrobot@gmail.com
 ; 20190319
 
-.equ stack_size, 8
-.alloc stack, stack_size 
-.alloc rstack, stack_size
+.alloc stack, 4
+.alloc rstack, 4
 ; redifine the registers
 
 .def W, R0 ; working register
@@ -17,12 +16,9 @@
 .def SP, R6 ; spare register 2
 .def RTN, R3 ; cpu jump store
 
-J reset
-.section .text
-
 reset:
-    MOVL PSP,7 
-    MOVL RSP,16
+    MOVL PSP,4 
+    MOVL RSP,8
     J init
 
 abort:
@@ -89,7 +85,14 @@ abort:
     .label $name
     .pos latest ; add current pos to code
     .set latest, $name ; copy this ref for next header
-    .ulstring $name ; string length then characters
+    .ulstring $name ; unlabeled string length then characters
+.endm
+
+.macro _fcall, addr ; call forth word from assembly.
+    MOVA W,$addr
+    LD SP,W,0
+    ADD W,W,SP
+    JR W,0
 .endm
 
 ; do colon 
@@ -115,19 +118,7 @@ HEADER ]
 NEXT
 
 ; MAIN LOOP
-QUIT:
-
 init:
-    MOVA PSP, QUIT
-    NOP
-    MOVI W, 100
-    push
-    MOVI W, 101
-    push
-    MOVI W, 102
-    push
-    pop
-    pop
-    pop
+    _fcall DUP
 J init
 
