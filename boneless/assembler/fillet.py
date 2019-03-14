@@ -44,7 +44,6 @@ else:
 asmblr = Assembler(debug=False, file_name=file_name)
 asmblr.assemble()
 asmblr.display()
-print(asmblr.rev_labels)
 cpu.load_program(asmblr.code)
 cpu.register_io(io)
 
@@ -56,12 +55,13 @@ def get_line():
 def line(asmblr):
     pc = str(cpu.pc).ljust(10)
     code = disassemble(cpu.mem[cpu.pc]).ljust(20)
-    reg = cpu.regs()
+    reg = cpu.regs()[0:8].tolist()
+    stack = cpu.regs()[9:16].tolist()
     if cpu.pc in asmblr.rev_labels:
        label = asmblr.rev_labels[cpu.pc]
     else:
         label = ""
-    print(pc, "|", code, "|", reg, "->",label)
+    print(pc, "|", code, "|", reg, "|", stack , "->",label)
 
 while(1):
     while(1):

@@ -17,8 +17,8 @@
 .def RTN, R3 ; cpu jump store
 
 reset:
-    MOVL PSP,7 
-    MOVL RSP,11
+    MOVL PSP,8 
+    MOVL RSP,12
     J init
 
 abort:
@@ -27,11 +27,12 @@ abort:
 .macro _call, name
     JAL RTN, $name
 .endm
-; stack structures
+
 .macro RET
     JR RTN, 0
 .endm
 
+; stack structures
 .macro pop
     _call POP
 .endm
@@ -52,8 +53,8 @@ abort:
 
 .label PUSH
     ST TOS, PSP, 0
-    ADDI PSP, 1
     MOV TOS, W
+    ADDI PSP, 1
     RET
 
 .label POP
@@ -63,49 +64,46 @@ abort:
     RET
 
 .label RPUSH
-    ST IP, RSP, 0
+    ST W, RSP, 0
     ADDI RSP, 1
     RET
 
 .label RPOP
-    LD IP, RSP, 0
+    LD W, RSP, 0
     SUBI RSP, 1
     RET
 
 ; start of low level forth words
+
+.equ latest, r_R0 
+
+.macro HEADER, name
+    .plabel $name , _ 
+    .pos latest ; add current pos to code
+    .pset latest, $name, _ ; copy this ref for next header
+    .ulstring $name ; unlabeled string length then characters
+    .label $name
+.endm
+
+; the inner interpreter
 
 .macro NEXT
     ADDI IP,1
     JR IP,0
 .endm
 
-.equ latest, r_R0 
-
-.macro HEADER, name
-    .label $name
-    .pos latest ; add current pos to code
-    .set latest, $name ; copy this ref for next header
-    .ulstring $name ; unlabeled string length then characters
+.macro ENTER
+    MOV W,IP
 .endm
 
-.macro _fcall, addr ; call forth word from assembly.
-    MOVA IP,$addr
-    LD W,IP,1
-    ADDI IP,2
-    ADD IP,IP,W
-    JR IP,0
+.macro EXECUTE
+    NOP
 .endm
 
-; do colon 
-HEADER DOCOL 
-NEXT
-
-; from address find the first code word
-HEADER >CFA
-    LD W,PSP,1 ; load the value after the current pointer
-    ADD W,PSP,W ; add the offset
-    MOV PSP,W    
-NEXT
+.macro @, name
+    MOVA IP, $name
+    JR IP, 0 
+.endm
 
 HEADER DUP
     MOV W,TOS
@@ -115,26 +113,17 @@ NEXT
 HEADER +
     pop
     ADD W,TOS,W
-    push
-NEXT
-
-HEADER [
-NEXT
-
-HEADER ]
-NEXT
+    MOV TOS,W 
+NEXT 
 
 ; MAIN LOOP
 init:
-    MOVI R0, 200
+    MOVI R0, 25 
     push
-    _fcall DUP
-    MOVI R0, 50
+    MOVI R0, 11 
     push
-    MOVI R0, 75
+    MOVI R0, 17 
     push
-    _fcall +
-    _fcall +
-    _fcall +
-J init
+    @ +
+    @ +
 

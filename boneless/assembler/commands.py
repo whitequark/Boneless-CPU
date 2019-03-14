@@ -43,6 +43,12 @@ def ulstringer(l):
     for i in txt:
         assembler.current_section.add_code([int(ord(i))])
 
+@register(".plabel", 2)
+def plabel(l):
+    " create a label with a prefix"
+    val = TokenLine(l.source, l.line, l.params[1] + "_" + l.params[0] + ": ")
+    return [val]
+
 @register(".label", 1)
 def label(l):
     " create a label , useful inside macros"
@@ -67,6 +73,13 @@ def equ(l):
     val = l.params[1]
     assembler.variables[name] = val
 
+" prefixed variable"
+@register(".pequ", 3)
+def pequ(l):
+    name = l.params[2] + "_" +l.params[0] 
+    val = l.params[1]
+    assembler.variables[name] = val
+
 " absolute refs via variables "
 @register(".pos",1) # name , value
 def get_pos(l):
@@ -77,6 +90,9 @@ def get_pos(l):
 def set_pos(l):
     assembler.variables[l.params[0]] = l.params[1]
  
+@register(".pset",3)
+def pset_pos(l):
+    assembler.variables[l.params[0]] = l.params[2] + "_" + l.params[1]
 
 # rebind a exisiting command
 @register(".def", 2)
