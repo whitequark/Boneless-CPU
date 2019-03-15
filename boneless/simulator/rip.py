@@ -11,6 +11,7 @@ class instr:
         self.opcode = {}
         l = getmembers(opcode)
         for i in l:
+            print(i)
             if i[0].startswith("OPCL"):
                 self.opclass[i[0]] = i[1]
             if i[0].startswith("OPCO"):

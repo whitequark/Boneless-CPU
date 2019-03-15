@@ -3,9 +3,10 @@
 ; obetgiantrobot@gmail.com
 ; 20190319
 
-.alloc stack, 8
+.alloc stack, 8 ; .alloc will label and zero X cells;
 .alloc rstack, 8
-; redifine the registers
+
+; redefine the registers
 
 .def W, R0 ; working register
 .def IP, R1 ; interpreter pointer
@@ -16,14 +17,20 @@
 .def SP, R6 ; spare register 2
 .def RTN, R3 ; cpu jump store
 
+; macro to send an external halt to the simulator
+.macro HALT 
+    STX SP,SP,1
+.endm
+
 reset:
-    MOVL PSP,8 
+    MOVL PSP,15 
     MOVL RSP,16
     J init
 
 abort:
     J init
 
+; short form 
 .macro _call, name
     JAL RTN, $name
 .endm
@@ -53,14 +60,15 @@ abort:
 
 .label PUSH
     ST TOS, PSP, 0
-    ADDI PSP, 1
+    SUBI PSP, 1
     MOV TOS, W
     RET
 
 .label POP
     MOV W, TOS
-    SUBI PSP, 1
+    ADDI PSP, 1
     LD TOS,PSP, 0
+    MOVI PSP, 0 
     RET
 
 .label RPUSH
@@ -78,32 +86,34 @@ abort:
 .equ latest, r_R0 
 
 .macro HEADER, name
-    .plabel $name , _ 
-    .pos latest ; add current pos to code
-    .pset latest, $name, _ ; copy this ref for next header
-    .ulstring $name ; unlabeled string length then characters
-    .label $name
+    .label $name        ; push a header label
+    .pos latest         ; add current pos to code
+    .set latest, $name  ; copy this ref for next header
+    .ulstring $name     ; unlabeled string length then characters
+    .plabel $name , xt  ; the execution token , direct pointer
 .endm
 
 ; the inner interpreter
 
+; --8<--  SNIP
+
 .macro NEXT
-    ADDI IP,1
-    JR IP,0
+    ADDI IP,1   ; jump to the next xt in the list
+    JR IP,0     ; jump to the address
 .endm
 
 .macro ENTER, h 
-    MOVA W, $h ; store this spot in the working register 
-    .label $h ; that's right here
-    ADDI W ,5 ; offset past these instructions
-    MOV IP, W ; copy into the interpter pointer
-    LD W,W,0 ; load the value of the working pointer 
-    JR W,0 ; jump to the XT
+    MOVA W, $h  ; store this spot in the working register 
+    .label $h   ; that's right here
+    ADDI W ,4   ; offset past these instructions
+    MOV IP, W   ; copy into the interpter pointer
+    LD W,W,0    ; load the value of the working pointer 
+    JR W,0      ; jump to the XT
 .endm
 
 
 .macro EXIT
-    rpop
+    rpop        ;
     MOV IP,W
     NEXT
 .endm
@@ -117,18 +127,13 @@ init:
     MOVL W, 25
     push
     ENTER start ; start the inner intepreter
-    .@ COLD
-    .@ +
-    .@ +
-    .@ DUP
-    EXIT
-spin:
-    NOP
-    J spin
+    .@ xt_+ ; to run words in assembly , use .@ 
+    .@ xt_+
+    HALT
+    J init
 
 .macro EXECUTE
 .endm
-
 
 HEADER COLD
     MOVL PSP,8 
@@ -171,10 +176,7 @@ HEADER SWAP
     push
 NEXT
 
-HEADER >R
+HEADER DROP
+    pop
 NEXT
-
-HEADER R>
-NEXT
-
 

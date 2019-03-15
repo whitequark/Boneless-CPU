@@ -42,7 +42,7 @@ if len(sys.argv) > 1:
     file_name = sys.argv[1]
 else:
     file_name = "asm/forth.asm"
-asmblr = Assembler(debug=True, file_name=file_name)
+asmblr = Assembler(debug=False, file_name=file_name)
 asmblr.assemble()
 asmblr.display()
 cpu.load_program(asmblr.code)
@@ -74,3 +74,4 @@ while 1:
         if exit:
             exit = False
             break
+    get_line()

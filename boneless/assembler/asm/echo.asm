@@ -1,4 +1,4 @@
-init:
+reset:
     MOVL R2, 0
 loop:
     LDX R0, R2,0
