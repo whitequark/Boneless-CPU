@@ -18,7 +18,7 @@
 
 reset:
     MOVL PSP,8 
-    MOVL RSP,17
+    MOVL RSP,16
     J init
 
 abort:
@@ -89,21 +89,26 @@ abort:
 
 .macro NEXT
     ADDI IP,1
-    JR IP,0
+    LD W,IP,0
+    JR W,0
 .endm
 
-.macro ENTER
-    MOV W,IP
-    rpush
+.macro ENTER, h 
+    MOVA W, $h ; store this spot in the working register 
+    .label $h ; that's right here
+    ADDI W ,5 ; offset past these instructions
+    MOV IP, W ; copy into the interpter pointer
+    rpush ; put it in the return stack
+    LD W,W,0
+    JR W,0
 .endm
 
 .macro EXECUTE
     NOP
 .endm
 
-.macro @, name
-    MOVA IP, $name
-    JR IP, 0 
+.macro EXIT
+    NOP
 .endm
 
 HEADER DUP
@@ -119,13 +124,17 @@ NEXT
 
 ; MAIN LOOP
 init:
-    MOVI R0, 25 
+    MOVI R0, 100
     push
-    MOVI R0, 11 
+    MOVI R0, 150
     push
-    MOVI R0, 17 
+    MOVI R0, 175
     push
-    ENTER
-    @ +
-    @ +
-
+    ENTER here
+    .@ +
+    .@ +
+    .@ DUP
+    .@ +
+    EXIT
+spin:
+    J spin

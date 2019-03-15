@@ -86,13 +86,15 @@ def pequ(l):
 
 
 " absolute refs via variables "
-
-
 @register(".pos", 1)  # name , value
 def get_pos(l):
     v = assembler.variables[l.params[0]]
     assembler.current_section.add_code([resolver(v)])
 
+" put the absolute address"
+@register(".@",1)
+def put_at(l):
+    assembler.current_section.add_code([resolver(l.params[0])])
 
 @register(".set", 2)
 def set_pos(l):
