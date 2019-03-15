@@ -37,7 +37,7 @@ def io(addr, data=None):
 #        elif addr == 4:
 #            print("spin")
 
-cpu = BonelessSimulator(start_pc=0, memsize=1024)
+cpu = BonelessSimulator(start_pc=24, memsize=1024)
 if len(sys.argv) > 1:
     file_name = sys.argv[1]
 else:

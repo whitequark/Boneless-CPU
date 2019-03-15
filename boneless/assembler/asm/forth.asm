@@ -17,6 +17,8 @@
 .def RTN, R3 ; cpu jump store
 
 reset:
+    MOVL PSP,8 
+    MOVL RSP,16
     J init
 
 abort:
@@ -51,8 +53,8 @@ abort:
 
 .label PUSH
     ST TOS, PSP, 0
-    MOV TOS, W
     ADDI PSP, 1
+    MOV TOS, W
     RET
 
 .label POP
@@ -87,8 +89,7 @@ abort:
 
 .macro NEXT
     ADDI IP,1
-    LD W,IP,0
-    JR W,0
+    JR IP,0
 .endm
 
 .macro ENTER, h 
@@ -109,8 +110,17 @@ abort:
 
 ; MAIN LOOP
 init:
+    MOVL W, 100
+    push
+    MOVL W, 50
+    push
+    MOVL W, 25
+    push
     ENTER start ; start the inner intepreter
     .@ COLD
+    .@ +
+    .@ +
+    .@ DUP
     EXIT
 spin:
     NOP
