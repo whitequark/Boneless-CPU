@@ -17,8 +17,6 @@
 .def RTN, R3 ; cpu jump store
 
 reset:
-    MOVL PSP,8 
-    MOVL RSP,16
     J init
 
 abort:
@@ -98,22 +96,54 @@ abort:
     .label $h ; that's right here
     ADDI W ,5 ; offset past these instructions
     MOV IP, W ; copy into the interpter pointer
-    rpush ; put it in the return stack
-    LD W,W,0
-    JR W,0
+    LD W,W,0 ; load the value of the working pointer 
+    JR W,0 ; jump to the XT
 .endm
 
-.macro EXECUTE
-    NOP
-.endm
 
 .macro EXIT
-    NOP
+    rpop
+    MOV IP,W
+    NEXT
 .endm
+
+; MAIN LOOP
+init:
+    ENTER start ; start the inner intepreter
+    .@ COLD
+    EXIT
+spin:
+    NOP
+    J spin
+
+.macro EXECUTE
+.endm
+
+
+HEADER COLD
+    MOVL PSP,8 
+    MOVL RSP,16
+NEXT
+
+HEADER DOCOL ; run the do colon code
+NEXT
 
 HEADER DUP
     MOV W,TOS
     push 
+NEXT
+
+HEADER QUIT
+    LDX W,SP,0
+NEXT
+
+HEADER &
+NEXT
+
+HEADER @
+NEXT
+
+HEADER !
 NEXT
 
 HEADER +
@@ -122,19 +152,19 @@ HEADER +
     MOV TOS,W 
 NEXT 
 
-; MAIN LOOP
-init:
-    MOVI R0, 100
+HEADER BRANCH
+NEXT
+
+HEADER SWAP
+    pop
+    XCHG W,TOS
     push
-    MOVI R0, 150
-    push
-    MOVI R0, 175
-    push
-    ENTER here
-    .@ +
-    .@ +
-    .@ DUP
-    .@ +
-    EXIT
-spin:
-    J spin
+NEXT
+
+HEADER >R
+NEXT
+
+HEADER R>
+NEXT
+
+
