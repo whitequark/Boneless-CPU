@@ -5,8 +5,10 @@ from boneless.arch.instr import *
 from boneless.assembler.asm import Assembler
 from boneless.arch.disasm import disassemble
 
+end = False
 exit = False
 strin = ""
+debug = False
 
 
 def io(addr, data=None):
@@ -37,7 +39,7 @@ def io(addr, data=None):
 #        elif addr == 4:
 #            print("spin")
 
-cpu = BonelessSimulator(start_pc=24, memsize=1024)
+cpu = BonelessSimulator(start_pc=0, memsize=1024)
 if len(sys.argv) > 1:
     file_name = sys.argv[1]
 else:
@@ -50,8 +52,13 @@ cpu.register_io(io)
 
 
 def get_line():
-    global strin
+    global strin,debug
     strin = input(">")
+    if strin.startswith("\\"):
+        if strin[1:] == 'd':
+            debug= not debug
+        strin = ""
+        
 
 
 def line(asmblr):
@@ -67,10 +74,11 @@ def line(asmblr):
     print(pc, "|", code, "|", reg, "|", stack,"|",rstack, "->", label)
 
 
-while 1:
+while not end:
     while 1:
         cpu.stepi()
-        line(asmblr)
+        if debug:
+            line(asmblr)
         if exit:
             exit = False
             break

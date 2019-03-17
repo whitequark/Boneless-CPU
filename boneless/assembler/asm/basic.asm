@@ -1,0 +1,46 @@
+
+HEADER COLD
+    MOVL PSP,8 
+    MOVL RSP,16
+NEXT
+
+HEADER DOCOL ; run the do colon code
+NEXT
+
+HEADER DUP
+    MOV W,TOS
+    push 
+NEXT
+
+HEADER QUIT
+    LDX W,SP,0
+NEXT
+
+HEADER &
+NEXT
+
+HEADER @
+NEXT
+
+HEADER !
+NEXT
+
+HEADER +
+    pop
+    ADD W,TOS,W
+    MOV TOS,W 
+NEXT 
+
+HEADER BRANCH
+NEXT
+
+HEADER SWAP
+    pop
+    XCHG W,TOS
+    push
+NEXT
+
+HEADER DROP
+    pop
+NEXT
+

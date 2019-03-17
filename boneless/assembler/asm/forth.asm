@@ -41,19 +41,29 @@ abort:
 
 ; stack structures
 .macro pop
-    _call POP
+;_call POP
+    MOV W, TOS
+    ADDI PSP, 1
+    LD TOS,PSP, 0
 .endm
 
 .macro push
-    _call PUSH
+;_call PUSH
+    ST TOS, PSP, 0
+    SUBI PSP, 1
+    MOV TOS, W
 .endm
 
 .macro rpop
-    _call RPOP
+;    _call RPOP
+    LD W, RSP, 0
+    SUBI RSP, 1
 .endm
 
 .macro rpush
-    _call RPUSH
+;    _call RPUSH
+    ST W, RSP, 0
+    ADDI RSP, 1
 .endm
 
 ; unprotected stack functions
@@ -99,7 +109,9 @@ abort:
 
 .macro NEXT
     ADDI IP,1   ; jump to the next xt in the list
-    JR IP,0     ; jump to the address
+    MOV W,IP    ; copy the IP into the working register
+    LD W,W,0    ; load the data at the address in W
+    JR IP,0     ; jump to the data reference 
 .endm
 
 .macro ENTER, h 
@@ -112,71 +124,19 @@ abort:
 .endm
 
 
-.macro EXIT
+HEADER EXIT
     rpop        ;
-    MOV IP,W
     NEXT
-.endm
 
 ; MAIN LOOP
 init:
-    MOVL W, 100
-    push
-    MOVL W, 50
-    push
-    MOVL W, 25
-    push
     ENTER start ; start the inner intepreter
-    .@ xt_+ ; to run words in assembly , use .@ 
     .@ xt_+
     HALT
     J init
 
-.macro EXECUTE
+.macro EXECUTE name
+    MOVA W, $name
+    rpush
 .endm
-
-HEADER COLD
-    MOVL PSP,8 
-    MOVL RSP,16
-NEXT
-
-HEADER DOCOL ; run the do colon code
-NEXT
-
-HEADER DUP
-    MOV W,TOS
-    push 
-NEXT
-
-HEADER QUIT
-    LDX W,SP,0
-NEXT
-
-HEADER &
-NEXT
-
-HEADER @
-NEXT
-
-HEADER !
-NEXT
-
-HEADER +
-    pop
-    ADD W,TOS,W
-    MOV TOS,W 
-NEXT 
-
-HEADER BRANCH
-NEXT
-
-HEADER SWAP
-    pop
-    XCHG W,TOS
-    push
-NEXT
-
-HEADER DROP
-    pop
-NEXT
-
+.include asm/basic.asm
