@@ -24,7 +24,7 @@
 
 reset:
     MOVL PSP,15 
-    MOVL RSP,16
+    MOVL RSP,23
     J init
 
 abort:
@@ -56,40 +56,15 @@ abort:
 
 .macro rpop
 ;    _call RPOP
-    LD W, RSP, 0
-    SUBI RSP, 1
+    LD W, RSP, 0 
+    ADDI RSP, 1
 .endm
 
 .macro rpush
 ;    _call RPUSH
-    ST W, RSP, 0
-    ADDI RSP, 1
-.endm
-
-; unprotected stack functions
-
-.label PUSH
-    ST TOS, PSP, 0
-    SUBI PSP, 1
-    MOV TOS, W
-    RET
-
-.label POP
-    MOV W, TOS
-    ADDI PSP, 1
-    LD TOS,PSP, 0
-    MOVI PSP, 0 
-    RET
-
-.label RPUSH
-    ST W, RSP, 0
-    ADDI RSP, 1
-    RET
-
-.label RPOP
-    LD W, RSP, 0
+    ST W, RSP, 0 
     SUBI RSP, 1
-    RET
+.endm
 
 ; start of low level forth words
 
@@ -111,32 +86,56 @@ abort:
     ADDI IP,1   ; jump to the next xt in the list
     MOV W,IP    ; copy the IP into the working register
     LD W,W,0    ; load the data at the address in W
-    JR IP,0     ; jump to the data reference 
+    JR W,0     ; jump to the data reference 
 .endm
 
 .macro ENTER, h 
-    MOVA W, $h  ; store this spot in the working register 
-    .label $h   ; that's right here
-    ADDI W ,4   ; offset past these instructions
+    MOVA W, $h ; store this spot in the working register 
+    rpush 
     MOV IP, W   ; copy into the interpter pointer
     LD W,W,0    ; load the value of the working pointer 
     JR W,0      ; jump to the XT
+    .label $h   ; that's right here
 .endm
 
 
 HEADER EXIT
     rpop        ;
-    NEXT
+    MOV IP,W
 
 ; MAIN LOOP
 init:
     ENTER start ; start the inner intepreter
-    .@ xt_+
-    HALT
+    .@ xt_ok
+    .@ xt_?key
+    .@ xt_EXIT
     J init
 
 .macro EXECUTE name
     MOVA W, $name
     rpush
 .endm
-.include asm/basic.asm
+
+HEADER ok ; output ok
+    MOVL W,111
+    STX W,SP,0
+    MOVL W,107
+    STX W,SP,0
+NEXT
+
+HEADER halt  ; send halt up to the simulator
+    STX SP,SP,1
+NEXT
+
+HEADER ?key
+    NOP
+again:
+    LDX W,SP,0
+    CMP W,SP
+    JZ out
+    STX W,SP,0
+    J again
+out:
+    HALT
+NEXT
+;.include asm/basic.asm

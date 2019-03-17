@@ -202,7 +202,7 @@ class BonelessSimulator:
         if not self.sim_active:
             self.mem[self.reg_loc(reg)] = val
 
-    def load_program(self, contents, start=0x10):
+    def load_program(self, contents, start=0x0):
         """Inject program code into the memory space of the simulated CPU.
 
         This function does not distinguish between loading program code and

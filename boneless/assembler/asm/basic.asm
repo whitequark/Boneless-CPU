@@ -5,6 +5,16 @@ HEADER COLD
 NEXT
 
 HEADER DOCOL ; run the do colon code
+    NOP
+NEXT
+
+
+HEADER ?key
+    STX SP,SP,1
+NEXT
+
+HEADER pad
+.alloc pad_alloc,10
 NEXT
 
 HEADER DUP

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import sys
-from boneless_sim import *
+from boneless.simulator import *
 from boneless.arch.instr import *
 from boneless.assembler.asm import Assembler
 from boneless.arch.disasm import disassemble
@@ -8,7 +8,7 @@ from boneless.arch.disasm import disassemble
 end = False
 exit = False
 strin = ""
-debug = False
+debug = True 
 
 
 def io(addr, data=None):
@@ -39,7 +39,7 @@ def io(addr, data=None):
 #        elif addr == 4:
 #            print("spin")
 
-cpu = BonelessSimulator(start_pc=0, memsize=1024)
+cpu = BonelessSimulator(start_pc=0,mem_size=1024)
 if len(sys.argv) > 1:
     file_name = sys.argv[1]
 else:
