@@ -91,25 +91,37 @@ abort:
 
 .macro ENTER, h 
     MOVA W, $h ; store this spot in the working register 
-    rpush 
+;    rpush 
     MOV IP, W   ; copy into the interpter pointer
     LD W,W,0    ; load the value of the working pointer 
     JR W,0      ; jump to the XT
     .label $h   ; that's right here
 .endm
 
-
-HEADER EXIT
-    rpop        ;
+.macro DOCOL
+    push
+    MOV W,IP
+    rpush
+    pop
+    ADDI W, 13 
     MOV IP,W
+    LD W,W,0
+    JR W,0
+.endm
+
+; no next on this one
+HEADER EXIT
+    rpop
+    MOV IP,W   
+NEXT
 
 ; MAIN LOOP
 init:
     ENTER start ; start the inner intepreter
     .@ xt_ok
-    .@ xt_?key
+    .@ xt_test
     .@ xt_EXIT
-    J init
+J init
 
 .macro EXECUTE name
     MOVA W, $name
@@ -138,4 +150,4 @@ again:
 out:
     HALT
 NEXT
-;.include asm/basic.asm
+.include asm/basic.asm

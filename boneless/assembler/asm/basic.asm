@@ -4,20 +4,31 @@ HEADER COLD
     MOVL RSP,16
 NEXT
 
-HEADER DOCOL ; run the do colon code
-    NOP
+HEADER set_10
+    MOVL W, 10
+    push
 NEXT
 
+HEADER test
+    DOCOL 
+    .@ xt_set_10
+    .@ xt_dup 
+    .@ xt_+
+    .@ xt_DROP
+    .@ xt_sub
+    .@ xt_EXIT
+NEXT
 
-HEADER ?key
-    STX SP,SP,1
+HEADER sub
+    DOCOL
+    .@ xt_EXIT
 NEXT
 
 HEADER pad
 .alloc pad_alloc,10
 NEXT
 
-HEADER DUP
+HEADER dup 
     MOV W,TOS
     push 
 NEXT
