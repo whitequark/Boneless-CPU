@@ -71,11 +71,12 @@ abort:
 .equ latest, r_R0 
 
 .macro HEADER, name
-    .label $name        ; push a header label
+    .plabel $name, d ; push a header label
     .pos latest         ; add current pos to code
-    .set latest, $name  ; copy this ref for next header
+    .pset latest, $name, d  ; copy this ref for next header
     .ulstring $name     ; unlabeled string length then characters
     .plabel $name , xt  ; the execution token , direct pointer
+    .mlabel $name ; make a direct execution macro , used later
 .endm
 
 ; the inner interpreter
@@ -119,7 +120,8 @@ NEXT
 init:
     ENTER start ; start the inner intepreter
     .@ xt_ok
-    .@ xt_test
+;    .@ xt_test
+    .@ xt_gorf
     .@ xt_EXIT
 J init
 

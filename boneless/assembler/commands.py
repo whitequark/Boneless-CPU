@@ -49,6 +49,18 @@ def plabel(l):
     return [val]
 
 
+@register(".mlabel",1)
+def mlabel(l):
+    "create a macro for direct access from a variable, forth helper"
+    v = l.params[0]
+    val = [
+            TokenLine(l.source, l.line,".macro "+v),
+            TokenLine(l.source, l.line,".@ xt_"+v),
+            TokenLine(l.source, l.line,".endm"),
+    ]
+    return val
+
+
 @register(".label", 1)
 def label(l):
     " create a label , useful inside macros"

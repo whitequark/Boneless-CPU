@@ -9,6 +9,12 @@ HEADER set_10
     push
 NEXT
 
+HEADER +
+    pop
+    ADD W,TOS,W
+    MOV TOS,W 
+NEXT 
+
 HEADER test
     DOCOL 
     .@ xt_set_10
@@ -18,6 +24,20 @@ HEADER test
     .@ xt_sub
     .@ xt_EXIT
 NEXT
+
+HEADER DROP
+    pop
+NEXT
+
+HEADER gorf
+    DOCOL
+    set_10
+    set_10
+    set_10
+    +
+    +
+    DROP
+NEXT 
 
 HEADER sub
     DOCOL
@@ -46,11 +66,6 @@ NEXT
 HEADER !
 NEXT
 
-HEADER +
-    pop
-    ADD W,TOS,W
-    MOV TOS,W 
-NEXT 
 
 HEADER BRANCH
 NEXT
@@ -61,7 +76,4 @@ HEADER SWAP
     push
 NEXT
 
-HEADER DROP
-    pop
-NEXT
 

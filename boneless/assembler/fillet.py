@@ -8,7 +8,7 @@ from boneless.arch.disasm import disassemble
 end = False
 exit = False
 strin = ""
-debug = True 
+debug = True
 
 
 def io(addr, data=None):
@@ -58,7 +58,7 @@ def get_line():
         if strin[1:] == 'd':
             debug= not debug
         strin = ""
-        
+
 
 
 def line(asmblr):
@@ -67,11 +67,15 @@ def line(asmblr):
     reg = cpu.regs()[0:8].tolist()
     stack = cpu.mem[9:15].tolist()
     rstack = cpu.mem[16:24].tolist()
+    if cpu.mem[cpu.pc] in asmblr.rev_labels:
+        ref = asmblr.rev_labels[cpu.mem[cpu.pc]]
+    else:
+        ref = ""
     if cpu.pc in asmblr.rev_labels:
         label = asmblr.rev_labels[cpu.pc]
     else:
         label = ""
-    print(pc, "|", code, "|", reg, "|", stack,"|",rstack, "->", label)
+    print(pc, "|", code, "|", reg, "|", stack,"|",rstack, "->", label,"|",ref)
 
 
 while not end:
