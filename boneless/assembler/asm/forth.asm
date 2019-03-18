@@ -92,7 +92,6 @@ abort:
 
 .macro ENTER, h 
     MOVA W, $h ; store this spot in the working register 
-;    rpush 
     MOV IP, W   ; copy into the interpter pointer
     LD W,W,0    ; load the value of the working pointer 
     JR W,0      ; jump to the XT
@@ -104,7 +103,7 @@ abort:
     MOV W,IP
     rpush
     pop
-    ADDI W, 13 
+    ADDI W, 13
     MOV IP,W
     LD W,W,0
     JR W,0
@@ -113,8 +112,7 @@ abort:
 ; no next on this one
 HEADER EXIT
     rpop
-    MOV IP,W   
-NEXT
+    MOV IP,W
 
 ; MAIN LOOP
 init:

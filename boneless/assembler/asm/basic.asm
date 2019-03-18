@@ -9,24 +9,26 @@ HEADER set_10
     push
 NEXT
 
+HEADER set_20
+    MOVL W, 20
+    push
+NEXT
+
 HEADER +
     pop
     ADD W,TOS,W
     MOV TOS,W 
 NEXT 
 
-HEADER test
-    DOCOL 
-    .@ xt_set_10
-    .@ xt_dup 
-    .@ xt_+
-    .@ xt_DROP
-    .@ xt_sub
-    .@ xt_EXIT
-NEXT
-
 HEADER DROP
     pop
+NEXT
+
+HEADER sub
+    DOCOL
+    set_20
+    DROP
+    EXIT
 NEXT
 
 HEADER gorf
@@ -37,12 +39,10 @@ HEADER gorf
     +
     +
     DROP
+    sub
+    EXIT
 NEXT 
 
-HEADER sub
-    DOCOL
-    .@ xt_EXIT
-NEXT
 
 HEADER pad
 .alloc pad_alloc,10
