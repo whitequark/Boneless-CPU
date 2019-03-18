@@ -1,7 +1,12 @@
+- stack return on inner forth intepreter is broken
+- put fillet.py into the simulator
+- integrate the assembler and the simulator for token access
+- single stepping on the simulator
+- later .... PTY for simulator , to prepare for gateware version
 [done]- macros are not returning TokenLines directly
 [done]- need to go full circular, use whitequarks dissasembly output as canonical input
 [done]- rewrite token line parser to do command , params that are comma seperated
 [done]- need to handle comments
 [done]- need to add param counts to commands
 [done]- covert returns from macros and commands to all be TokenLines
-- need get and set variable , and cross check the absolute resolver
+[done]- need get and set variable , and cross check the absolute resolver
