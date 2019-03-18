@@ -1,3 +1,6 @@
+- look at code ptr implementations
+ - split out asm code blocks
+ - look at data pointers so do>does can work
 - stack return on inner forth intepreter is broken
 - put fillet.py into the simulator
 - integrate the assembler and the simulator for token access
