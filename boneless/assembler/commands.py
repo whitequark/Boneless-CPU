@@ -30,8 +30,7 @@ def section(l):
 
 @register(".int", 1)
 def pos(l):
-    v = assembler.variables[l.params[0]]
-    assembler.current_section.add_code([int(v)])
+    assembler.current_section.add_code([int(l.params[0])])
 
 
 @register(".ulstring", 1)
