@@ -72,7 +72,7 @@ J init
 
 init:
     MOVL R0,0
-    MOVL STP,8
+    MOVL STP,9
 loop:
     in
     command 82 , read ; R 
