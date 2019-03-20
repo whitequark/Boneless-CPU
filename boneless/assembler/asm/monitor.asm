@@ -2,8 +2,9 @@
 ; for teathering the CPU
 ;
 ; Needs to provide the following commands
+;
 ; READ : read a specific word from memory -> R , ADDR , VAL
-; WRITE : write a specific word to memory memory -> W , ADDR , VAL
+; WRITE : write a specific word to memory -> W , ADDR , VAL
 ; CALL : jump the execution to a memory position -> J ADDR
 ;
 ; extras
@@ -121,22 +122,25 @@ halt:               ; stop the simulator and get a line
 ; READ A VALUE FROM MEMORY
 ; needs an ADDRESS
 read:
-    in
-    CMP W,R6
-    JE read_out
-    push
-    J read
+    in ; Get the address off the input, goes into W
+    LD W,W,0 ; load it
+    out ; Send it out
 read_out:
     return
 
 ; WRITE A VALUE TO MEMORY
 ; needs an address and a value
 write:
+    in ; Get the address off the input, goes into W
+    MOV W,ADDR  ; move the value into the address register
+    ST W,ADDR,0 ; copy the data into place
     return
 
 ; CALL AN ADDRESS
 ; needs an address
 call:
+    in ; get the address off the input
+    JR W,0
     return
 
 ; DUMP the entire memory space
