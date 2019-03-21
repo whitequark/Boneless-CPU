@@ -7,7 +7,7 @@ from nmigen.cli import main
 
 
 class Boneless:
-    def __init__(self, has_pins=False, asmfile="test.asm"):
+    def __init__(self, has_pins=False, asmfile="asm/monitor.asm"):
         self.memory = Memory(width=16, depth=4096)
         self.ext_port = _ExternalPort()
         self.pins = Signal(16, name="pins") if has_pins else None
