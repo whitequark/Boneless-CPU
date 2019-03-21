@@ -60,13 +60,13 @@ J init
 .endm
 
 jump_table:
+    jump_target 0 ,  halt ;
     jump_target 82 , read ; R 
     jump_target 87 , write ; W
     jump_target 67 , call ; C
     jump_target 68, dump ; D
     jump_target 73, bulk_write; I
     jump_target 79, bulk_read; O
-    jump_target 0 ,  halt ;
 jump_table_end:
     NOP
 ; macro to send an external halt to the simulator
@@ -133,6 +133,7 @@ read_out:
 write:
     in ; Get the address off the input, goes into W
     MOV W,ADDR  ; move the value into the address register
+    in
     ST W,ADDR,0 ; copy the data into place
     return
 
