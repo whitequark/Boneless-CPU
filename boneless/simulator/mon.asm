@@ -1,2 +1,0 @@
-
-.string leader,"Simulator Test"
