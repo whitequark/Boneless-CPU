@@ -37,31 +37,8 @@ class Boneless:
         return m.lower(platform)
 
 
-def simulate(cpu):
-    ecpu = cpu.elaborate(None)
-
-    print(dir(cpu.pins))
-
-    def testbench(sim):
-        def read():
-            return (yield cpu.pins)
-
-        sim._traces.decoder = lambda n: "{}".format(n)
-        for i in range(5):
-            d = ecpu.ports.items()
-            print(i, d)
-            yield
-
-    print(dir(ecpu))
-    with pysim.Simulator(ecpu, vcd_file=None, traces=ecpu.pins) as sim:
-        sim.add_clock(1, domain="sync")
-        sim.add_sync_process(testbench(sim), domain="sync")
-        sim.run()
-
-
 if __name__ == "__main__":
     tm = Boneless(has_pins=True)
     # for i in dir(tm.ext_port): print(i)
     print(dir(tm.pins))
-    # simulate(tm)
     main(tm)

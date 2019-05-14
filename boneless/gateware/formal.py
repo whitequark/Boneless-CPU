@@ -52,4 +52,4 @@ class BonelessFormalInterface:
                 self.ext_w_data.eq(self.ext_port.w_data),
                 self.ext_w_en  .eq(self.ext_port.w_en),
             ]
-        return m.lower(platform)
+        return m

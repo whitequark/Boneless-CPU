@@ -16,7 +16,7 @@ def AddSignedImm(v, i):
         return v + Cat(i, Repl(i[i_nbits - 1], v.nbits - i_nbits))
 
 
-class _MemoryPort:
+class _MemoryPort(Elaboratable):
     def __init__(self, name):
         self.addr = Signal(16, name=name + "_addr")
         self.en   = Signal(1,  name=name + "_en")
@@ -26,7 +26,7 @@ class _MemoryPort:
         return Fragment()
 
 
-class _ExternalPort:
+class _ExternalPort(Elaboratable):
     def __init__(self):
         self.addr   = Signal(16, name="ext_addr")
         self.r_en   = Signal(1,  name="ext_r_en")
@@ -38,7 +38,7 @@ class _ExternalPort:
         return Fragment()
 
 
-class _ALU:
+class _ALU(Elaboratable):
     SEL_AND = 0b1000
     SEL_OR  = 0b1001
     SEL_XOR = 0b1010
@@ -75,10 +75,10 @@ class _ALU:
             s_m1n0.eq(Mux(self.c_sel[3], s_m2n0, s_m2n0 + s_m2n1 + self.c_sel[2])),
             self.s_o.eq(s_m1n0),
         ]
-        return m.lower(platform)
+        return m
 
 
-class _SRU:
+class _SRU(Elaboratable):
     DIR_L = 0b0
     DIR_R = 0b1
 
@@ -108,10 +108,10 @@ class _SRU:
             s_m1n0.eq(Mux(self.c_ld, self.s_i, s_m2n0)),
         ]
         m.d.sync += self.r_o.eq(s_m1n0)
-        return m.lower(platform)
+        return m
 
 
-class BonelessCoreFSM:
+class BonelessCoreFSM(Elaboratable):
     def __init__(self, reset_addr, mem_rdport, mem_wrport, ext_port=None):
         self.reset_addr = reset_addr
 
@@ -444,7 +444,7 @@ class BonelessCoreFSM:
                 m.d.sync += r_pc.eq(AddSignedImm(mem_r.data, i_imm8))
                 m.next = "FETCH"
 
-        return m.lower(platform)
+        return m
 
 # -------------------------------------------------------------------------------------------------
 
@@ -452,7 +452,7 @@ import argparse
 from nmigen import cli
 
 
-class BonelessFSMTestbench:
+class BonelessFSMTestbench(Elaboratable):
     def __init__(self, has_pins=False):
         self.memory   = Memory(width=16, depth=256)
         self.ext_port = _ExternalPort()
@@ -510,10 +510,10 @@ class BonelessFSMTestbench:
             mem_rdport=mem_rdport,
             mem_wrport=mem_wrport,
             ext_port  =self.ext_port)
-        return m.lower(platform)
+        return m
 
 
-class BonelessFSMFormal:
+class BonelessFSMFormal(Elaboratable):
     def __init__(self):
         self.mem_rdport = _MemoryPort("mem_r")
         self.mem_wrport = _MemoryPort("mem_w")
@@ -553,7 +553,7 @@ if __name__ == "__main__":
 
     if args.type == "pins":
         tb  = BonelessFSMTestbench(has_pins=True)
-        ios = (tb.pins,)
+        ios = (tb.pins)
 
     if args.type == "formal":
         tb  = BonelessFSMFormal()
