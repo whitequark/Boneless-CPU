@@ -553,7 +553,7 @@ if __name__ == "__main__":
 
     if args.type == "pins":
         tb  = BonelessFSMTestbench(has_pins=True)
-        ios = (tb.pins)
+        ios = (tb.pins,)
 
     if args.type == "formal":
         tb  = BonelessFSMFormal()
