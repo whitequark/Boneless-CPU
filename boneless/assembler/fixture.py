@@ -18,16 +18,14 @@ class TokenLine:
     def __init__(self, source, line, val):
         self.source = source
         self.line = line
-        self.val = val
+        self.val = val.strip()
         self.comment = False
-        if val.startswith(";"):
+        if self.val.startswith(";"):
             self.comment = True
             return
         comment_pos = val.find(";")
         if comment_pos != -1:
             val = val[:comment_pos]
-            print(val)
-        # self.items = val.split()
         part = val.strip().partition(" ")
         self.command = part[0]
         self.params = []  # comma seperated values
@@ -43,6 +41,10 @@ class TokenLine:
         return c
 
     def __repr__(self):
+        if self.comment:
+            comment = ''
+        else:
+            comment = self.comment
         return (
             "<"
             + self.source
@@ -52,6 +54,8 @@ class TokenLine:
             + str(self.command)
             + "|"
             + str(self.params)
+            + "|"
+            + str(comment)
             + ">"
         )
 
