@@ -1,10 +1,10 @@
-\begin{instruction}{MOVA}{Move Address PC-relative}
+\begin{instruction}{MOVR}{Move PC-relative Address}
   \begin{encoding*}{short}
-    \mnemonic & \op{3}{100} & \op{2}{00} & \reg{d} & \off{8} \\
+    \mnemonic & \op{5}{10000} & \reg{d} & \off{8} \\
   \end{encoding*}
   \begin{encoding*}{long}
     \exti
-    \mnemonic & \op{3}{100} & \op{2}{00} & \reg{d} & \off{8} \\
+    \mnemonic & \op{5}{10000} & \reg{d} & \off{8} \\
   \end{encoding*}
   \assembly{\mnemonic{} Rd, off}
   \purpose{To load a register with an address relative to PC with a constant offset..}
