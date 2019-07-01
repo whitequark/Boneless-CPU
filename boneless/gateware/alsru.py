@@ -8,8 +8,7 @@ class ALSRU:
     """Arithmetical, logical, shift, and rotate unit."""
 
     # defined by subclasses
-    CTRL_BITS = None
-
+    BITS_OP   = None
     CTRL_A    = None
     CTRL_B    = None
     CTRL_nB   = None
@@ -58,7 +57,7 @@ class ALSRU:
             return "R<<1"
         if word == cls.CTRL_SR._as_const():
             return "R>>1"
-        return "? {:0{}b}".format(word, cls.CTRL_BITS)
+        return "? {:0{}b}".format(word, cls.BITS_OP)
 
 
 class ALSRU_4LUT(ALSRU, Elaboratable):
@@ -100,10 +99,10 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
     MUX_S_R   = 0b1
 
     MUX_X_x   =  0
-    MUX_X_AaB =  0b00
-    MUX_X_AoB =  0b01
-    MUX_X_AxB =  0b10
-    MUX_X_A   =  0b11
+    MUX_X_A   =  0b00
+    MUX_X_AaB =  0b01
+    MUX_X_AoB =  0b10
+    MUX_X_AxB =  0b11
 
     MUX_Y_0   =    0b00
     MUX_Y_S   =    0b01
@@ -113,8 +112,7 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
     MUX_O_XpY =      0b0
     MUX_O_Y   =      0b1
 
-    CTRL_BITS = 6
-
+    BITS_OP   = 6
     CTRL_A    = Cat(C(MUX_S_x, 1), C(MUX_X_A,   2), C(MUX_Y_0,  2), C(MUX_O_XpY, 1))
     CTRL_B    = Cat(C(MUX_S_x, 1), C(MUX_X_x,   2), C(MUX_Y_B,  2), C(MUX_O_Y,   1))
     CTRL_nB   = Cat(C(MUX_S_x, 1), C(MUX_X_x,   2), C(MUX_Y_nB, 2), C(MUX_O_Y,   1))
