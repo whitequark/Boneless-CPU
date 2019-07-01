@@ -61,7 +61,7 @@ class ALSRU:
         return "? {:0{}b}".format(word, cls.CTRL_BITS)
 
 
-class ALSRU_4LUT(ALSRU):
+class ALSRU_4LUT(ALSRU, Elaboratable):
     """ALSRU optimized for 4-LUT architecture with no adder pre-inversion.
 
     On iCE40 with Yosys, ABC, and -relut this synthesizes to the optimal 4n+3 LUTs.
@@ -189,7 +189,7 @@ class ALSRU_4LUT(ALSRU):
 
         m.d.sync += self.r.eq(self.o)
 
-        return m.lower(platform)
+        return m
 
 # -------------------------------------------------------------------------------------------------
 
