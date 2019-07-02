@@ -33,10 +33,10 @@ class ALSRU:
         self.si = Signal() # shift in
         self.so = Signal() # shift out
 
-        self.ctrl = None  # defined by subclasses
+        self.op = None  # defined by subclasses
 
     @classmethod
-    def ctrl_decoder(cls, word):
+    def op_decoder(cls, word):
         if word == cls.CTRL_A._as_const():
             return "A"
         if word == cls.CTRL_B._as_const():
@@ -127,11 +127,11 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
     def __init__(self, width):
         super().__init__(width)
 
-        self.s = Signal(width)
-        self.x = Signal(width)
-        self.y = Signal(width)
+        self.s  = Signal(width)
+        self.x  = Signal(width)
+        self.y  = Signal(width)
 
-        self.ctrl = Record([
+        self.op = Record([
             ("s", 1),
             ("x", 2),
             ("y", 2),
@@ -141,7 +141,7 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
     def elaborate(self, platform):
         m = Module()
 
-        with m.Switch(self.ctrl.s):
+        with m.Switch(self.op.s):
             with m.Case(self.MUX_S_L):
                 m.d.comb += self.s.eq(Cat(self.si, self.r[:-1]))
                 m.d.comb += self.so.eq(self.r[-1])
@@ -149,7 +149,7 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
                 m.d.comb += self.s.eq(Cat(self.r[ 1:], self.si))
                 m.d.comb += self.so.eq(self.r[ 0])
 
-        with m.Switch(self.ctrl.x):
+        with m.Switch(self.op.x):
             with m.Case(self.MUX_X_AaB):
                 m.d.comb += self.x.eq(self.a & self.b)
             with m.Case(self.MUX_X_AoB):
@@ -159,7 +159,7 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
             with m.Case(self.MUX_X_A):
                 m.d.comb += self.x.eq(self.a)
 
-        with m.Switch(self.ctrl.y):
+        with m.Switch(self.op.y):
             with m.Case(self.MUX_Y_0):
                 m.d.comb += self.y.eq(0)
             with m.Case(self.MUX_Y_S):
@@ -172,7 +172,7 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
         p = Signal.like(self.o)
         m.d.comb += Cat(p, self.co).eq(self.x + self.y + self.ci)
 
-        with m.Switch(self.ctrl.o):
+        with m.Switch(self.op.o):
             with m.Case(self.MUX_O_XpY):
                 m.d.comb += self.o.eq(p)
             with m.Case(self.MUX_O_Y):

@@ -71,7 +71,7 @@ class ImmediateDecoder(Elaboratable):
                 m.d.comb += s_imm16.eq(Cat(d_imm3, self.r_ext13))
 
         with m.If(self.c_addpc):
-            m.d.comb += self.o_imm16.eq(s_imm16 + self.i_pc + 1)
+            m.d.comb += self.o_imm16.eq(s_imm16 + self.i_pc)
         with m.Else():
             m.d.comb += self.o_imm16.eq(s_imm16)
 
@@ -79,6 +79,8 @@ class ImmediateDecoder(Elaboratable):
 
 
 class InstructionDecoder(Elaboratable):
+    CTRL_LD_PTR     = 0b1_00
+
     BITS_LD_A       = 3
     CTRL_LD_A_0     = 0b0_00
     CTRL_LD_A_W     = 0b0_01
@@ -99,7 +101,7 @@ class InstructionDecoder(Elaboratable):
     BITS_ST_F       = 2
     CTRL_ST_F_x     = 0b00
     CTRL_ST_F_ZS    = 0b01
-    CTRL_ST_F_CVZS  = 0b11
+    CTRL_ST_F_ZSCV  = 0b11
 
     BITS_CI         = 2
     CTRL_CI_ZERO    = 0b00
@@ -147,7 +149,7 @@ class InstructionDecoder(Elaboratable):
         self.o_st_f  = Signal(self.BITS_ST_F)
 
         self.o_op    = Signal(alsru_cls.BITS_OP,
-                              decoder=alsru_cls.ctrl_decoder)
+                              decoder=alsru_cls.op_decoder)
         self.o_ci    = Signal(self.BITS_CI)
         self.o_si    = Signal(self.BITS_SI)
 
@@ -221,7 +223,7 @@ class InstructionDecoder(Elaboratable):
                         m.d.comb += [
                             self.o_ci.eq(self.CTRL_CI_ONE),
                             self.o_op.eq(alsru_cls.CTRL_AmB),
-                            self.o_st_f.eq(self.CTRL_ST_F_CVZS),
+                            self.o_st_f.eq(self.CTRL_ST_F_ZSCV),
                         ]
 
             with m.Case(OPCODE4_ARITH):
@@ -231,7 +233,7 @@ class InstructionDecoder(Elaboratable):
                     self.o_ld_a.eq(self.CTRL_LD_A_RA),
                     self.o_ld_b.eq(Mux(d_mode, self.CTRL_LD_B_IMM, self.CTRL_LD_B_RB)),
                     self.o_st_r.eq(self.CTRL_ST_R_RSD),
-                    self.o_st_f.eq(self.CTRL_ST_F_CVZS),
+                    self.o_st_f.eq(self.CTRL_ST_F_ZSCV),
                 ]
                 with m.Switch(d_type2):
                     with m.Case(OPTYPE2_ADD):
@@ -337,6 +339,7 @@ class InstructionDecoder(Elaboratable):
 
             with m.Case(OPCODE4_MOV_M):
                 m.d.comb += [
+                    m_imm.c_width.eq(m_imm.CTRL_IMM8),
                     m_imm.c_addpc.eq(d_mode),
                     self.o_ld_a.eq(self.CTRL_LD_A_0),
                     self.o_ld_b.eq(self.CTRL_LD_B_IMM),

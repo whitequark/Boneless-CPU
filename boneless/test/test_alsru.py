@@ -16,7 +16,7 @@ class ALSRUTestCase:
         self.dut    = self.dut_cls(self.width)
 
     @contextlib.contextmanager
-    def assertComputes(self, ctrl, ci=None, si=None):
+    def assertComputes(self, op, ci=None, si=None):
         asserts = []
         yield(self.dut, asserts)
 
@@ -30,7 +30,7 @@ class ALSRUTestCase:
 
             with Simulator(self.dut) as sim:
                 def process():
-                    yield self.dut.ctrl.eq(ctrl)
+                    yield self.dut.op.eq(op)
                     yield self.dut.a.eq(rand_a)
                     yield self.dut.b.eq(rand_b)
                     yield self.dut.r.eq(rand_r)
