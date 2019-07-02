@@ -1,5 +1,6 @@
 from nmigen import *
 
+from . import ControlEnum
 from .decoder_v3 import InstructionDecoder
 
 
@@ -175,16 +176,16 @@ class CoreFSM(Elaboratable):
             self.s_f.v.eq(m_alsru.vo),
         ]
         with m.Switch(m_dec.o_ci):
-            with m.Case(m_dec.CTRL_CI_ZERO):
+            with m.Case(m_dec.CI.ZERO):
                 m.d.comb += m_alsru.ci.eq(0)
-            with m.Case(m_dec.CTRL_CI_ONE):
+            with m.Case(m_dec.CI.ONE):
                 m.d.comb += m_alsru.ci.eq(1)
-            with m.Case(m_dec.CTRL_CI_FLAG):
+            with m.Case(m_dec.CI.FLAG):
                 m.d.comb += m_alsru.ci.eq(self.r_f.c)
         with m.Switch(m_dec.o_si):
-            with m.Case(m_dec.CTRL_SI_ZERO):
+            with m.Case(m_dec.SI.ZERO):
                 m.d.comb += m_alsru.si.eq(0)
-            with m.Case(m_dec.CTRL_SI_MSB):
+            with m.Case(m_dec.SI.MSB):
                 m.d.comb += m_alsru.si.eq(m_alsru.r[-1])
 
         with m.FSM():
@@ -199,46 +200,46 @@ class CoreFSM(Elaboratable):
                 m.d.sync += self.r_insn.eq(m_arb.o_data)
                 m.d.comb += m_dec.i_insn.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_ld_a):
-                    with m.Case(m_dec.CTRL_LD_A_RA):
+                    with m.Case(m_dec.LdA.RA):
                         m.d.comb += m_arb.c_mode.eq(m_arb.CTRL_LD_RA)
                 m.next = "LOAD-B"
 
             with m.State("LOAD-B"):
                 with m.Switch(m_dec.o_ld_a):
-                    with m.Case(m_dec.CTRL_LD_A_0):
+                    with m.Case(m_dec.LdA.ZERO):
                         m.d.sync += self.r_a.eq(0)
-                    with m.Case(m_dec.CTRL_LD_A_W):
+                    with m.Case(m_dec.LdA.W):
                         m.d.sync += self.r_a.eq(self.r_w << 3)
-                    with m.Case(m_dec.CTRL_LD_A_PCp1):
+                    with m.Case(m_dec.LdA.PCp1):
                         m.d.sync += self.r_a.eq(self.r_pc)
-                    with m.Case(m_dec.CTRL_LD_A_RA):
+                    with m.Case(m_dec.LdA.RA):
                         m.d.sync += self.r_a.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_ld_b):
-                    with m.Case(m_dec.CTRL_LD_B_ApI):
+                    with m.Case(m_dec.LdB.ApI):
                         m.d.comb += m_arb.c_mode.eq(
                             Mux(m_dec.o_xbus, m_arb.CTRL_LD_EXT, m_arb.CTRL_LD_MEM))
-                    with m.Case(m_dec.CTRL_LD_B_RSD):
+                    with m.Case(m_dec.LdB.RSD):
                         m.d.comb += m_arb.c_mode.eq(m_arb.CTRL_LD_RSD)
-                    with m.Case(m_dec.CTRL_LD_B_RB):
+                    with m.Case(m_dec.LdB.RB):
                         m.d.comb += m_arb.c_mode.eq(m_arb.CTRL_LD_RB)
                 m.next = "EXECUTE"
 
             with m.State("EXECUTE"):
                 with m.Switch(m_dec.o_ld_b):
-                    with m.Case(m_dec.CTRL_LD_B_IMM):
+                    with m.Case(m_dec.LdB.IMM):
                         m.d.comb += self.s_b.eq(m_dec.o_imm16)
-                    with m.Case(m_dec.CTRL_LD_B_ApI, m_dec.CTRL_LD_B_RSD, m_dec.CTRL_LD_B_RB):
+                    with m.Case(m_dec.LdB.ApI, m_dec.LdB.RSD, m_dec.LdB.RB):
                         m.d.comb += self.s_b.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_st_r):
-                    with m.Case(m_dec.CTRL_ST_R_ApI):
+                    with m.Case(m_dec.StR.ApI):
                         m.d.comb += m_arb.c_mode.eq(
                             Mux(m_dec.o_xbus, m_arb.CTRL_ST_EXT, m_arb.CTRL_ST_MEM))
-                    with m.Case(m_dec.CTRL_ST_R_RSD):
+                    with m.Case(m_dec.StR.RSD):
                         m.d.comb += m_arb.c_mode.eq(m_arb.CTRL_ST_RSD)
                 with m.Switch(m_dec.o_st_f):
-                    with m.Case(m_dec.CTRL_ST_F_ZS):
+                    with m.Case(m_dec.StF.ZS):
                         m.d.sync += self.r_f["z","s"]        .eq(self.s_f["z","s"])
-                    with m.Case(m_dec.CTRL_ST_F_ZSCV):
+                    with m.Case(m_dec.StF.ZSCV):
                         m.d.sync += self.r_f["z","s","c","v"].eq(self.s_f["z","s","c","v"])
                 with m.If(m_dec.o_wind):
                     m.d.sync += self.r_w .eq(m_alsru.o >> 3)
