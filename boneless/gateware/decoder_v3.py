@@ -1,7 +1,7 @@
 from nmigen import *
 
 from ..arch.opcode_v3 import *
-from . import ControlEnum
+from .control import *
 
 
 __all__ = ["ImmediateDecoder", "InstructionDecoder"]
@@ -149,8 +149,7 @@ class InstructionDecoder(Elaboratable):
         self.o_st_r  = self.StR.signal()
         self.o_st_f  = self.StF.signal()
 
-        self.o_op    = Signal(alsru_cls.BITS_OP,
-                              decoder=alsru_cls.op_decoder)
+        self.o_op    = alsru_cls.Op.signal()
         self.o_ci    = self.CI.signal()
         self.o_si    = self.SI.signal()
 
@@ -210,20 +209,20 @@ class InstructionDecoder(Elaboratable):
                 with m.Switch(d_type2):
                     with m.Case(OPTYPE2_AND):
                         m.d.comb += [
-                            self.o_op.eq(alsru_cls.CTRL_AaB),
+                            self.o_op.eq(alsru_cls.Op.AaB),
                         ]
                     with m.Case(OPTYPE2_OR):
                         m.d.comb += [
-                            self.o_op.eq(alsru_cls.CTRL_AoB),
+                            self.o_op.eq(alsru_cls.Op.AoB),
                         ]
                     with m.Case(OPTYPE2_XOR):
                         m.d.comb += [
-                            self.o_op.eq(alsru_cls.CTRL_AxB),
+                            self.o_op.eq(alsru_cls.Op.AxB),
                         ]
                     with m.Case(OPTYPE2_CMP):
                         m.d.comb += [
                             self.o_ci.eq(self.CI.ONE),
-                            self.o_op.eq(alsru_cls.CTRL_AmB),
+                            self.o_op.eq(alsru_cls.Op.AmB),
                             self.o_st_f.eq(self.StF.ZSCV),
                         ]
 
@@ -240,22 +239,22 @@ class InstructionDecoder(Elaboratable):
                     with m.Case(OPTYPE2_ADD):
                         m.d.comb += [
                             self.o_ci.eq(self.CI.ZERO),
-                            self.o_op.eq(alsru_cls.CTRL_ApB),
+                            self.o_op.eq(alsru_cls.Op.ApB),
                         ]
                     with m.Case(OPTYPE2_ADC):
                         m.d.comb += [
                             self.o_ci.eq(self.CI.FLAG),
-                            self.o_op.eq(alsru_cls.CTRL_ApB),
+                            self.o_op.eq(alsru_cls.Op.ApB),
                         ]
                     with m.Case(OPTYPE2_SUB):
                         m.d.comb += [
                             self.o_ci.eq(self.CI.ONE),
-                            self.o_op.eq(alsru_cls.CTRL_AmB),
+                            self.o_op.eq(alsru_cls.Op.AmB),
                         ]
                     with m.Case(OPTYPE2_SBB):
                         m.d.comb += [
                             self.o_ci.eq(self.CI.FLAG),
-                            self.o_op.eq(alsru_cls.CTRL_AmB),
+                            self.o_op.eq(alsru_cls.Op.AmB),
                         ]
 
             with m.Case(OPCODE4_SHIFT):
@@ -273,22 +272,22 @@ class InstructionDecoder(Elaboratable):
                     with m.Case(OPTYPE2_SLL):
                         m.d.comb += [
                             self.o_si.eq(self.SI.ZERO),
-                            self.o_op.eq(alsru_cls.CTRL_SL),
+                            self.o_op.eq(alsru_cls.Op.SL),
                         ]
                     with m.Case(OPTYPE2_ROT):
                         m.d.comb += [
                             self.o_si.eq(self.SI.MSB),
-                            self.o_op.eq(alsru_cls.CTRL_SL),
+                            self.o_op.eq(alsru_cls.Op.SL),
                         ]
                     with m.Case(OPTYPE2_SRL):
                         m.d.comb += [
                             self.o_si.eq(self.SI.ZERO),
-                            self.o_op.eq(alsru_cls.CTRL_SR),
+                            self.o_op.eq(alsru_cls.Op.SR),
                         ]
                     with m.Case(OPTYPE2_SRA):
                         m.d.comb += [
                             self.o_si.eq(self.SI.MSB),
-                            self.o_op.eq(alsru_cls.CTRL_SR),
+                            self.o_op.eq(alsru_cls.Op.SR),
                         ]
 
             with m.Case(OPCODE4_LD_M, OPCODE4_ST_M):
@@ -296,7 +295,7 @@ class InstructionDecoder(Elaboratable):
                     m_imm.c_width.eq(m_imm.Width.IMM5),
                     m_imm.c_addpc.eq(d_mode),
                     self.o_ld_a.eq(self.LdA.RA),
-                    self.o_op.eq(alsru_cls.CTRL_B),
+                    self.o_op.eq(alsru_cls.Op.B),
                 ]
                 with m.Switch(d_code4):
                     with m.Case(OPCODE4_LD_M):
@@ -313,7 +312,7 @@ class InstructionDecoder(Elaboratable):
             with m.Case(OPCODE4_LDX_M, OPCODE4_STX_M):
                 m.d.comb += [
                     self.o_xbus.eq(1),
-                    self.o_op.eq(alsru_cls.CTRL_B),
+                    self.o_op.eq(alsru_cls.Op.B),
                 ]
                 with m.Switch(d_code5):
                     with m.Case(OPCODE5_LDX,  OPCODE5_STX ):
@@ -344,7 +343,7 @@ class InstructionDecoder(Elaboratable):
                     m_imm.c_addpc.eq(d_mode),
                     self.o_ld_a.eq(self.LdA.ZERO),
                     self.o_ld_b.eq(self.LdB.IMM),
-                    self.o_op.eq(alsru_cls.CTRL_B),
+                    self.o_op.eq(alsru_cls.Op.B),
                     self.o_st_r.eq(self.StR.RSD),
                 ]
 
@@ -367,23 +366,23 @@ class InstructionDecoder(Elaboratable):
                             with m.Case(OPTYPE3_STW):
                                 m.d.comb += [
                                     self.o_ld_b.eq(self.LdB.RB),
-                                    self.o_op.eq(alsru_cls.CTRL_B),
+                                    self.o_op.eq(alsru_cls.Op.B),
                                 ]
                             with m.Case(OPTYPE3_SWPW):
                                 m.d.comb += [
                                     self.o_ld_b.eq(self.LdB.RB),
-                                    self.o_op.eq(alsru_cls.CTRL_B),
+                                    self.o_op.eq(alsru_cls.Op.B),
                                     self.o_st_r.eq(self.StR.RSD),
                                 ]
                             with m.Case(OPTYPE3_ADJW):
                                 m.d.comb += [
                                     self.o_ld_b.eq(self.LdB.IMM),
-                                    self.o_op.eq(alsru_cls.CTRL_ApB),
+                                    self.o_op.eq(alsru_cls.Op.ApB),
                                 ]
                             with m.Case(OPTYPE3_LDW):
                                 m.d.comb += [
                                     self.o_ld_b.eq(self.LdB.IMM),
-                                    self.o_op.eq(alsru_cls.CTRL_ApB),
+                                    self.o_op.eq(alsru_cls.Op.ApB),
                                     self.o_st_r.eq(self.StR.RSD),
                                 ]
 
@@ -394,7 +393,7 @@ class InstructionDecoder(Elaboratable):
                                     self.o_jump.eq(1),
                                     self.o_ld_a.eq(self.LdA.RA),
                                     self.o_ld_b.eq(self.LdB.IMM),
-                                    self.o_op.eq(alsru_cls.CTRL_ApB),
+                                    self.o_op.eq(alsru_cls.Op.ApB),
                                 ]
 
                             with m.Case(OPTYPE3_JV):
@@ -402,7 +401,7 @@ class InstructionDecoder(Elaboratable):
                                     self.o_jump.eq(1),
                                     self.o_ld_a.eq(self.LdA.RA),
                                     self.o_ld_b.eq(self.LdB.ApI),
-                                    self.o_op.eq(alsru_cls.CTRL_ApB),
+                                    self.o_op.eq(alsru_cls.Op.ApB),
                                 ]
 
                             with m.Case(OPTYPE3_JT):
@@ -412,7 +411,7 @@ class InstructionDecoder(Elaboratable):
                                     self.o_jump.eq(1),
                                     self.o_ld_a.eq(self.LdA.RA),
                                     self.o_ld_b.eq(self.LdB.ApI),
-                                    self.o_op.eq(alsru_cls.CTRL_ApB),
+                                    self.o_op.eq(alsru_cls.Op.ApB),
                                 ]
 
                     with m.Case(OPCODE5_JAL):
@@ -422,7 +421,7 @@ class InstructionDecoder(Elaboratable):
                             self.o_jump.eq(1),
                             self.o_ld_a.eq(self.LdA.PCp1),
                             self.o_ld_b.eq(self.LdB.IMM),
-                            self.o_op.eq(alsru_cls.CTRL_ApB),
+                            self.o_op.eq(alsru_cls.Op.ApB),
                             self.o_st_r.eq(self.StR.RSD),
                         ]
 
@@ -432,7 +431,7 @@ class InstructionDecoder(Elaboratable):
                     self.o_jump.eq(1),
                     self.o_ld_a.eq(self.LdA.PCp1),
                     self.o_ld_b.eq(self.LdB.IMM),
-                    self.o_op.eq(alsru_cls.CTRL_A), # not taken
+                    self.o_op.eq(alsru_cls.Op.A), # not taken
                 ]
 
             with m.Case():

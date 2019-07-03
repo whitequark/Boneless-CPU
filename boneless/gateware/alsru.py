@@ -1,5 +1,7 @@
 from nmigen import *
 
+from .control import *
+
 
 __all__ = ["ALSRU", "ALSRU_4LUT"]
 
@@ -7,18 +9,18 @@ __all__ = ["ALSRU", "ALSRU_4LUT"]
 class ALSRU:
     """Arithmetical, logical, shift, and rotate unit."""
 
-    # defined by subclasses
-    BITS_OP   = None
-    CTRL_A    = None
-    CTRL_B    = None
-    CTRL_nB   = None
-    CTRL_AaB  = None
-    CTRL_AoB  = None
-    CTRL_AxB  = None
-    CTRL_ApB  = None
-    CTRL_AmB  = None
-    CTRL_SL   = None
-    CTRL_SR   = None
+    # redefined by subclasses
+    class Op(MultiControlEnum):
+        A    = ()
+        B    = ()
+        nB   = ()
+        AaB  = ()
+        AoB  = ()
+        AxB  = ()
+        ApB  = ()
+        AmB  = ()
+        SL   = ()
+        SR   = ()
 
     def __init__(self, width):
         self.a  = Signal(width)
@@ -33,31 +35,7 @@ class ALSRU:
         self.si = Signal() # shift in
         self.so = Signal() # shift out
 
-        self.op = None  # defined by subclasses
-
-    @classmethod
-    def op_decoder(cls, word):
-        if word == cls.CTRL_A._as_const():
-            return "A"
-        if word == cls.CTRL_B._as_const():
-            return "B"
-        if word == cls.CTRL_nB._as_const():
-            return "~B"
-        if word == cls.CTRL_AaB._as_const():
-            return "A&B"
-        if word == cls.CTRL_AoB._as_const():
-            return "A|B"
-        if word == cls.CTRL_AxB._as_const():
-            return "A^B"
-        if word == cls.CTRL_ApB._as_const():
-            return "A+B"
-        if word == cls.CTRL_AmB._as_const():
-            return "A-B"
-        if word == cls.CTRL_SL._as_const():
-            return "R<<1"
-        if word == cls.CTRL_SR._as_const():
-            return "R>>1"
-        return "? {:0{}b}".format(word, cls.BITS_OP)
+        self.op = self.Op.signal() # redefined by subclasses
 
 
 class ALSRU_4LUT(ALSRU, Elaboratable):
@@ -94,92 +72,87 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
     #   R<<1: S=SLn-1         Y=S   O=Y    (pre-load R)
     #   R>>1: S=SRn+1         Y=S   O=Y    (pre-load R)
 
-    MUX_S_x   = 0
-    MUX_S_L   = 0b0
-    MUX_S_R   = 0b1
+    class MuxS(ControlEnum):
+        L   = 0b0
+        R   = 0b1
+        x   = 0
 
-    MUX_X_x   =  0
-    MUX_X_A   =  0b00
-    MUX_X_AaB =  0b01
-    MUX_X_AoB =  0b10
-    MUX_X_AxB =  0b11
+    class MuxX(ControlEnum):
+        A   = 0b00
+        AaB = 0b01
+        AoB = 0b10
+        AxB = 0b11
+        x   = 0
 
-    MUX_Y_0   =    0b00
-    MUX_Y_S   =    0b01
-    MUX_Y_B   =    0b10
-    MUX_Y_nB  =    0b11
+    class MuxY(ControlEnum):
+        Z   = 0b00
+        S   = 0b01
+        B   = 0b10
+        nB  = 0b11
 
-    MUX_O_XpY =      0b0
-    MUX_O_Y   =      0b1
+    class MuxO(ControlEnum):
+        XpY = 0b0
+        Y   = 0b1
 
-    BITS_OP   = 6
-    CTRL_A    = Cat(C(MUX_S_x, 1), C(MUX_X_A,   2), C(MUX_Y_0,  2), C(MUX_O_XpY, 1))
-    CTRL_B    = Cat(C(MUX_S_x, 1), C(MUX_X_x,   2), C(MUX_Y_B,  2), C(MUX_O_Y,   1))
-    CTRL_nB   = Cat(C(MUX_S_x, 1), C(MUX_X_x,   2), C(MUX_Y_nB, 2), C(MUX_O_Y,   1))
-    CTRL_AaB  = Cat(C(MUX_S_x, 1), C(MUX_X_AaB, 2), C(MUX_Y_0,  2), C(MUX_O_XpY, 1))
-    CTRL_AoB  = Cat(C(MUX_S_x, 1), C(MUX_X_AoB, 2), C(MUX_Y_0,  2), C(MUX_O_XpY, 1))
-    CTRL_AxB  = Cat(C(MUX_S_x, 1), C(MUX_X_AxB, 2), C(MUX_Y_0,  2), C(MUX_O_XpY, 1))
-    CTRL_ApB  = Cat(C(MUX_S_x, 1), C(MUX_X_A,   2), C(MUX_Y_B,  2), C(MUX_O_XpY, 1))
-    CTRL_AmB  = Cat(C(MUX_S_x, 1), C(MUX_X_A,   2), C(MUX_Y_nB, 2), C(MUX_O_XpY, 1))
-    CTRL_SL   = Cat(C(MUX_S_L, 1), C(MUX_X_x,   2), C(MUX_Y_S,  2), C(MUX_O_Y,   1))
-    CTRL_SR   = Cat(C(MUX_S_R, 1), C(MUX_X_x,   2), C(MUX_Y_S,  2), C(MUX_O_Y,   1))
-
-    def __init__(self, width):
-        super().__init__(width)
-
-        self.s  = Signal(width)
-        self.x  = Signal(width)
-        self.y  = Signal(width)
-
-        self.op = Record([
-            ("s", 1),
-            ("x", 2),
-            ("y", 2),
-            ("o", 1),
-        ])
+    class Op(MultiControlEnum, layout={"s":MuxS, "x":MuxX, "y":MuxY, "o":MuxO}):
+        A    = ("x", "A",   "Z",  "XpY",)
+        B    = ("x", "x",   "B",  "Y",  )
+        nB   = ("x", "x",   "nB", "Y",  )
+        AaB  = ("x", "AaB", "Z",  "XpY",)
+        AoB  = ("x", "AoB", "Z",  "XpY",)
+        AxB  = ("x", "AxB", "Z",  "XpY",)
+        ApB  = ("x", "A",   "B",  "XpY",)
+        AmB  = ("x", "A",   "nB", "XpY",)
+        SL   = ("L", "x",   "S",  "Y",  )
+        SR   = ("R", "x",   "S",  "Y",  )
 
     def elaborate(self, platform):
         m = Module()
 
-        with m.Switch(self.op.s):
-            with m.Case(self.MUX_S_L):
-                m.d.comb += self.s.eq(Cat(self.si, self.r[:-1]))
+        op = self.Op.expand(m, self.op)
+
+        s = Signal.like(self.o)
+        with m.Switch(op.s):
+            with m.Case(self.MuxS.L):
+                m.d.comb += s.eq(Cat(self.si, self.r[:-1]))
                 m.d.comb += self.so.eq(self.r[-1])
-            with m.Case(self.MUX_S_R):
-                m.d.comb += self.s.eq(Cat(self.r[ 1:], self.si))
+            with m.Case(self.MuxS.R):
+                m.d.comb += s.eq(Cat(self.r[ 1:], self.si))
                 m.d.comb += self.so.eq(self.r[ 0])
 
-        with m.Switch(self.op.x):
-            with m.Case(self.MUX_X_AaB):
-                m.d.comb += self.x.eq(self.a & self.b)
-            with m.Case(self.MUX_X_AoB):
-                m.d.comb += self.x.eq(self.a | self.b)
-            with m.Case(self.MUX_X_AxB):
-                m.d.comb += self.x.eq(self.a ^ self.b)
-            with m.Case(self.MUX_X_A):
-                m.d.comb += self.x.eq(self.a)
+        x = Signal.like(self.o)
+        with m.Switch(op.x):
+            with m.Case(self.MuxX.AaB):
+                m.d.comb += x.eq(self.a & self.b)
+            with m.Case(self.MuxX.AoB):
+                m.d.comb += x.eq(self.a | self.b)
+            with m.Case(self.MuxX.AxB):
+                m.d.comb += x.eq(self.a ^ self.b)
+            with m.Case(self.MuxX.A):
+                m.d.comb += x.eq(self.a)
 
-        with m.Switch(self.op.y):
-            with m.Case(self.MUX_Y_0):
-                m.d.comb += self.y.eq(0)
-            with m.Case(self.MUX_Y_S):
-                m.d.comb += self.y.eq(self.s)
-            with m.Case(self.MUX_Y_B):
-                m.d.comb += self.y.eq(self.b)
-            with m.Case(self.MUX_Y_nB):
-                m.d.comb += self.y.eq(~self.b)
+        y = Signal.like(self.o)
+        with m.Switch(op.y):
+            with m.Case(self.MuxY.Z):
+                m.d.comb += y.eq(0)
+            with m.Case(self.MuxY.S):
+                m.d.comb += y.eq(s)
+            with m.Case(self.MuxY.B):
+                m.d.comb += y.eq(self.b)
+            with m.Case(self.MuxY.nB):
+                m.d.comb += y.eq(~self.b)
 
         p = Signal.like(self.o)
-        m.d.comb += Cat(p, self.co).eq(self.x + self.y + self.ci)
+        m.d.comb += Cat(p, self.co).eq(x + y + self.ci)
 
-        with m.Switch(self.op.o):
-            with m.Case(self.MUX_O_XpY):
+        with m.Switch(op.o):
+            with m.Case(self.MuxO.XpY):
                 m.d.comb += self.o.eq(p)
-            with m.Case(self.MUX_O_Y):
-                m.d.comb += self.o.eq(self.y)
+            with m.Case(self.MuxO.Y):
+                m.d.comb += self.o.eq(y)
 
         # http://teaching.idallen.com/cst8214/08w/notes/overflow.txt
-        with m.Switch(Cat(self.x[-1], self.y[-1], self.o[-1])):
+        with m.Switch(Cat(x[-1], y[-1], self.o[-1])):
             with m.Case(0b100):
                 m.d.comb += self.vo.eq(1)
             with m.Case(0b011):

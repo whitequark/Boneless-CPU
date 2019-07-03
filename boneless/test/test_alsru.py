@@ -60,31 +60,31 @@ class ALSRUTestCase:
                 sim.run()
 
     def test_A(self):
-        with self.assertComputes(self.dut_cls.CTRL_A, ci=0) as (dut, asserts):
+        with self.assertComputes(self.dut_cls.Op.A, ci=0) as (dut, asserts):
             asserts += [(dut.o, dut.a)]
 
     def test_B(self):
-        with self.assertComputes(self.dut_cls.CTRL_B, ci=0) as (dut, asserts):
+        with self.assertComputes(self.dut_cls.Op.B, ci=0) as (dut, asserts):
             asserts += [(dut.o, dut.b)]
 
     def test_nB(self):
-        with self.assertComputes(self.dut_cls.CTRL_nB, ci=0) as (dut, asserts):
+        with self.assertComputes(self.dut_cls.Op.nB, ci=0) as (dut, asserts):
             asserts += [(dut.o, ~dut.b)]
 
     def test_AaB(self):
-        with self.assertComputes(self.dut_cls.CTRL_AaB, ci=0) as (dut, asserts):
+        with self.assertComputes(self.dut_cls.Op.AaB, ci=0) as (dut, asserts):
             asserts += [(dut.o, dut.a & dut.b)]
 
     def test_AoB(self):
-        with self.assertComputes(self.dut_cls.CTRL_AoB, ci=0) as (dut, asserts):
+        with self.assertComputes(self.dut_cls.Op.AoB, ci=0) as (dut, asserts):
             asserts += [(dut.o, dut.a | dut.b)]
 
     def test_AxB(self):
-        with self.assertComputes(self.dut_cls.CTRL_AxB, ci=0) as (dut, asserts):
+        with self.assertComputes(self.dut_cls.Op.AxB, ci=0) as (dut, asserts):
             asserts += [(dut.o, dut.a ^ dut.b)]
 
     def test_ApB(self):
-        with self.assertComputes(self.dut_cls.CTRL_ApB) as (dut, asserts):
+        with self.assertComputes(self.dut_cls.Op.ApB) as (dut, asserts):
             result   = dut.a + dut.b + dut.ci
             asserts += [(dut.o,   result[:self.width]),
                         (dut.co,  result[self.width]),
@@ -92,7 +92,7 @@ class ALSRUTestCase:
                                   (dut.a[-1] != result[self.width - 1]))]
 
     def test_AmB(self):
-        with self.assertComputes(self.dut_cls.CTRL_AmB) as (dut, asserts):
+        with self.assertComputes(self.dut_cls.Op.AmB) as (dut, asserts):
             result   = dut.a - dut.b - ~dut.ci
             asserts += [(dut.o,   result[:self.width]),
                         (dut.co, ~result[self.width]),
@@ -100,13 +100,13 @@ class ALSRUTestCase:
                                   (dut.a[-1] != result[self.width - 1]))]
 
     def test_SL(self):
-        with self.assertComputes(self.dut_cls.CTRL_SL) as (dut, asserts):
+        with self.assertComputes(self.dut_cls.Op.SL) as (dut, asserts):
             result   = (dut.r << 1) | dut.si
             asserts += [(dut.o,   result[:self.width]),
                         (dut.so,  dut.r[-1])]
 
     def test_SR(self):
-        with self.assertComputes(self.dut_cls.CTRL_SR) as (dut, asserts):
+        with self.assertComputes(self.dut_cls.Op.SR) as (dut, asserts):
             result   = (dut.r >> 1) | (dut.si << (self.width - 1))
             asserts += [(dut.o,   result[:self.width]),
                         (dut.so,  dut.r[0])]

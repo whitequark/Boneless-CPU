@@ -1,37 +1,43 @@
 from nmigen import *
 
-from . import ControlEnum
+from .control import *
 from .decoder_v3 import InstructionDecoder
 
 
+__all__ = ["BusArbiter", "CoreFSM"]
+
+
 class BusArbiter(Elaboratable):
-    MUX_ADDR_x   = 0
-    MUX_ADDR_REG = 0b0
-    MUX_ADDR_PTR = 0b1
+    class MuxAddr(ControlEnum):
+        REG = 0b0
+        PTR = 0b1
+        x   = 0
 
-    MUX_REG_x    =  0
-    MUX_REG_PC   =  0b00
-    MUX_REG_A    =  0b01
-    MUX_REG_B    =  0b10
-    MUX_REG_SD   =  0b11
+    class MuxReg(ControlEnum):
+        PC  = 0b00
+        A   = 0b01
+        B   = 0b10
+        SD  = 0b11
+        x   = 0
 
-    MUX_OP_x     =    0b0_00
-    MUX_OP_RD    =    0b1_00
-    MUX_OP_RDX   =    0b1_10
-    MUX_OP_WR    =    0b1_01
-    MUX_OP_WRX   =    0b1_11
+    class MuxDir(ControlEnum):
+        RD  = 0b1_00
+        RDX = 0b1_10
+        WR  = 0b1_01
+        WRX = 0b1_11
+        x   = 0b0
 
-    BITS_MODE    = 5
-    CTRL_x       = Cat(C(MUX_ADDR_x,   1), C(MUX_REG_x,  2), C(MUX_OP_x,   3))
-    CTRL_LD_PC   = Cat(C(MUX_ADDR_REG, 1), C(MUX_REG_PC, 2), C(MUX_OP_RD,  3))
-    CTRL_LD_RA   = Cat(C(MUX_ADDR_REG, 1), C(MUX_REG_A,  2), C(MUX_OP_RD,  3))
-    CTRL_LD_RB   = Cat(C(MUX_ADDR_REG, 1), C(MUX_REG_B,  2), C(MUX_OP_RD,  3))
-    CTRL_LD_RSD  = Cat(C(MUX_ADDR_REG, 1), C(MUX_REG_SD, 2), C(MUX_OP_RD,  3))
-    CTRL_ST_RSD  = Cat(C(MUX_ADDR_REG, 1), C(MUX_REG_SD, 2), C(MUX_OP_WR,  3))
-    CTRL_LD_MEM  = Cat(C(MUX_ADDR_PTR, 1), C(MUX_REG_x,  2), C(MUX_OP_RD,  3))
-    CTRL_ST_MEM  = Cat(C(MUX_ADDR_PTR, 1), C(MUX_REG_x,  2), C(MUX_OP_WR,  3))
-    CTRL_LD_EXT  = Cat(C(MUX_ADDR_PTR, 1), C(MUX_REG_x,  2), C(MUX_OP_RDX, 3))
-    CTRL_ST_EXT  = Cat(C(MUX_ADDR_PTR, 1), C(MUX_REG_x,  2), C(MUX_OP_WRX, 3))
+    class Op(MultiControlEnum, layout={"addr":MuxAddr, "reg":MuxReg, "dir":MuxDir}):
+        LD_PC   = ("REG", "PC", "RD", )
+        LD_RA   = ("REG", "A",  "RD", )
+        LD_RB   = ("REG", "B",  "RD", )
+        LD_RSD  = ("REG", "SD", "RD", )
+        ST_RSD  = ("REG", "SD", "WR", )
+        LD_MEM  = ("PTR", "x",  "RD", )
+        ST_MEM  = ("PTR", "x",  "WR", )
+        LD_EXT  = ("PTR", "x",  "RDX",)
+        ST_EXT  = ("PTR", "x",  "WRX",)
+        x       = ("x",   "x",  "x",  )
 
     def __init__(self):
         self.i_pc   = Signal(16)
@@ -43,11 +49,7 @@ class BusArbiter(Elaboratable):
         self.i_data = Signal(16)
         self.o_data = Signal(16)
 
-        self.c_mode = Record([
-            ("addr", 1),
-            ("reg",  2),
-            ("op",   3),
-        ])
+        self.c_op   = self.Op.signal()
 
         self.o_bus_addr = Signal(16)
 
@@ -64,28 +66,30 @@ class BusArbiter(Elaboratable):
     def elaborate(self, platform):
         m = Module()
 
-        with m.Switch(self.c_mode.addr):
-            with m.Case(self.MUX_ADDR_REG):
-                with m.Switch(self.c_mode.reg):
-                    with m.Case(self.MUX_REG_PC):
+        op = self.Op.expand(m, self.c_op)
+
+        with m.Switch(op.addr):
+            with m.Case(self.MuxAddr.REG):
+                with m.Switch(op.reg):
+                    with m.Case(self.MuxReg.PC):
                         m.d.comb += self.o_bus_addr.eq(self.i_pc)
-                    with m.Case(self.MUX_REG_A):
+                    with m.Case(self.MuxReg.A):
                         m.d.comb += self.o_bus_addr.eq(Cat(self.i_ra,  self.i_w))
-                    with m.Case(self.MUX_REG_B):
+                    with m.Case(self.MuxReg.B):
                         m.d.comb += self.o_bus_addr.eq(Cat(self.i_rb,  self.i_w))
-                    with m.Case(self.MUX_REG_SD):
+                    with m.Case(self.MuxReg.SD):
                         m.d.comb += self.o_bus_addr.eq(Cat(self.i_rsd, self.i_w))
-            with m.Case(self.MUX_ADDR_PTR):
+            with m.Case(self.MuxAddr.PTR):
                 m.d.comb += self.o_bus_addr.eq(self.i_ptr)
 
-        with m.Switch(self.c_mode.op):
-            with m.Case(self.MUX_OP_RD):
+        with m.Switch(op.dir):
+            with m.Case(self.MuxDir.RD):
                 m.d.comb += self.o_mem_re.eq(1)
-            with m.Case(self.MUX_OP_RDX):
+            with m.Case(self.MuxDir.RDX):
                 m.d.comb += self.o_ext_re.eq(1)
-            with m.Case(self.MUX_OP_WR):
+            with m.Case(self.MuxDir.WR):
                 m.d.comb += self.o_mem_we.eq(1)
-            with m.Case(self.MUX_OP_WRX):
+            with m.Case(self.MuxDir.WRX):
                 m.d.comb += self.o_ext_we.eq(1)
 
         r_mem_re = Signal()
@@ -193,7 +197,7 @@ class CoreFSM(Elaboratable):
 
             with m.State("FETCH"):
                 m.d.sync += self.r_pc.eq(m_dec.o_pc_p1)
-                m.d.comb += m_arb.c_mode.eq(m_arb.CTRL_LD_PC)
+                m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_PC)
                 m.next = "LOAD-A"
 
             with m.State("LOAD-A"):
@@ -201,7 +205,7 @@ class CoreFSM(Elaboratable):
                 m.d.comb += m_dec.i_insn.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_ld_a):
                     with m.Case(m_dec.LdA.RA):
-                        m.d.comb += m_arb.c_mode.eq(m_arb.CTRL_LD_RA)
+                        m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_RA)
                 m.next = "LOAD-B"
 
             with m.State("LOAD-B"):
@@ -216,12 +220,12 @@ class CoreFSM(Elaboratable):
                         m.d.sync += self.r_a.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_ld_b):
                     with m.Case(m_dec.LdB.ApI):
-                        m.d.comb += m_arb.c_mode.eq(
-                            Mux(m_dec.o_xbus, m_arb.CTRL_LD_EXT, m_arb.CTRL_LD_MEM))
+                        m.d.comb += m_arb.c_op.eq(
+                            Mux(m_dec.o_xbus, m_arb.Op.LD_EXT, m_arb.Op.LD_MEM))
                     with m.Case(m_dec.LdB.RSD):
-                        m.d.comb += m_arb.c_mode.eq(m_arb.CTRL_LD_RSD)
+                        m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_RSD)
                     with m.Case(m_dec.LdB.RB):
-                        m.d.comb += m_arb.c_mode.eq(m_arb.CTRL_LD_RB)
+                        m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_RB)
                 m.next = "EXECUTE"
 
             with m.State("EXECUTE"):
@@ -232,10 +236,10 @@ class CoreFSM(Elaboratable):
                         m.d.comb += self.s_b.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_st_r):
                     with m.Case(m_dec.StR.ApI):
-                        m.d.comb += m_arb.c_mode.eq(
-                            Mux(m_dec.o_xbus, m_arb.CTRL_ST_EXT, m_arb.CTRL_ST_MEM))
+                        m.d.comb += m_arb.c_op.eq(
+                            Mux(m_dec.o_xbus, m_arb.Op.ST_EXT, m_arb.Op.ST_MEM))
                     with m.Case(m_dec.StR.RSD):
-                        m.d.comb += m_arb.c_mode.eq(m_arb.CTRL_ST_RSD)
+                        m.d.comb += m_arb.c_op.eq(m_arb.Op.ST_RSD)
                 with m.Switch(m_dec.o_st_f):
                     with m.Case(m_dec.StF.ZS):
                         m.d.sync += self.r_f["z","s"]        .eq(self.s_f["z","s"])
@@ -269,7 +273,7 @@ if __name__ == "__main__":
         ports = (
             dut.i_pc, dut.i_w, dut.i_ra, dut.i_rb, dut.i_rsd, dut.i_ptr,
             dut.i_data, dut.o_data,
-            dut.c_mode.addr, dut.c_mode.reg, dut.c_mode.op,
+            dut.c_op.addr, dut.c_op.reg, dut.c_op.op,
             dut.o_bus_addr,
             dut.i_mem_data, dut.o_mem_re, dut.o_mem_data, dut.o_mem_we,
             dut.i_ext_data, dut.o_ext_re, dut.o_ext_data, dut.o_ext_we,
