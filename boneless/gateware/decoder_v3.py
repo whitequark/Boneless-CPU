@@ -1,6 +1,6 @@
 from nmigen import *
 
-from ..arch.opcode_v3 import *
+from ..arch.opcode_v3_old import *
 from .control import *
 
 

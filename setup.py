@@ -9,7 +9,7 @@ setup(
     description="Resource-efficient 16-bit CPU architecture for FPGA control plane",
     #long_description="""TODO""",
     license="0-clause BSD License",
-    install_requires=["nmigen"],
+    install_requires=["nmigen", "parse>=1.12"],
     packages=find_packages(),
     project_urls={
         #"Documentation": "https://glasgow.readthedocs.io/",
