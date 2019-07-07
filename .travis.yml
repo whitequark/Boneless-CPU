@@ -1,0 +1,17 @@
+sudo: required
+language: python
+python:
+  - "3.6"
+addons:
+  apt:
+    update: true
+before_install:
+  - pip install git+https://github.com/m-labs/nmigen
+  - pip install codecov
+script:
+  - coverage run -m unittest discover
+  - codecov
+notifications:
+  email:
+    on_failure: never
+    on_success: never

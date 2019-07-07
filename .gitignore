@@ -6,3 +6,4 @@ build/
 *.v
 *.vcd
 *.gtkw
+doc/build
