@@ -6,3 +6,5 @@ build/
 *.v
 *.vcd
 *.gtkw
+*.hex
+/*.asm

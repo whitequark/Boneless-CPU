@@ -18,7 +18,8 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "boneless-disasm = boneless.disasm:main"
+            "boneless-as = boneless.cli:as_main",
+            "boneless-dis = boneless.cli:dis_main",
         ]
     }
 )
