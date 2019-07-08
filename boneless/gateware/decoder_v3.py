@@ -12,8 +12,8 @@ class ImmediateDecoder(Elaboratable):
     IMM3_TABLE_SR = Array(instr.Imm3SR.lut_to_imm)
 
     class Table(ControlEnum):
-        AL    = 0b0
-        SR    = 0b1
+        AL    = 0b1
+        SR    = 0b0
 
     class Width(ControlEnum):
         IMM3  = 0b00
@@ -189,11 +189,16 @@ class InstructionDecoder(Elaboratable):
             with m.Case(opcode.T_A.coding):
                 m.d.comb += self.o_cond.eq(self.Cond.A)
 
+        with m.Switch(self.i_insn):
+            with m.Case(opcode.C_LOGIC.coding, opcode.C_ARITH.coding):
+                m.d.comb += m_imm.c_table.eq(m_imm.Table.AL)
+            with m.Case(opcode.C_SHIFT.coding):
+                m.d.comb += m_imm.c_table.eq(m_imm.Table.SR)
+
         alsru_cls = self.alsru_cls
         with m.Switch(self.i_insn):
             with m.Case(opcode.C_LOGIC.coding):
                 m.d.comb += [
-                    m_imm.c_table.eq(m_imm.Table.AL),
                     m_imm.c_width.eq(m_imm.Width.IMM3),
                     self.o_ld_a.eq(self.LdA.RA),
                     self.o_st_r.eq(self.StR.RSD),
@@ -226,7 +231,6 @@ class InstructionDecoder(Elaboratable):
 
             with m.Case(opcode.C_ARITH.coding):
                 m.d.comb += [
-                    m_imm.c_table.eq(m_imm.Table.AL),
                     m_imm.c_width.eq(m_imm.Width.IMM3),
                     self.o_ld_a.eq(self.LdA.RA),
                     self.o_st_r.eq(self.StR.RSD),
@@ -261,7 +265,6 @@ class InstructionDecoder(Elaboratable):
 
             with m.Case(opcode.C_SHIFT.coding):
                 m.d.comb += [
-                    m_imm.c_table.eq(m_imm.Table.SR),
                     m_imm.c_width.eq(m_imm.Width.IMM3),
                     self.o_multi.eq(1),
                     self.o_shift.eq(1),
