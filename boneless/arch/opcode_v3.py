@@ -1,9 +1,12 @@
 from collections import defaultdict
 
+from .mc import Label
 from .instr_v3 import Instr, Reg
 
 
 __all__ = [
+    # Directives
+    "L",
     # Registers
     "R0",   "R1",   "R2",   "R3",   "R4",   "R5",   "R6",   "R7",
     # Instructions
@@ -52,7 +55,7 @@ class T_SRA  (Instr): coding = "-----------11---"
 
 # Memory opcodes
 class M_ABS  (Instr): coding = "----0-----------"
-class M_REL  (Instr): coding = "----1-----------"
+class M_REL  (Instr): coding = "----1-----------"; pc_rel_ops = {"imm"}
 class M_LIT  (Instr): coding = "----1-----------"
 class C_LD   (Instr): coding = "0100------------"
 class C_ST   (Instr): coding = "0101------------"
@@ -69,13 +72,13 @@ class T_LDW  (Instr): coding = "--------011-----"
 class T_JR   (Instr): coding = "--------100-----"
 # class T_?  (Instr): coding = "--------101-----"
 class T_JV   (Instr): coding = "--------110-----"
-class T_JT   (Instr): coding = "--------111-----"
-class C_JAL  (Instr): coding = "10101-----------"
+class T_JT   (Instr): coding = "--------111-----"; pc_rel_ops = {"imm"}
+class C_JAL  (Instr): coding = "10101-----------"; pc_rel_ops = {"imm"}
 
 # Conditional opcode
 class M_FL0  (Instr): coding = "----0-----------"
 class M_FL1  (Instr): coding = "----1-----------"
-class C_JCOND(Instr): coding = "1011------------"
+class C_JCOND(Instr): coding = "1011------------"; pc_rel_ops = {"imm"}
 class T_Z    (Instr): coding = "-----000--------"
 class T_S    (Instr): coding = "-----001--------"
 class T_C    (Instr): coding = "-----010--------"
@@ -88,6 +91,9 @@ class T_A    (Instr): coding = "-----111--------"
 # Extended immediate opcode
 class C_EXT  (Instr): coding = "110-------------"
 
+
+# Directives
+L = Label
 
 # Registers
 R0, R1, R2, R3, R4, R5, R6, R7 = map(Reg, range(8))

@@ -154,16 +154,19 @@ class Instr(mc.Instr):
             return 2 # EXTI plus instruction
         return 1 # just the instruction
 
-    def encode(self, stream):
+    def encode(self, stream, use_longest=False):
         # Translate the instruction first, so that we don't append anything to the stream if there
         # is an unresolved relocation.
         instr_encoding = int(self)
         length = 1
-        # If the immediate is too large to fit into the field in the encoding...
-        if hasattr(self, "imm") and not self.imm.is_legal:
-            # ... then encode an EXTI instruction first.
-            stream.append(self._ext_code | ((self.imm.value >> 3) & self._i13_mask))
-            length += 1
+        # If the instruction has an immediate...
+        if hasattr(self, "imm"):
+            # ... which is too large to fit into the field in the encoding, or might participate
+            # in relocation later...
+            if use_longest or not self.imm.is_legal:
+                # ... then encode an EXTI instruction first.
+                stream.append(self._ext_code | ((self.imm.value >> 3) & self._i13_mask))
+                length += 1
         # And encode the instruction in either case.
         stream.append(instr_encoding)
         return length

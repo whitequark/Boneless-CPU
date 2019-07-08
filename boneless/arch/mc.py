@@ -5,11 +5,24 @@ from parse import parse
 from string import Formatter
 
 
-__all__ = ["UnresolvedRef", "Operand", "Instr"]
+__all__ = ["UnresolvedRef", "Label", "Operand", "Instr"]
 
 
 class UnresolvedRef(Exception):
     pass
+
+
+class Label:
+    __slots__ = ["name"]
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return f"Label({repr(self.name)})"
+
+    def __eq__(self, other):
+        return isinstance(other, Label) and self.name == other.name
 
 
 class OperandMeta(abc.ABCMeta):
@@ -230,6 +243,7 @@ class Instr(metaclass=InstrMeta):
     operands   = abc.abstractproperty()
     alias      = abc.abstractproperty()
     max_length = 1
+    pc_rel_ops = set()
 
     @classmethod
     def from_str(cls, input):
@@ -274,7 +288,7 @@ class Instr(metaclass=InstrMeta):
         """Determine length of a variable instruction, in units."""
         return 1
 
-    def encode(self, stream):
+    def encode(self, stream, use_longest=False):
         """Encode instruction, append to the stream of units, and return the encoded length."""
         stream.append(int(self))
         return 1
@@ -284,3 +298,15 @@ class Instr(metaclass=InstrMeta):
         """Decode instruction from the stream of units at given index, and return the instruction
         as well as its length."""
         return cls.from_int(stream[index]), 1
+
+    @classmethod
+    def assemble(cls, *args, **kwargs):
+        """Shortcut for :func:`.asm_v3.assemble(..., instr_cls=cls)`."""
+        from .asm_v3 import assemble
+        return assemble(*args, **kwargs, instr_cls=cls)
+
+    @classmethod
+    def disassemble(cls, *args, **kwargs):
+        """Shortcut for :func:`.asm_v3.disassemble(..., instr_cls=cls)`."""
+        from .asm_v3 import disassemble
+        return disassemble(*args, **kwargs, instr_cls=cls)
