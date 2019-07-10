@@ -110,9 +110,9 @@ class BusArbiter(Elaboratable):
 
 
 class CoreFSM(Elaboratable):
-    def __init__(self, alsru_cls, memory=None):
-        self.r_pc    = Signal(16)
-        self.r_w     = Signal(13)
+    def __init__(self, alsru_cls, reset_pc=0, reset_w=0xffff, memory=None):
+        self.r_pc    = Signal(16, reset=reset_pc)
+        self.r_w     = Signal(13, reset=reset_w >> 3)
         self.r_f     = Record([("z", 1), ("s", 1), ("c", 1), ("v", 1)])
 
         self.r_insn  = Signal(16)
