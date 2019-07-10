@@ -89,6 +89,16 @@ class InstructionTestCase(unittest.TestCase):
         self.assertEqual(stream_1, stream_2)
         self.assertNotEqual(instr_1, instr_2)
 
+    def test_negative_imm_legal(self):
+        stream_1 = []
+        instr_1  = op.MOVI(op.R1, -10)
+        instr_1.encode(stream_1)
+        stream_2 = []
+        instr_2  = op.MOVI(op.R1, 65526)
+        instr_2.encode(stream_2)
+        self.assertEqual(stream_1, stream_2)
+        self.assertNotEqual(instr_1, instr_2)
+
     def test_roundtrip_negative_imm(self):
         instr = op.LD(op.R1, op.R0, -10)
         self.assertEqual(op.Instr.from_int(int(instr)), instr)

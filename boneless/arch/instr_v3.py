@@ -53,7 +53,8 @@ class Imm(mc.Operand):
 
     @property
     def is_legal(self):
-        return self.value in range(-1 << self.bits - 1, 1 << self.bits - 1)
+        return self.value & 0xffff not in range((+1 << self.bits - 1) & 0xffff,
+                                                (-1 << self.bits - 1) & 0xffff)
 
     @classmethod
     def from_str(cls, input):
