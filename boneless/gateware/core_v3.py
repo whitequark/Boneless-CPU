@@ -167,7 +167,6 @@ class CoreFSM(Elaboratable):
             m_arb.i_rsd.eq(m_dec.o_rsd),
             m_arb.i_ra .eq(m_dec.o_ra),
             m_arb.i_rb .eq(m_dec.o_rb),
-            m_arb.i_ptr.eq(m_dec.o_imm16 + self.r_a),
         ]
 
         m.submodules.alsru = m_alsru = self.m_alsru
@@ -222,6 +221,7 @@ class CoreFSM(Elaboratable):
                         m.d.sync += self.r_a.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_ld_b):
                     with m.Case(m_dec.LdB.ApI):
+                        m.d.comb += m_arb.i_ptr.eq(self.m_arb.o_data + m_dec.o_imm16)
                         m.d.comb += m_arb.c_op.eq(
                             Mux(m_dec.o_xbus, m_arb.Op.LD_EXT, m_arb.Op.LD_MEM))
                     with m.Case(m_dec.LdB.RSD):
@@ -238,6 +238,7 @@ class CoreFSM(Elaboratable):
                         m.d.comb += self.s_b.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_st_r):
                     with m.Case(m_dec.StR.ApI):
+                        m.d.comb += m_arb.i_ptr.eq(self.r_a + m_dec.o_imm16)
                         m.d.comb += m_arb.c_op.eq(
                             Mux(m_dec.o_xbus, m_arb.Op.ST_EXT, m_arb.Op.ST_MEM))
                     with m.Case(m_dec.StR.RSD):
