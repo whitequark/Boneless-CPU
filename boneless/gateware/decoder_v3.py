@@ -114,11 +114,19 @@ class InstructionDecoder(Elaboratable):
         SxVoZ = 0b110
         A     = 0b111
 
+    @staticmethod
+    def _insn_decoder(encoding):
+        try:
+            insn = opcode.Instr.from_int(encoding)
+            return str(insn).expandtabs(1)
+        except ValueError:
+            return "{:04x}".format(encoding)
+
     def __init__(self, alsru_cls):
         self.alsru_cls = alsru_cls
 
         self.i_pc    = Signal(16)
-        self.i_insn  = Signal(16)
+        self.i_insn  = Signal(16, decoder=self._insn_decoder)
 
         self.o_pc_p1 = Signal(16)
         self.o_imm16 = Signal(16)
