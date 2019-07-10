@@ -197,6 +197,7 @@ class CoreFSM(Elaboratable):
             m.d.comb += m_dec.i_insn.eq(self.r_insn)
 
             with m.State("FETCH"):
+                m.d.comb += m_dec.c_done.eq(1)
                 m.d.sync += self.r_pc.eq(m_dec.o_pc_p1)
                 m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_PC)
                 m.next = "LOAD-A"

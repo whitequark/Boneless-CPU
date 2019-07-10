@@ -128,6 +128,8 @@ class InstructionDecoder(Elaboratable):
         self.i_pc    = Signal(16)
         self.i_insn  = Signal(16, decoder=self._insn_decoder)
 
+        self.c_done  = Signal()
+
         self.o_pc_p1 = Signal(16)
         self.o_imm16 = Signal(16)
         self.o_rsd   = Signal(3)
@@ -151,6 +153,8 @@ class InstructionDecoder(Elaboratable):
         self.o_op    = alsru_cls.Op.signal()
         self.o_ci    = self.CI.signal()
         self.o_si    = self.SI.signal()
+
+        self.r_exti  = Signal()
 
         self.m_imm   = ImmediateDecoder()
 
@@ -460,6 +464,12 @@ class InstructionDecoder(Elaboratable):
                 m.d.comb += [
                     self.o_skip.eq(1),
                 ]
+
+        with m.If(self.c_done):
+            m.d.sync += self.r_exti.eq(m_imm.c_exti)
+
+        with m.If(self.r_exti):
+            m.d.comb += m_imm.c_width.eq(m_imm.Width.IMM16)
 
         return m
 
