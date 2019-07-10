@@ -120,6 +120,8 @@ class CoreFSM(Elaboratable):
         self.s_b     = Signal(16)
         self.s_f     = Record(self.r_f.layout)
 
+        self.o_done  = Signal()
+
         self.m_dec   = InstructionDecoder(alsru_cls)
         self.m_arb   = BusArbiter()
         self.m_alsru = alsru_cls(width=16)
@@ -249,6 +251,7 @@ class CoreFSM(Elaboratable):
                     m.d.sync += self.r_w .eq(m_alsru.o >> 3)
                 with m.If(m_dec.o_jump):
                     m.d.sync += self.r_pc.eq(m_alsru.o)
+                m.d.comb += self.o_done.eq(1)
                 m.next = "FETCH"
 
         return m
