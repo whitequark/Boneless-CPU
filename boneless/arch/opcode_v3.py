@@ -25,7 +25,9 @@ __all__ = [
 
 # Instruction formats
 class F_RRR  (Instr): coding = "-----DDDAAA--BBB"; operands = "{rsd:R}, {ra:R}, {rb:R}"
+class F_XRR  (Instr): coding = "-----000AAA--BBB"; operands = "{ra:R}, {rb:R}"
 class F_RR3A (Instr): coding = "-----DDDAAA--iii"; operands = "{rsd:R}, {ra:R}, {imm:I3AL}"
+class F_XR3A (Instr): coding = "-----000AAA--iii"; operands = "{ra:R}, {imm:I3AL}"
 class F_RR3S (Instr): coding = "-----DDDAAA--iii"; operands = "{rsd:R}, {ra:R}, {imm:I3SR}"
 class F_RR5  (Instr): coding = "-----DDDAAAiiiii"; operands = "{rsd:R}, {ra:R}, {imm:I5}"
 class F_RR   (Instr): coding = "-----DDD---00BBB"; operands = "{rsd:R}, {rb:R}"
@@ -105,8 +107,8 @@ class OR  (C_LOGIC, M_RRR, T_OR,    F_RRR ): pass
 class ORI (C_LOGIC, M_RRI, T_OR,    F_RR3A): pass
 class XOR (C_LOGIC, M_RRR, T_XOR,   F_RRR ): pass
 class XORI(C_LOGIC, M_RRI, T_XOR,   F_RR3A): pass
-class CMP (C_LOGIC, M_RRR, T_CMP,   F_RRR ): pass
-class CMPI(C_LOGIC, M_RRI, T_CMP,   F_RR3A): pass
+class CMP (C_LOGIC, M_RRR, T_CMP,   F_XRR ): pass
+class CMPI(C_LOGIC, M_RRI, T_CMP,   F_XR3A): pass
 
 class ADD (C_ARITH, M_RRR, T_ADD,   F_RRR ): pass
 class ADDI(C_ARITH, M_RRI, T_ADD,   F_RR3A): pass
