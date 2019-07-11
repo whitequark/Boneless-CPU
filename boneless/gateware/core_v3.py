@@ -327,9 +327,10 @@ class CoreFSM(Elaboratable):
                         m.d.comb += m_arb.c_op.eq(m_arb.Op.ST_RSD)
                 with m.Switch(m_dec.o_st_f):
                     with m.Case(m_dec.StF.ZS):
-                        m.d.sync += self.r_f["z","s"]        .eq(self.s_f["z","s"])
+                        m.d.sync += self.r_f["z","s"].eq(self.s_f["z","s"])
                     with m.Case(m_dec.StF.ZSCV):
-                        m.d.sync += self.r_f["z","s","c","v"].eq(self.s_f["z","s","c","v"])
+                        m.d.sync += self.r_f["z","s"].eq(self.s_f["z","s"])
+                        m.d.sync += self.r_f["c","v"].eq(self.s_f["c","v"])
                 with m.If(m_dec.o_st_w):
                     m.d.sync += self.r_w.eq(m_alsru.o >> 3)
                 with m.If(self.o_done):
