@@ -249,6 +249,8 @@ class CoreFSM(Elaboratable):
                 m.d.sync += self.r_insn.eq(m_arb.o_data)
                 m.d.comb += m_dec.i_insn.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_ld_a):
+                    with m.Case(m_dec.LdA.RSD):
+                        m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_RSD)
                     with m.Case(m_dec.LdA.RA):
                         m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_RA)
                 m.next = "LOAD-B"
@@ -261,7 +263,7 @@ class CoreFSM(Elaboratable):
                         m.d.sync += self.r_a.eq(self.r_w << 3)
                     with m.Case(m_dec.LdA.PCp1):
                         m.d.sync += self.r_a.eq(self.r_pc)
-                    with m.Case(m_dec.LdA.RA):
+                    with m.Case(m_dec.LdA.RSD, m_dec.LdA.RA):
                         m.d.sync += self.r_a.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_ld_b):
                     with m.Case(m_dec.LdB.ApI):

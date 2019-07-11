@@ -77,6 +77,7 @@ class InstructionDecoder(Elaboratable):
         ZERO  = 0b0_00
         W     = 0b0_01
         PCp1  = 0b0_10
+        RSD   = 0b1_01
         RA    = 0b1_10
 
     class LdB(ControlEnum):
@@ -414,14 +415,14 @@ class InstructionDecoder(Elaboratable):
                     # Jumps
                     with m.Case(opcode.T_JR.coding):
                         m.d.comb += [
-                            self.o_ld_a.eq(self.LdA.RA),
+                            self.o_ld_a.eq(self.LdA.RSD),
                             self.o_ld_b.eq(self.LdB.IMM),
                             self.o_op.eq(alsru_cls.Op.ApB),
                             self.o_st_pc.eq(1),
                         ]
                     with m.Case(opcode.T_JV.coding):
                         m.d.comb += [
-                            self.o_ld_a.eq(self.LdA.RA),
+                            self.o_ld_a.eq(self.LdA.RSD),
                             self.o_ld_b.eq(self.LdB.ApI),
                             self.o_op.eq(alsru_cls.Op.ApB),
                             self.o_st_pc.eq(1),
@@ -430,7 +431,7 @@ class InstructionDecoder(Elaboratable):
                         m.d.comb += [
                             m_imm.c_addpc.eq(1),
                             self.o_multi.eq(1),
-                            self.o_ld_a.eq(self.LdA.RA),
+                            self.o_ld_a.eq(self.LdA.RSD),
                             self.o_ld_b.eq(self.LdB.ApI),
                             self.o_op.eq(alsru_cls.Op.ApB),
                             self.o_st_pc.eq(1),
