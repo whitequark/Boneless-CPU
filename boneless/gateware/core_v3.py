@@ -39,6 +39,32 @@ class CondSelector(Elaboratable):
         return m
 
 
+class ShiftSequencer(Elaboratable):
+    def __init__(self, width=4):
+        self.i_shamt = Signal(width)
+        self.o_done  = Signal()
+
+        self.c_en    = Signal()
+        self.c_load  = Signal()
+
+        self.r_shamt = Signal(width)
+
+    def elaborate(self, platform):
+        m = Module()
+
+        s_next = Signal.like(self.r_shamt)
+        with m.If(self.c_load):
+            m.d.comb += s_next.eq(self.i_shamt)
+        with m.Else():
+            m.d.comb += s_next.eq(self.r_shamt - 1)
+
+        with m.If(self.c_en):
+            m.d.comb += self.o_done.eq(s_next == 0)
+            m.d.sync += self.r_shamt.eq(s_next)
+
+        return m
+
+
 class BusArbiter(Elaboratable):
     class MuxAddr(ControlEnum):
         REG = 0b0
@@ -155,12 +181,14 @@ class CoreFSM(Elaboratable):
         self.s_b     = Signal(16)
         self.s_f     = Record(self.r_f.layout)
 
+        self.r_cycle = Signal(1)
         self.o_done  = Signal()
 
         self.m_dec   = InstructionDecoder(alsru_cls)
         self.m_csel  = CondSelector()
         self.m_arb   = BusArbiter()
         self.m_alsru = alsru_cls(width=16)
+        self.m_shift = ShiftSequencer()
 
         self.o_bus_addr = self.m_arb.o_bus_addr
 
@@ -194,6 +222,7 @@ class CoreFSM(Elaboratable):
         m.submodules.dec = m_dec = self.m_dec
         m.d.comb += [
             m_dec.i_pc.eq(self.r_pc),
+            m_dec.c_cycle.eq(self.r_cycle),
         ]
 
         m.submodules.csel = m_csel = self.m_csel
@@ -240,6 +269,11 @@ class CoreFSM(Elaboratable):
                 m.d.comb += m_alsru.si.eq(0)
             with m.Case(m_dec.SI.MSB):
                 m.d.comb += m_alsru.si.eq(m_alsru.r[-1])
+
+        m.submodules.shift = m_shift = self.m_shift
+        m.d.comb += [
+            m_shift.i_shamt.eq(self.s_b),
+        ]
 
         with m.FSM():
             m.d.comb += m_dec.i_insn.eq(self.r_insn)
@@ -297,13 +331,23 @@ class CoreFSM(Elaboratable):
                     with m.Case(m_dec.StF.ZSCV):
                         m.d.sync += self.r_f["z","s","c","v"].eq(self.s_f["z","s","c","v"])
                 with m.If(m_dec.o_st_w):
-                    m.d.sync += self.r_w .eq(m_alsru.o >> 3)
-                with m.If(m_dec.o_st_pc):
-                    m.d.sync += self.r_pc.eq(m_alsru.o)
+                    m.d.sync += self.r_w.eq(m_alsru.o >> 3)
+                with m.If(self.o_done):
+                    with m.If(m_dec.o_st_pc):
+                        m.d.sync += self.r_pc.eq(m_alsru.o)
+                    with m.Else():
+                        m.d.sync += self.r_pc.eq(m_dec.o_pc_p1)
+                with m.If(m_dec.o_shift):
+                    m.d.comb += m_shift.c_en.eq(1)
+                    m.d.comb += m_shift.c_load.eq(self.r_cycle == 0)
+                    m.d.comb += self.o_done.eq(m_shift.o_done)
                 with m.Else():
-                    m.d.sync += self.r_pc.eq(m_dec.o_pc_p1)
-                m.d.comb += self.o_done.eq(1)
-                m.next = "FETCH"
+                    m.d.comb += self.o_done.eq(1)
+                with m.If(self.o_done):
+                    m.d.sync += self.r_cycle.eq(0)
+                    m.next = "FETCH"
+                with m.Else():
+                    m.d.sync += self.r_cycle.eq(1)
 
         return m
 

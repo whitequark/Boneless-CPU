@@ -129,6 +129,7 @@ class InstructionDecoder(Elaboratable):
         self.i_pc    = Signal(16)
         self.i_insn  = Signal(16, decoder=self._insn_decoder)
 
+        self.c_cycle = Signal(1)
         self.c_done  = Signal()
 
         self.o_pc_p1 = Signal(16)
@@ -313,6 +314,8 @@ class InstructionDecoder(Elaboratable):
                             self.o_si.eq(self.SI.MSB),
                             self.o_op.eq(alsru_cls.Op.SR),
                         ]
+                with m.If(self.c_cycle == 0):
+                    m.d.comb += self.o_op.eq(alsru_cls.Op.A)
 
             with m.Case(opcode.C_LD.coding, opcode.C_ST.coding):
                 m.d.comb += [
