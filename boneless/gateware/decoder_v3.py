@@ -29,7 +29,7 @@ class ImmediateDecoder(Elaboratable):
         self.c_exti  = Signal()
         self.c_table = self.Table.signal()
         self.c_width = self.Width.signal()
-        self.c_addpc = Signal()
+        self.c_pcrel = Signal()
 
         self.r_ext13 = Signal(13)
 
@@ -62,8 +62,8 @@ class ImmediateDecoder(Elaboratable):
             with m.Case(self.Width.IMM16):
                 m.d.comb += s_imm16.eq(Cat(d_imm3, self.r_ext13))
 
-        with m.If(self.c_addpc):
-            m.d.comb += self.o_imm16.eq(s_imm16 + self.i_pc)
+        with m.If(self.c_pcrel):
+            m.d.comb += self.o_imm16.eq(s_imm16 + self.i_pc + 1)
         with m.Else():
             m.d.comb += self.o_imm16.eq(s_imm16)
 
@@ -322,9 +322,9 @@ class InstructionDecoder(Elaboratable):
                 ]
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.M_ABS.coding):
-                        m.d.comb += m_imm.c_addpc.eq(0)
+                        m.d.comb += m_imm.c_pcrel.eq(0)
                     with m.Case(opcode.M_REL.coding):
-                        m.d.comb += m_imm.c_addpc.eq(1)
+                        m.d.comb += m_imm.c_pcrel.eq(1)
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.C_LD.coding):
                         m.d.comb += [
@@ -368,9 +368,9 @@ class InstructionDecoder(Elaboratable):
             with m.Case(opcode.C_MOVE.coding):
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.M_ABS.coding):
-                        m.d.comb += m_imm.c_addpc.eq(0)
+                        m.d.comb += m_imm.c_pcrel.eq(0)
                     with m.Case(opcode.M_REL.coding):
-                        m.d.comb += m_imm.c_addpc.eq(1)
+                        m.d.comb += m_imm.c_pcrel.eq(1)
                 m.d.comb += [
                     m_imm.c_width.eq(m_imm.Width.IMM8),
                     self.o_ld_a.eq(self.LdA.ZERO),
@@ -429,7 +429,7 @@ class InstructionDecoder(Elaboratable):
                         ]
                     with m.Case(opcode.T_JT.coding):
                         m.d.comb += [
-                            m_imm.c_addpc.eq(1),
+                            m_imm.c_pcrel.eq(1),
                             self.o_multi.eq(1),
                             self.o_ld_a.eq(self.LdA.RSD),
                             self.o_ld_b.eq(self.LdB.ApI),
@@ -497,7 +497,7 @@ if __name__ == "__main__":
         ports = (
             dut.i_pc, dut.i_insn,
             dut.o_imm16,
-            dut.c_exti, dut.c_table, dut.c_width, dut.c_addpc,
+            dut.c_exti, dut.c_table, dut.c_width, dut.c_pcrel,
         )
 
     if args.type == "instruction":

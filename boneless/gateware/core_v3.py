@@ -240,7 +240,6 @@ class CoreFSM(Elaboratable):
             m.d.comb += m_dec.i_insn.eq(self.r_insn)
 
             with m.State("FETCH"):
-                m.d.sync += self.r_pc.eq(m_dec.o_pc_p1)
                 m.d.comb += m_dec.c_done.eq(1)
                 m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_PC)
                 m.next = "LOAD-A"
@@ -262,12 +261,12 @@ class CoreFSM(Elaboratable):
                     with m.Case(m_dec.LdA.W):
                         m.d.sync += self.r_a.eq(self.r_w << 3)
                     with m.Case(m_dec.LdA.PCp1):
-                        m.d.sync += self.r_a.eq(self.r_pc)
+                        m.d.sync += self.r_a.eq(m_dec.o_pc_p1)
                     with m.Case(m_dec.LdA.RSD, m_dec.LdA.RA):
                         m.d.sync += self.r_a.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_ld_b):
                     with m.Case(m_dec.LdB.ApI):
-                        m.d.comb += m_arb.i_ptr.eq(self.m_arb.o_data + m_dec.o_imm16)
+                        m.d.comb += m_arb.i_ptr.eq(m_arb.o_data + m_dec.o_imm16)
                         m.d.comb += m_arb.c_op.eq(
                             Mux(m_dec.o_xbus, m_arb.Op.LD_EXT, m_arb.Op.LD_MEM))
                     with m.Case(m_dec.LdB.RSD):
@@ -298,6 +297,8 @@ class CoreFSM(Elaboratable):
                     m.d.sync += self.r_w .eq(m_alsru.o >> 3)
                 with m.If(m_dec.o_st_pc):
                     m.d.sync += self.r_pc.eq(m_alsru.o)
+                with m.Else():
+                    m.d.sync += self.r_pc.eq(m_dec.o_pc_p1)
                 m.d.comb += self.o_done.eq(1)
                 m.next = "FETCH"
 
