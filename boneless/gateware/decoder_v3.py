@@ -71,7 +71,7 @@ class ImmediateDecoder(Elaboratable):
 
 
 class InstructionDecoder(Elaboratable):
-    CTRL_LD_PTR     = 0b1_00
+    LdX_PTR = "1--"
 
     class LdA(ControlEnum):
         ZERO  = 0b0_00

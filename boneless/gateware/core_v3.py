@@ -262,7 +262,7 @@ class CoreFSM(Elaboratable):
                         m.d.sync += self.r_a.eq(self.r_w << 3)
                     with m.Case(m_dec.LdA.PCp1):
                         m.d.sync += self.r_a.eq(m_dec.o_pc_p1)
-                    with m.Case(m_dec.LdA.RSD, m_dec.LdA.RA):
+                    with m.Case(m_dec.LdX_PTR):
                         m.d.sync += self.r_a.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_ld_b):
                     with m.Case(m_dec.LdB.ApI):
@@ -279,7 +279,7 @@ class CoreFSM(Elaboratable):
                 with m.Switch(m_dec.o_ld_b):
                     with m.Case(m_dec.LdB.IMM):
                         m.d.comb += self.s_b.eq(m_dec.o_imm16)
-                    with m.Case(m_dec.LdB.ApI, m_dec.LdB.RSD, m_dec.LdB.RB):
+                    with m.Case(m_dec.LdX_PTR):
                         m.d.comb += self.s_b.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_st_r):
                     with m.Case(m_dec.StR.ApI):
