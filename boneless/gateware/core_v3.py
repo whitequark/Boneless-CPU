@@ -148,6 +148,7 @@ class CoreFSM(Elaboratable):
         self.r_f     = Record([("z", 1), ("s", 1), ("c", 1), ("v", 1)])
 
         self.r_insn  = Signal(16)
+        self.s_base  = Signal(16)
         self.r_a     = Signal(16)
         self.s_b     = Signal(16)
         self.s_f     = Record(self.r_f.layout)
@@ -206,6 +207,7 @@ class CoreFSM(Elaboratable):
             m_arb.i_rsd.eq(m_dec.o_rsd),
             m_arb.i_ra .eq(m_dec.o_ra),
             m_arb.i_rb .eq(m_dec.o_rb),
+            m_arb.i_ptr.eq(self.s_base + m_dec.o_imm16)
         ]
 
         m.submodules.alsru = m_alsru = self.m_alsru
@@ -238,6 +240,7 @@ class CoreFSM(Elaboratable):
 
         with m.FSM():
             m.d.comb += m_dec.i_insn.eq(self.r_insn)
+            m.d.comb += self.s_base.eq(self.r_a)
 
             with m.State("FETCH"):
                 m.d.comb += m_dec.c_done.eq(1)
@@ -264,9 +267,9 @@ class CoreFSM(Elaboratable):
                         m.d.sync += self.r_a.eq(m_dec.o_pc_p1)
                     with m.Case(m_dec.LdX_PTR):
                         m.d.sync += self.r_a.eq(m_arb.o_data)
+                m.d.comb += self.s_base.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_ld_b):
                     with m.Case(m_dec.LdB.ApI):
-                        m.d.comb += m_arb.i_ptr.eq(m_arb.o_data + m_dec.o_imm16)
                         m.d.comb += m_arb.c_op.eq(
                             Mux(m_dec.o_xbus, m_arb.Op.LD_EXT, m_arb.Op.LD_MEM))
                     with m.Case(m_dec.LdB.RSD):
@@ -283,7 +286,6 @@ class CoreFSM(Elaboratable):
                         m.d.comb += self.s_b.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_st_r):
                     with m.Case(m_dec.StR.ApI):
-                        m.d.comb += m_arb.i_ptr.eq(self.r_a + m_dec.o_imm16)
                         m.d.comb += m_arb.c_op.eq(
                             Mux(m_dec.o_xbus, m_arb.Op.ST_EXT, m_arb.Op.ST_MEM))
                     with m.Case(m_dec.StR.RSD):
