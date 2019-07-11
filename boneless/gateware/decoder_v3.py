@@ -239,6 +239,7 @@ class InstructionDecoder(Elaboratable):
                         m.d.comb += [
                             self.o_ci.eq(self.CI.ONE),
                             self.o_op.eq(alsru_cls.Op.AmB),
+                            self.o_st_r.eq(self.StR.x),
                             self.o_st_f.eq(self.StF.ZSCV),
                         ]
 
