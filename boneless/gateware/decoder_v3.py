@@ -141,14 +141,14 @@ class InstructionDecoder(Elaboratable):
         self.o_shift = Signal() # shift multicycle instruction
         self.o_multi = Signal() # other multicycle instruction
         self.o_xbus  = Signal() # load/store external instruction
-        self.o_wind  = Signal() # window instruction
-        self.o_jump  = Signal() # jump instruction
         self.o_skip  = Signal() # skip load/execute/store
 
         self.o_ld_a  = self.LdA.signal()
         self.o_ld_b  = self.LdB.signal()
         self.o_st_r  = self.StR.signal()
         self.o_st_f  = self.StF.signal()
+        self.o_st_w  = Signal()
+        self.o_st_pc = Signal()
 
         self.o_op    = alsru_cls.Op.signal()
         self.o_ci    = self.CI.signal()
@@ -382,8 +382,8 @@ class InstructionDecoder(Elaboratable):
                                 opcode.T_ADJW.coding, opcode.T_LDW.coding):
                         m.d.comb += [
                             self.o_multi.eq(1),
-                            self.o_wind.eq(1),
                             self.o_ld_a.eq(self.LdA.W),
+                            self.o_st_w.eq(1),
                         ]
                 with m.Switch(self.i_insn):
                     # Window operations
@@ -412,46 +412,46 @@ class InstructionDecoder(Elaboratable):
                     # Jumps
                     with m.Case(opcode.T_JR.coding):
                         m.d.comb += [
-                            self.o_jump.eq(1),
                             self.o_ld_a.eq(self.LdA.RA),
                             self.o_ld_b.eq(self.LdB.IMM),
                             self.o_op.eq(alsru_cls.Op.ApB),
+                            self.o_st_pc.eq(1),
                         ]
                     with m.Case(opcode.T_JV.coding):
                         m.d.comb += [
-                            self.o_jump.eq(1),
                             self.o_ld_a.eq(self.LdA.RA),
                             self.o_ld_b.eq(self.LdB.ApI),
                             self.o_op.eq(alsru_cls.Op.ApB),
+                            self.o_st_pc.eq(1),
                         ]
                     with m.Case(opcode.T_JT.coding):
                         m.d.comb += [
                             m_imm.c_addpc.eq(1),
                             self.o_multi.eq(1),
-                            self.o_jump.eq(1),
                             self.o_ld_a.eq(self.LdA.RA),
                             self.o_ld_b.eq(self.LdB.ApI),
                             self.o_op.eq(alsru_cls.Op.ApB),
+                            self.o_st_pc.eq(1),
                         ]
 
             with m.Case(opcode.C_JAL.coding):
                 m.d.comb += [
                     m_imm.c_width.eq(m_imm.Width.IMM8),
                     self.o_multi.eq(1),
-                    self.o_jump.eq(1),
                     self.o_ld_a.eq(self.LdA.PCp1),
                     self.o_ld_b.eq(self.LdB.IMM),
                     self.o_op.eq(alsru_cls.Op.ApB),
                     self.o_st_r.eq(self.StR.RSD),
+                    self.o_st_pc.eq(1),
                 ]
 
             with m.Case(opcode.C_JCOND.coding):
                 m.d.comb += [
                     m_imm.c_width.eq(m_imm.Width.IMM8),
-                    self.o_jump.eq(1),
                     self.o_ld_a.eq(self.LdA.PCp1),
                     self.o_ld_b.eq(self.LdB.IMM),
                     self.o_op.eq(alsru_cls.Op.A), # not taken
+                    self.o_st_pc.eq(1),
                 ]
 
             with m.Case(opcode.C_EXT.coding):
@@ -501,8 +501,8 @@ if __name__ == "__main__":
         ports = (
             dut.i_pc, dut.i_insn,
             dut.o_pc_p1, dut.o_imm16, dut.o_rsd, dut.o_ra, dut.o_rb, dut.o_cond, dut.o_flag,
-            dut.o_shift, dut.o_multi, dut.o_xbus, dut.o_wind, dut.o_jump, dut.o_skip,
-            dut.o_ld_a, dut.o_ld_b, dut.o_st_r,
+            dut.o_shift, dut.o_multi, dut.o_xbus, dut.o_skip,
+            dut.o_ld_a, dut.o_ld_b, dut.o_st_r, dut.o_st_w, dut.o_st_pc,
             dut.o_op, dut.o_ci, dut.o_si,
         )
 

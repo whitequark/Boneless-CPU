@@ -197,8 +197,8 @@ class CoreFSM(Elaboratable):
             m.d.comb += m_dec.i_insn.eq(self.r_insn)
 
             with m.State("FETCH"):
-                m.d.comb += m_dec.c_done.eq(1)
                 m.d.sync += self.r_pc.eq(m_dec.o_pc_p1)
+                m.d.comb += m_dec.c_done.eq(1)
                 m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_PC)
                 m.next = "LOAD-A"
 
@@ -249,9 +249,9 @@ class CoreFSM(Elaboratable):
                         m.d.sync += self.r_f["z","s"]        .eq(self.s_f["z","s"])
                     with m.Case(m_dec.StF.ZSCV):
                         m.d.sync += self.r_f["z","s","c","v"].eq(self.s_f["z","s","c","v"])
-                with m.If(m_dec.o_wind):
+                with m.If(m_dec.o_st_w):
                     m.d.sync += self.r_w .eq(m_alsru.o >> 3)
-                with m.If(m_dec.o_jump):
+                with m.If(m_dec.o_st_pc):
                     m.d.sync += self.r_pc.eq(m_alsru.o)
                 m.d.comb += self.o_done.eq(1)
                 m.next = "FETCH"
