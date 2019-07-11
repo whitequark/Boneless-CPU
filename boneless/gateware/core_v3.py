@@ -7,6 +7,38 @@ from .decoder_v3 import InstructionDecoder
 __all__ = ["BusArbiter", "CoreFSM"]
 
 
+class CondSelector(Elaboratable):
+    Cond = InstructionDecoder.Cond
+
+    def __init__(self):
+        self.i_f    = Record([("z", 1), ("s", 1), ("c", 1), ("v", 1)])
+        self.c_cond = self.Cond.signal()
+        self.o_flag = Signal()
+
+    def elaborate(self, platform):
+        m = Module()
+
+        with m.Switch(self.c_cond):
+            with m.Case(self.Cond.Z):
+                m.d.comb += self.o_flag.eq(self.i_f.z)
+            with m.Case(self.Cond.S):
+                m.d.comb += self.o_flag.eq(self.i_f.s)
+            with m.Case(self.Cond.C):
+                m.d.comb += self.o_flag.eq(self.i_f.c)
+            with m.Case(self.Cond.V):
+                m.d.comb += self.o_flag.eq(self.i_f.v)
+            with m.Case(self.Cond.nCoZ):
+                m.d.comb += self.o_flag.eq(~self.i_f.c | self.i_f.z)
+            with m.Case(self.Cond.SxV):
+                m.d.comb += self.o_flag.eq(self.i_f.s ^ self.i_f.v)
+            with m.Case(self.Cond.SxVoZ):
+                m.d.comb += self.o_flag.eq((self.i_f.s ^ self.i_f.v) | self.i_f.z)
+            with m.Case(self.Cond.A):
+                m.d.comb += self.o_flag.eq(1)
+
+        return m
+
+
 class BusArbiter(Elaboratable):
     class MuxAddr(ControlEnum):
         REG = 0b0
@@ -123,6 +155,7 @@ class CoreFSM(Elaboratable):
         self.o_done  = Signal()
 
         self.m_dec   = InstructionDecoder(alsru_cls)
+        self.m_csel  = CondSelector()
         self.m_arb   = BusArbiter()
         self.m_alsru = alsru_cls(width=16)
 
@@ -160,6 +193,12 @@ class CoreFSM(Elaboratable):
             m_dec.i_pc.eq(self.r_pc),
         ]
 
+        m.submodules.csel = m_csel = self.m_csel
+        m.d.comb += [
+            m_csel.i_f.eq(self.r_f),
+            m_csel.c_cond.eq(m_dec.o_cond),
+        ]
+
         m.submodules.arb = m_arb = self.m_arb
         m.d.comb += [
             m_arb.i_pc.eq(self.r_pc),
@@ -180,6 +219,10 @@ class CoreFSM(Elaboratable):
             self.s_f.c.eq(m_alsru.co),
             self.s_f.v.eq(m_alsru.vo),
         ]
+        with m.If(m_dec.o_jcc):
+            assert (m_alsru.Op.A | m_alsru.Op.ApB) == m_alsru.Op.ApB
+            with m.If(m_dec.o_flag == m_csel.o_flag):
+                m.d.comb += m_alsru.op.eq(m_dec.o_op | m_alsru.Op.ApB)
         with m.Switch(m_dec.o_ci):
             with m.Case(m_dec.CI.ZERO):
                 m.d.comb += m_alsru.ci.eq(0)
@@ -268,10 +311,21 @@ if __name__ == "__main__":
     from .alsru import ALSRU_4LUT
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("type", choices=["bus-arbiter", "core-fsm", "core-fsm+memory"])
+    parser.add_argument("type", choices=[
+        "cond-selector", "bus-arbiter",
+        "core-fsm", "core-fsm+memory"
+    ])
     cli.main_parser(parser)
 
     args = parser.parse_args()
+
+    if args.type == "cond-selector":
+        dut = CondSelector()
+        ports = (
+            dut.i_f.z, dut.i_f.s, dut.i_f.c, dut.i_f.v,
+            dut.c_cond,
+            dut.o_flag
+        )
 
     if args.type == "bus-arbiter":
         dut = BusArbiter()

@@ -140,7 +140,8 @@ class InstructionDecoder(Elaboratable):
 
         self.o_shift = Signal() # shift multicycle instruction
         self.o_multi = Signal() # other multicycle instruction
-        self.o_xbus  = Signal() # load/store external instruction
+        self.o_xbus  = Signal() # use external bus for load/store
+        self.o_jcc   = Signal() # select ALU operation based on cond/flag
         self.o_skip  = Signal() # skip load/execute/store
 
         self.o_ld_a  = self.LdA.signal()
@@ -448,6 +449,7 @@ class InstructionDecoder(Elaboratable):
             with m.Case(opcode.C_JCOND.coding):
                 m.d.comb += [
                     m_imm.c_width.eq(m_imm.Width.IMM8),
+                    self.o_jcc.eq(1),
                     self.o_ld_a.eq(self.LdA.PCp1),
                     self.o_ld_b.eq(self.LdB.IMM),
                     self.o_op.eq(alsru_cls.Op.A), # not taken
