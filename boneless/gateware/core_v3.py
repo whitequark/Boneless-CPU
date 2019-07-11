@@ -137,10 +137,8 @@ class BusArbiter(Elaboratable):
 
         m.d.comb += self.o_mem_data.eq(self.i_data)
         m.d.comb += self.o_ext_data.eq(self.i_data)
-        with m.If(r_mem_re):
-            m.d.comb += self.o_data.eq(self.i_mem_data)
-        with m.If(r_ext_re):
-            m.d.comb += self.o_data.eq(self.i_ext_data)
+        m.d.comb += self.o_data.eq((Repl(r_mem_re, 16) & self.i_mem_data) |
+                                   (Repl(r_ext_re, 16) & self.i_ext_data))
 
         return m
 
