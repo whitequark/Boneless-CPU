@@ -16,7 +16,7 @@ __all__ = [
     "LD",   "LDR",  "ST",   "STR",  "LDX",  "LDXA", "STX",  "STXA",
     "MOVI", "MOVR",
     "STW",  "SWPW", "ADJW", "LDW",
-    "JR",   "JV",   "JT",   "JAL",
+    "JR",   "JALR", "JV",   "JT",   "JAL",
     "JNZ",  "JZ",   "JNS",  "JS",   "JNC",  "JC",   "JNO",  "JO",   "JN",   "J",
     "JNE",  "JE",   "JULT", "JUGE", "JUGT", "JULE", "JSGE", "JSLT", "JSGT", "JSLE",
     "EXTI"
@@ -75,7 +75,7 @@ class C_LDW  (Instr): coding = "10100---011-----"
 
 # Jump opcodes
 class C_JR   (Instr): coding = "10100---100-----"
-# class C_?  (Instr): coding = "10100---101-----"
+class C_JALR (Instr): coding = "10100---101-----"
 class C_JV   (Instr): coding = "10100---110-----"
 class C_JT   (Instr): coding = "10100---111-----"; pc_rel_ops = {"imm"}
 class C_JAL  (Instr): coding = "10101-----------"; pc_rel_ops = {"imm"}
@@ -153,7 +153,7 @@ class LDW (C_LDW,                   F_R5  ): pass
 
 # Jump instructions
 class JR  (C_JR,                    F_R5  ): pass
-# class ? (C_?,                     F_R5  ): pass
+class JALR(C_JALR,                  F_RR  ): pass
 class JV  (C_JV,                    F_R5  ): pass
 class JT  (C_JT,                    F_R5  ): pass
 class JAL (C_JAL,                   F_R8  ): pass
