@@ -282,7 +282,6 @@ class InstructionDecoder(Elaboratable):
             with m.Case(opcode.C_SHIFT.coding):
                 m.d.comb += [
                     m_imm.c_width.eq(m_imm.Width.IMM3),
-                    self.o_multi.eq(1),
                     self.o_shift.eq(1),
                     self.o_ld_a.eq(self.LdA.RA),
                     self.o_st_r.eq(self.StR.RSD),
@@ -382,63 +381,76 @@ class InstructionDecoder(Elaboratable):
                     self.o_st_r.eq(self.StR.RSD),
                 ]
 
-            with m.Case(opcode.C_FLOW.coding):
+            with m.Case(opcode.C_STW.coding,  opcode.C_SWPW.coding,
+                        opcode.C_ADJW.coding, opcode.C_LDW.coding):
+                m.d.comb += [
+                    m_imm.c_width.eq(m_imm.Width.IMM5),
+                    self.o_multi.eq(1),
+                    self.o_ld_a.eq(self.LdA.W),
+                ]
                 with m.Switch(self.i_insn):
-                    with m.Case(opcode.T_STW.coding,  opcode.T_SWPW.coding,
-                                opcode.T_ADJW.coding, opcode.T_LDW.coding):
-                        m.d.comb += [
-                            self.o_multi.eq(1),
-                            self.o_ld_a.eq(self.LdA.W),
-                            self.o_st_w.eq(1),
-                        ]
-                with m.Switch(self.i_insn):
-                    # Window operations
-                    with m.Case(opcode.T_STW.coding):
+                    with m.Case(opcode.C_STW.coding):
                         m.d.comb += [
                             self.o_ld_b.eq(self.LdB.RB),
                             self.o_op.eq(alsru_cls.Op.B),
                         ]
-                    with m.Case(opcode.T_SWPW.coding):
+                    with m.Case(opcode.C_SWPW.coding):
                         m.d.comb += [
                             self.o_ld_b.eq(self.LdB.RB),
                             self.o_op.eq(alsru_cls.Op.B),
                             self.o_st_r.eq(self.StR.RSD),
                         ]
-                    with m.Case(opcode.T_ADJW.coding):
+                    with m.Case(opcode.C_ADJW.coding):
                         m.d.comb += [
                             self.o_ld_b.eq(self.LdB.IMM),
                             self.o_op.eq(alsru_cls.Op.ApB),
                         ]
-                    with m.Case(opcode.T_LDW.coding):
+                    with m.Case(opcode.C_LDW.coding):
                         m.d.comb += [
                             self.o_ld_b.eq(self.LdB.IMM),
                             self.o_op.eq(alsru_cls.Op.ApB),
                             self.o_st_r.eq(self.StR.RSD),
                         ]
-                    # Jumps
-                    with m.Case(opcode.T_JR.coding):
-                        m.d.comb += [
-                            self.o_ld_a.eq(self.LdA.RSD),
-                            self.o_ld_b.eq(self.LdB.IMM),
-                            self.o_op.eq(alsru_cls.Op.ApB),
-                            self.o_st_pc.eq(1),
-                        ]
-                    with m.Case(opcode.T_JV.coding):
-                        m.d.comb += [
-                            self.o_ld_a.eq(self.LdA.RSD),
-                            self.o_ld_b.eq(self.LdB.ApI),
-                            self.o_op.eq(alsru_cls.Op.ApB),
-                            self.o_st_pc.eq(1),
-                        ]
-                    with m.Case(opcode.T_JT.coding):
-                        m.d.comb += [
-                            m_imm.c_pcrel.eq(1),
-                            self.o_multi.eq(1),
-                            self.o_ld_a.eq(self.LdA.RSD),
-                            self.o_ld_b.eq(self.LdB.ApI),
-                            self.o_op.eq(alsru_cls.Op.ApB),
-                            self.o_st_pc.eq(1),
-                        ]
+                with m.If(self.c_cycle == 0):
+                    m.d.comb += [
+                        self.o_st_w.eq(1),
+                        self.o_st_r.eq(self.StR.x),
+                    ]
+                with m.Else():
+                    m.d.comb += [
+                        self.o_op.eq(alsru_cls.Op.A),
+                    ]
+
+            with m.Case(opcode.C_JR.coding):
+                m.d.comb += [
+                    m_imm.c_width.eq(m_imm.Width.IMM5),
+                    self.o_ld_a.eq(self.LdA.RSD),
+                    self.o_ld_b.eq(self.LdB.IMM),
+                    self.o_op.eq(alsru_cls.Op.ApB),
+                    self.o_st_pc.eq(1),
+                ]
+
+            # with m.Case(opcode.C_J?.coding):
+
+            with m.Case(opcode.C_JV.coding):
+                m.d.comb += [
+                    m_imm.c_width.eq(m_imm.Width.IMM5),
+                    self.o_ld_a.eq(self.LdA.RSD),
+                    self.o_ld_b.eq(self.LdB.ApI),
+                    self.o_op.eq(alsru_cls.Op.ApB),
+                    self.o_st_pc.eq(1),
+                ]
+
+            with m.Case(opcode.C_JT.coding):
+                m.d.comb += [
+                    m_imm.c_width.eq(m_imm.Width.IMM5),
+                    m_imm.c_pcrel.eq(1),
+                    self.o_multi.eq(1),
+                    self.o_ld_a.eq(self.LdA.RSD),
+                    self.o_ld_b.eq(self.LdB.ApI),
+                    self.o_op.eq(alsru_cls.Op.ApB),
+                    self.o_st_pc.eq(1),
+                ]
 
             with m.Case(opcode.C_JAL.coding):
                 m.d.comb += [

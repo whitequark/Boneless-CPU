@@ -342,6 +342,8 @@ class CoreFSM(Elaboratable):
                     m.d.comb += m_shift.c_en.eq(1)
                     m.d.comb += m_shift.c_load.eq(self.r_cycle == 0)
                     m.d.comb += self.o_done.eq(m_shift.o_done)
+                with m.Elif(m_dec.o_multi):
+                    m.d.comb += self.o_done.eq(self.r_cycle == 1)
                 with m.Else():
                     m.d.comb += self.o_done.eq(1)
                 with m.If(self.o_done):

@@ -31,7 +31,9 @@ class F_XR3A (Instr): coding = "-----000AAA--iii"; operands = "{ra:R}, {imm:I3AL
 class F_RR3S (Instr): coding = "-----DDDAAA--iii"; operands = "{rsd:R}, {ra:R}, {imm:I3SR}"
 class F_RR5  (Instr): coding = "-----DDDAAAiiiii"; operands = "{rsd:R}, {ra:R}, {imm:I5}"
 class F_RR   (Instr): coding = "-----DDD---00BBB"; operands = "{rsd:R}, {rb:R}"
+class F_XR   (Instr): coding = "-----000---00BBB"; operands = "{rb:R}"
 class F_R5   (Instr): coding = "-----DDD---iiiii"; operands = "{rsd:R}, {imm:I5}"
+class F_X5   (Instr): coding = "-----000---iiiii"; operands = "{imm:I5}"
 class F_R8   (Instr): coding = "-----DDDiiiiiiii"; operands = "{rsd:R}, {imm:I8}"
 class F_8    (Instr): coding = "--------iiiiiiii"; operands = "{imm:I8}"
 class F_13   (Instr): coding = "---iiiiiiiiiiiii"; operands = "{imm:I13}"
@@ -65,16 +67,17 @@ class C_LDX  (Instr): coding = "0110------------"
 class C_STX  (Instr): coding = "0111------------"
 class C_MOVE (Instr): coding = "1000------------"
 
-# Flow opcodes
-class C_FLOW (Instr): coding = "10100-----------"
-class T_STW  (Instr): coding = "--------000-----"
-class T_SWPW (Instr): coding = "--------001-----"
-class T_ADJW (Instr): coding = "--------010-----"
-class T_LDW  (Instr): coding = "--------011-----"
-class T_JR   (Instr): coding = "--------100-----"
-# class T_?  (Instr): coding = "--------101-----"
-class T_JV   (Instr): coding = "--------110-----"
-class T_JT   (Instr): coding = "--------111-----"; pc_rel_ops = {"imm"}
+# Window opcodes
+class C_STW  (Instr): coding = "10100---000-----"
+class C_SWPW (Instr): coding = "10100---001-----"
+class C_ADJW (Instr): coding = "10100---010-----"
+class C_LDW  (Instr): coding = "10100---011-----"
+
+# Jump opcodes
+class C_JR   (Instr): coding = "10100---100-----"
+# class C_?  (Instr): coding = "10100---101-----"
+class C_JV   (Instr): coding = "10100---110-----"
+class C_JT   (Instr): coding = "10100---111-----"; pc_rel_ops = {"imm"}
 class C_JAL  (Instr): coding = "10101-----------"; pc_rel_ops = {"imm"}
 
 # Conditional opcode
@@ -143,16 +146,16 @@ class MOVI(C_MOVE,  M_ABS,          F_R8  ): pass
 class MOVR(C_MOVE,  M_REL,          F_R8  ): pass
 
 # Window instructions
-class STW (C_FLOW,         T_STW,   F_RR  ): pass
-class SWPW(C_FLOW,         T_SWPW,  F_RR  ): pass
-class ADJW(C_FLOW,         T_ADJW,  F_R5  ): pass
-class LDW (C_FLOW,         T_LDW,   F_R5  ): pass
+class STW (C_STW,                   F_XR  ): pass
+class SWPW(C_SWPW,                  F_RR  ): pass
+class ADJW(C_ADJW,                  F_X5  ): pass
+class LDW (C_LDW,                   F_R5  ): pass
 
 # Jump instructions
-class JR  (C_FLOW,         T_JR,    F_R5  ): pass
-# class ? (C_FLOW,         T_?,     F_R5  ): pass
-class JV  (C_FLOW,         T_JV,    F_R5  ): pass
-class JT  (C_FLOW,         T_JT,    F_R5  ): pass
+class JR  (C_JR,                    F_R5  ): pass
+# class ? (C_?,                     F_R5  ): pass
+class JV  (C_JV,                    F_R5  ): pass
+class JT  (C_JT,                    F_R5  ): pass
 class JAL (C_JAL,                   F_R8  ): pass
 
 # Conditional instructions
