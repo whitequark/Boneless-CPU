@@ -4,7 +4,7 @@ from nmigen import *
 __all__ = ["BonelessFormalInterface"]
 
 
-class BonelessFormalInterface:
+class BonelessFormalInterface(Elaboratable):
     def __init__(self, mem_wrport=None, ext_port=None):
         self.mem_wrport = mem_wrport
         self.ext_port   = ext_port
@@ -52,4 +52,4 @@ class BonelessFormalInterface:
                 self.ext_w_data.eq(self.ext_port.w_data),
                 self.ext_w_en  .eq(self.ext_port.w_en),
             ]
-        return m.lower(platform)
+        return m

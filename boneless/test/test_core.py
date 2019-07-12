@@ -20,12 +20,12 @@ def simulation_test(**kwargs):
     return configure_wrapper
 
 
-class BonelessSimulationTestbench(Module):
+class BonelessSimulationTestbench(Elaboratable):
     def __init__(self):
         self.mem_init = []
         self.ext_init = []
 
-    def get_fragment(self, platform):
+    def elaborate(self, platform):
         m = Module()
 
         mem = self.mem = Memory(width=16, depth=len(self.mem_init), init=self.mem_init)
@@ -54,7 +54,7 @@ class BonelessSimulationTestbench(Module):
             mem_wrport=mem_wrport,
             ext_port  =ext_port)
 
-        return m.lower(platform)
+        return m
 
 
 class BonelessTestCase(unittest.TestCase):
