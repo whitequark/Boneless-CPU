@@ -314,7 +314,7 @@ class InstructionDecoder(Elaboratable):
                             self.o_op.eq(alsru_cls.Op.SR),
                         ]
                 with m.If(self.c_cycle == 0):
-                    m.d.comb += self.o_op.eq(alsru_cls.Op.A)
+                    m.d.comb += self.o_op.eq(alsru_cls.Op.A)    # overrides above
 
             with m.Case(opcode.C_LD.coding, opcode.C_ST.coding):
                 m.d.comb += [
@@ -412,14 +412,10 @@ class InstructionDecoder(Elaboratable):
                             self.o_st_r.eq(self.StR.RSD),
                         ]
                 with m.If(self.c_cycle == 0):
-                    m.d.comb += [
-                        self.o_st_w.eq(1),
-                        self.o_st_r.eq(self.StR.x),
-                    ]
-                with m.Else():
-                    m.d.comb += [
-                        self.o_op.eq(alsru_cls.Op.A),
-                    ]
+                    m.d.comb += self.o_st_w.eq(1)
+                    m.d.comb += self.o_st_r.eq(self.StR.x)      # overrides above
+                with m.If(self.c_cycle == 1):
+                    m.d.comb += self.o_op.eq(alsru_cls.Op.A)    # overrides above
 
             with m.Case(opcode.C_JR.coding):
                 m.d.comb += [
@@ -458,10 +454,13 @@ class InstructionDecoder(Elaboratable):
                     self.o_multi.eq(1),
                     self.o_ld_a.eq(self.LdA.PCp1),
                     self.o_ld_b.eq(self.LdB.IMM),
-                    self.o_op.eq(alsru_cls.Op.ApB),
-                    self.o_st_r.eq(self.StR.RSD),
                     self.o_st_pc.eq(1),
                 ]
+                with m.If(self.c_cycle == 0):
+                    m.d.comb += self.o_op.eq(alsru_cls.Op.A)
+                    m.d.comb += self.o_st_r.eq(self.StR.RSD)
+                with m.If(self.c_cycle == 1):
+                    m.d.comb += self.o_op.eq(alsru_cls.Op.ApB)
 
             with m.Case(opcode.C_JCOND.coding):
                 m.d.comb += [
@@ -469,7 +468,7 @@ class InstructionDecoder(Elaboratable):
                     self.o_jcc.eq(1),
                     self.o_ld_a.eq(self.LdA.PCp1),
                     self.o_ld_b.eq(self.LdB.IMM),
-                    self.o_op.eq(alsru_cls.Op.A), # not taken
+                    self.o_op.eq(alsru_cls.Op.A), # overridden in core if taken
                     self.o_st_pc.eq(1),
                 ]
 
