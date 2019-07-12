@@ -3,7 +3,7 @@ import functools
 import traceback
 import sys
 
-from ..arch.opcode_v3 import *
+from ..arch.opcode import *
 
 
 def simulation_test(case):

@@ -1,8 +1,8 @@
 import sys
 import argparse
 
-from .arch.asm_v3 import TranslationError
-from .arch.opcode_v3 import Instr
+from .arch.asm import TranslationError
+from .arch.opcode import Instr
 
 
 def as_options(parser):

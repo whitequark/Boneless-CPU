@@ -1,6 +1,6 @@
 import unittest
 
-from ..arch import mc, opcode_v3 as op
+from ..arch import mc, opcode as op
 
 
 class InstructionTestCase(unittest.TestCase):

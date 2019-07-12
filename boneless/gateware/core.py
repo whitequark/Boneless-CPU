@@ -1,7 +1,7 @@
 from nmigen import *
 
 from .control import *
-from .decoder_v3 import InstructionDecoder
+from .decoder import InstructionDecoder
 
 
 __all__ = ["BusArbiter", "CoreFSM"]

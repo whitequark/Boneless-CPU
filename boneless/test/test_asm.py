@@ -1,9 +1,9 @@
 from contextlib import contextmanager
 import unittest
 
-from ..arch.opcode_v3 import Instr
-from ..arch.opcode_v3 import *
-from ..arch.asm_v3 import TranslationError
+from ..arch.opcode import Instr
+from ..arch.opcode import *
+from ..arch.asm import TranslationError
 
 
 class AssemblerTestCase(unittest.TestCase):

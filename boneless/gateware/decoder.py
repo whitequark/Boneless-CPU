@@ -1,6 +1,6 @@
 from nmigen import *
 
-from ..arch import instr_v3 as instr, opcode_v3 as opcode
+from ..arch import instr as instr, opcode as opcode
 from .control import *
 
 

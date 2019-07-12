@@ -301,12 +301,12 @@ class Instr(metaclass=InstrMeta):
 
     @classmethod
     def assemble(cls, *args, **kwargs):
-        """Shortcut for :func:`.asm_v3.assemble(..., instr_cls=cls)`."""
-        from .asm_v3 import assemble
+        """Shortcut for :func:`.asm.assemble(..., instr_cls=cls)`."""
+        from .asm import assemble
         return assemble(*args, **kwargs, instr_cls=cls)
 
     @classmethod
     def disassemble(cls, *args, **kwargs):
-        """Shortcut for :func:`.asm_v3.disassemble(..., instr_cls=cls)`."""
-        from .asm_v3 import disassemble
+        """Shortcut for :func:`.asm.disassemble(..., instr_cls=cls)`."""
+        from .asm import disassemble
         return disassemble(*args, **kwargs, instr_cls=cls)
