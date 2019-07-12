@@ -106,6 +106,8 @@ class BusArbiter(Elaboratable):
         self.c_op   = self.Op.signal()
         self.c_xbus = Signal()
 
+        self.r_xbus = Signal()
+
         self.o_bus_addr = Signal(16)
 
         self.i_mem_data = Signal(16)
@@ -136,6 +138,7 @@ class BusArbiter(Elaboratable):
                         m.d.comb += self.o_bus_addr.eq(Cat(self.i_rsd, self.i_w))
                 with m.Switch(op.dir):
                     with m.Case(self.MuxDir.RD):
+                        m.d.sync += self.r_xbus.eq(0)
                         m.d.comb += self.o_mem_re.eq(1)
                     with m.Case(self.MuxDir.WR):
                         m.d.comb += self.o_mem_we.eq(1)
@@ -144,27 +147,20 @@ class BusArbiter(Elaboratable):
                 m.d.comb += self.o_bus_addr.eq(self.i_ptr)
                 with m.Switch(op.dir):
                     with m.Case(self.MuxDir.RD):
-                        with m.If(~self.c_xbus):
-                            m.d.comb += self.o_mem_re.eq(1)
-                        with m.Else():
+                        m.d.sync += self.r_xbus.eq(self.c_xbus)
+                        with m.If(self.c_xbus):
                             m.d.comb += self.o_ext_re.eq(1)
-                    with m.Case(self.MuxDir.WR):
-                        with m.If(~self.c_xbus):
-                            m.d.comb += self.o_mem_we.eq(1)
                         with m.Else():
+                            m.d.comb += self.o_mem_re.eq(1)
+                    with m.Case(self.MuxDir.WR):
+                        with m.If(self.c_xbus):
                             m.d.comb += self.o_ext_we.eq(1)
-
-        r_mem_re = Signal()
-        r_ext_re = Signal()
-        m.d.sync += [
-            r_mem_re.eq(self.o_mem_re),
-            r_ext_re.eq(self.o_ext_re),
-        ]
+                        with m.Else():
+                            m.d.comb += self.o_mem_we.eq(1)
 
         m.d.comb += self.o_mem_data.eq(self.i_data)
         m.d.comb += self.o_ext_data.eq(self.i_data)
-        m.d.comb += self.o_data.eq((Repl(r_mem_re, 16) & self.i_mem_data) |
-                                   (Repl(r_ext_re, 16) & self.i_ext_data))
+        m.d.comb += self.o_data.eq(Mux(self.r_xbus, self.i_ext_data, self.i_mem_data))
 
         return m
 
@@ -177,6 +173,7 @@ class CoreFSM(Elaboratable):
 
         self.r_insn  = Signal(16)
         self.s_base  = Signal(16)
+        self.s_a     = Signal(16)
         self.r_a     = Signal(16)
         self.s_b     = Signal(16)
         self.s_f     = Record(self.r_f.layout)
@@ -297,14 +294,15 @@ class CoreFSM(Elaboratable):
             with m.State("LOAD-B"):
                 with m.Switch(m_dec.o_ld_a):
                     with m.Case(m_dec.LdA.ZERO):
-                        m.d.sync += self.r_a.eq(0)
+                        m.d.comb += self.s_a.eq(0)
                     with m.Case(m_dec.LdA.W):
-                        m.d.sync += self.r_a.eq(self.r_w << 3)
+                        m.d.comb += self.s_a.eq(self.r_w << 3)
                     with m.Case(m_dec.LdA.PCp1):
-                        m.d.sync += self.r_a.eq(m_dec.o_pc_p1)
+                        m.d.comb += self.s_a.eq(m_dec.o_pc_p1)
                     with m.Case(m_dec.LdX_PTR):
-                        m.d.sync += self.r_a.eq(m_arb.o_data)
-                m.d.comb += self.s_base.eq(m_arb.o_data)
+                        m.d.comb += self.s_a.eq(m_arb.o_data)
+                m.d.sync += self.r_a.eq(self.s_a)
+                m.d.comb += self.s_base.eq(self.s_a)
                 with m.Switch(m_dec.o_ld_b):
                     with m.Case(m_dec.LdB.ApI):
                         m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_PTR)

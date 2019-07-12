@@ -348,12 +348,12 @@ class InstructionDecoder(Elaboratable):
                     with m.Case(opcode.M_ABS.coding):
                         m.d.comb += [
                             m_imm.c_width.eq(m_imm.Width.IMM5),
-                            self.o_ld_a.eq(self.LdA.RA)
+                            self.o_ld_a.eq(self.LdA.RA),
                         ]
                     with m.Case(opcode.M_LIT.coding):
                         m.d.comb += [
                             m_imm.c_width.eq(m_imm.Width.IMM8),
-                            self.o_ld_a.eq(self.LdA.ZERO)
+                            self.o_ld_a.eq(self.LdA.ZERO),
                         ]
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.C_LDX.coding):
@@ -426,7 +426,19 @@ class InstructionDecoder(Elaboratable):
                     self.o_st_pc.eq(1),
                 ]
 
-            # with m.Case(opcode.C_J?.coding):
+            with m.Case(opcode.C_JALR.coding):
+                m.d.comb += [
+                    m_imm.c_width.eq(m_imm.Width.IMM5), # unused, simplifies decoding
+                    self.o_multi.eq(1),
+                    self.o_ld_a.eq(self.LdA.PCp1),
+                    self.o_ld_b.eq(self.LdB.RB),
+                    self.o_st_pc.eq(1),
+                ]
+                with m.If(self.c_cycle == 0):
+                    m.d.comb += self.o_op.eq(alsru_cls.Op.A)
+                    m.d.comb += self.o_st_r.eq(self.StR.RSD)
+                with m.If(self.c_cycle == 1):
+                    m.d.comb += self.o_op.eq(alsru_cls.Op.B)
 
             with m.Case(opcode.C_JV.coding):
                 m.d.comb += [
