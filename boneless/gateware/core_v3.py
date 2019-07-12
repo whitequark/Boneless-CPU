@@ -272,6 +272,23 @@ class CoreFSM(Elaboratable):
             m_shift.i_shamt.eq(self.s_b),
         ]
 
+        with m.Switch(m_dec.o_ld_a):
+            with m.Case(m_dec.LdA.ZERO):
+                m.d.comb += self.s_a.eq(0)
+            with m.Case(m_dec.LdA.W):
+                m.d.comb += self.s_a.eq(self.r_w << 3)
+            with m.Case(m_dec.LdA.PCp1):
+                m.d.comb += self.s_a.eq(m_dec.o_pc_p1)
+            with m.Case(m_dec.LdX_PTR):
+                m.d.comb += self.s_a.eq(m_arb.o_data)
+        m.d.sync += self.r_a.eq(self.s_a)
+
+        with m.Switch(m_dec.o_ld_b):
+            with m.Case(m_dec.LdB.IMM):
+                m.d.comb += self.s_b.eq(m_dec.o_imm16)
+            with m.Case(m_dec.LdX_PTR):
+                m.d.comb += self.s_b.eq(m_arb.o_data)
+
         with m.FSM():
             m.d.comb += m_dec.i_insn.eq(self.r_insn)
             m.d.comb += self.s_base.eq(self.r_a)
@@ -292,19 +309,9 @@ class CoreFSM(Elaboratable):
                 m.next = "LOAD-B"
 
             with m.State("LOAD-B"):
-                with m.Switch(m_dec.o_ld_a):
-                    with m.Case(m_dec.LdA.ZERO):
-                        m.d.comb += self.s_a.eq(0)
-                    with m.Case(m_dec.LdA.W):
-                        m.d.comb += self.s_a.eq(self.r_w << 3)
-                    with m.Case(m_dec.LdA.PCp1):
-                        m.d.comb += self.s_a.eq(m_dec.o_pc_p1)
-                    with m.Case(m_dec.LdX_PTR):
-                        m.d.comb += self.s_a.eq(m_arb.o_data)
-                m.d.sync += self.r_a.eq(self.s_a)
                 m.d.comb += self.s_base.eq(self.s_a)
                 with m.Switch(m_dec.o_ld_b):
-                    with m.Case(m_dec.LdB.ApI):
+                    with m.Case(m_dec.LdB.IND):
                         m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_PTR)
                     with m.Case(m_dec.LdB.RSD):
                         m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_RSD)
@@ -313,13 +320,16 @@ class CoreFSM(Elaboratable):
                 m.next = "EXECUTE"
 
             with m.State("EXECUTE"):
-                with m.Switch(m_dec.o_ld_b):
-                    with m.Case(m_dec.LdB.IMM):
-                        m.d.comb += self.s_b.eq(m_dec.o_imm16)
-                    with m.Case(m_dec.LdX_PTR):
-                        m.d.comb += self.s_b.eq(m_arb.o_data)
+                with m.If(m_dec.o_shift):
+                    m.d.comb += m_shift.c_en.eq(1)
+                    m.d.comb += m_shift.c_load.eq(self.r_cycle == 0)
+                    m.d.comb += self.o_done.eq(m_shift.o_done)
+                with m.Elif(m_dec.o_multi):
+                    m.d.comb += self.o_done.eq(self.r_cycle == 1)
+                with m.Else():
+                    m.d.comb += self.o_done.eq(1)
                 with m.Switch(m_dec.o_st_r):
-                    with m.Case(m_dec.StR.ApI):
+                    with m.Case(m_dec.StR.IND):
                         m.d.comb += m_arb.c_op.eq(m_arb.Op.ST_PTR)
                     with m.Case(m_dec.StR.RSD):
                         m.d.comb += m_arb.c_op.eq(m_arb.Op.ST_RSD)
@@ -336,15 +346,6 @@ class CoreFSM(Elaboratable):
                         m.d.sync += self.r_pc.eq(m_alsru.o)
                     with m.Else():
                         m.d.sync += self.r_pc.eq(m_dec.o_pc_p1)
-                with m.If(m_dec.o_shift):
-                    m.d.comb += m_shift.c_en.eq(1)
-                    m.d.comb += m_shift.c_load.eq(self.r_cycle == 0)
-                    m.d.comb += self.o_done.eq(m_shift.o_done)
-                with m.Elif(m_dec.o_multi):
-                    m.d.comb += self.o_done.eq(self.r_cycle == 1)
-                with m.Else():
-                    m.d.comb += self.o_done.eq(1)
-                with m.If(self.o_done):
                     m.d.sync += self.r_cycle.eq(0)
                     m.next = "FETCH"
                 with m.Else():

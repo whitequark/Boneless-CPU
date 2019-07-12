@@ -82,13 +82,13 @@ class InstructionDecoder(Elaboratable):
 
     class LdB(ControlEnum):
         IMM   = 0b0_11
-        ApI   = 0b1_00
+        IND   = 0b1_00
         RSD   = 0b1_01
         RB    = 0b1_11
 
     class StR(ControlEnum):
         x     = 0b0_00
-        ApI   = 0b1_00
+        IND   = 0b1_00
         RSD   = 0b1_01
 
     class StF(ControlEnum):
@@ -330,13 +330,13 @@ class InstructionDecoder(Elaboratable):
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.C_LD.coding):
                         m.d.comb += [
-                            self.o_ld_b.eq(self.LdB.ApI),
+                            self.o_ld_b.eq(self.LdB.IND),
                             self.o_st_r.eq(self.StR.RSD),
                         ]
                     with m.Case(opcode.C_ST.coding):
                         m.d.comb += [
                             self.o_ld_b.eq(self.LdB.RSD),
-                            self.o_st_r.eq(self.StR.ApI),
+                            self.o_st_r.eq(self.StR.IND),
                         ]
 
             with m.Case(opcode.C_LDX.coding, opcode.C_STX.coding):
@@ -358,13 +358,13 @@ class InstructionDecoder(Elaboratable):
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.C_LDX.coding):
                         m.d.comb += [
-                            self.o_ld_b.eq(self.LdB.ApI),
+                            self.o_ld_b.eq(self.LdB.IND),
                             self.o_st_r.eq(self.StR.RSD),
                         ]
                     with m.Case(opcode.C_STX.coding):
                         m.d.comb += [
                             self.o_ld_b.eq(self.LdB.RSD),
-                            self.o_st_r.eq(self.StR.ApI),
+                            self.o_st_r.eq(self.StR.IND),
                         ]
 
             with m.Case(opcode.C_MOVE.coding):
@@ -444,7 +444,7 @@ class InstructionDecoder(Elaboratable):
                 m.d.comb += [
                     m_imm.c_width.eq(m_imm.Width.IMM5),
                     self.o_ld_a.eq(self.LdA.RSD),
-                    self.o_ld_b.eq(self.LdB.ApI),
+                    self.o_ld_b.eq(self.LdB.IND),
                     self.o_op.eq(alsru_cls.Op.ApB),
                     self.o_st_pc.eq(1),
                 ]
@@ -454,11 +454,14 @@ class InstructionDecoder(Elaboratable):
                     m_imm.c_width.eq(m_imm.Width.IMM5),
                     m_imm.c_pcrel.eq(1),
                     self.o_multi.eq(1),
-                    self.o_ld_a.eq(self.LdA.RSD),
-                    self.o_ld_b.eq(self.LdB.ApI),
+                    self.o_ld_a.eq(self.LdA.RSD),   # latches [M] on 2nd cycle
                     self.o_op.eq(alsru_cls.Op.ApB),
                     self.o_st_pc.eq(1),
                 ]
+                with m.If(self.c_cycle == 0):
+                    m.d.comb += self.o_ld_b.eq(self.LdB.IND)
+                with m.If(self.c_cycle == 1):
+                    m.d.comb += self.o_ld_b.eq(self.LdB.IMM)
 
             with m.Case(opcode.C_JAL.coding):
                 m.d.comb += [
