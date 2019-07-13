@@ -66,35 +66,17 @@ class ShiftSequencer(Elaboratable):
 
 
 class BusArbiter(Elaboratable):
-    class MuxAddr(ControlEnum):
-        REG = 0b0
-        PTR = 0b1
-        x   = 0
+    class Addr(ControlEnum):
+        PTR = 0b00
+        RA  = 0b01
+        RB  = 0b10
+        RSD = 0b11
 
-    class MuxReg(ControlEnum):
-        PC  = 0b00
-        A   = 0b01
-        B   = 0b10
-        SD  = 0b11
-        x   = 0
-
-    class MuxDir(ControlEnum):
-        RD  = 0b10
-        WR  = 0b11
-        x   = 0b0
-
-    class Op(MultiControlEnum, layout={"addr":MuxAddr, "reg":MuxReg, "dir":MuxDir}):
-        LD_PC   = ("REG", "PC", "RD",)
-        LD_RA   = ("REG", "A",  "RD",)
-        LD_RB   = ("REG", "B",  "RD",)
-        LD_RSD  = ("REG", "SD", "RD",)
-        ST_RSD  = ("REG", "SD", "WR",)
-        LD_PTR  = ("PTR", "x",  "RD",)
-        ST_PTR  = ("PTR", "x",  "WR",)
-        x       = ("x",   "x",  "x", )
+    class Dir(ControlEnum):
+        LD  = 0b0
+        ST  = 0b1
 
     def __init__(self):
-        self.i_pc   = Signal(16)
         self.i_w    = Signal(13)
         self.i_ra   = Signal(3)
         self.i_rb   = Signal(3)
@@ -103,10 +85,10 @@ class BusArbiter(Elaboratable):
         self.i_data = Signal(16)
         self.o_data = Signal(16)
 
-        self.c_op   = self.Op.signal()
+        self.c_en   = Signal()
+        self.c_dir  = self.Dir.signal()
+        self.c_addr = self.Addr.signal()
         self.c_xbus = Signal()
-
-        self.r_xbus = Signal()
 
         self.o_bus_addr = Signal(16)
 
@@ -123,44 +105,34 @@ class BusArbiter(Elaboratable):
     def elaborate(self, platform):
         m = Module()
 
-        op = self.Op.expand(m, self.c_op)
-
-        with m.Switch(op.addr):
-            with m.Case(self.MuxAddr.REG):
-                with m.Switch(op.reg):
-                    with m.Case(self.MuxReg.PC):
-                        m.d.comb += self.o_bus_addr.eq(self.i_pc)
-                    with m.Case(self.MuxReg.A):
-                        m.d.comb += self.o_bus_addr.eq(Cat(self.i_ra,  self.i_w))
-                    with m.Case(self.MuxReg.B):
-                        m.d.comb += self.o_bus_addr.eq(Cat(self.i_rb,  self.i_w))
-                    with m.Case(self.MuxReg.SD):
-                        m.d.comb += self.o_bus_addr.eq(Cat(self.i_rsd, self.i_w))
-                with m.Switch(op.dir):
-                    with m.Case(self.MuxDir.RD):
-                        m.d.sync += self.r_xbus.eq(0)
-                        m.d.comb += self.o_mem_re.eq(1)
-                    with m.Case(self.MuxDir.WR):
-                        m.d.comb += self.o_mem_we.eq(1)
-
-            with m.Case(self.MuxAddr.PTR):
+        with m.Switch(self.c_addr):
+            with m.Case(self.Addr.PTR):
                 m.d.comb += self.o_bus_addr.eq(self.i_ptr)
-                with m.Switch(op.dir):
-                    with m.Case(self.MuxDir.RD):
-                        m.d.sync += self.r_xbus.eq(self.c_xbus)
-                        with m.If(self.c_xbus):
-                            m.d.comb += self.o_ext_re.eq(1)
-                        with m.Else():
-                            m.d.comb += self.o_mem_re.eq(1)
-                    with m.Case(self.MuxDir.WR):
-                        with m.If(self.c_xbus):
-                            m.d.comb += self.o_ext_we.eq(1)
-                        with m.Else():
-                            m.d.comb += self.o_mem_we.eq(1)
+            with m.Case(self.Addr.RA):
+                m.d.comb += self.o_bus_addr.eq(Cat(self.i_ra,  self.i_w))
+            with m.Case(self.Addr.RB):
+                m.d.comb += self.o_bus_addr.eq(Cat(self.i_rb,  self.i_w))
+            with m.Case(self.Addr.RSD):
+                m.d.comb += self.o_bus_addr.eq(Cat(self.i_rsd, self.i_w))
+
+        r_xbus = Signal()
+        with m.Switch(self.c_dir):
+            with m.Case(self.Dir.LD):
+                with m.If(self.c_en):
+                    m.d.sync += r_xbus.eq(self.c_xbus)
+                with m.If(self.c_xbus):
+                    m.d.comb += self.o_ext_re.eq(self.c_en)
+                with m.Else():
+                    m.d.comb += self.o_mem_re.eq(self.c_en)
+            with m.Case(self.Dir.ST):
+                with m.If(self.c_xbus):
+                    m.d.comb += self.o_ext_we.eq(self.c_en)
+                with m.Else():
+                    m.d.comb += self.o_mem_we.eq(self.c_en)
 
         m.d.comb += self.o_mem_data.eq(self.i_data)
         m.d.comb += self.o_ext_data.eq(self.i_data)
-        m.d.comb += self.o_data.eq(Mux(self.r_xbus, self.i_ext_data, self.i_mem_data))
+        m.d.comb += self.o_data.eq(Mux(r_xbus, self.i_ext_data, self.i_mem_data))
 
         return m
 
@@ -230,13 +202,11 @@ class CoreFSM(Elaboratable):
 
         m.submodules.arb = m_arb = self.m_arb
         m.d.comb += [
-            m_arb.i_pc.eq(self.r_pc),
-            m_arb.i_w .eq(self.r_w),
-            m_arb.i_rsd.eq(m_dec.o_rsd),
+            m_arb.i_w  .eq(self.r_w),
             m_arb.i_ra .eq(m_dec.o_ra),
             m_arb.i_rb .eq(m_dec.o_rb),
+            m_arb.i_rsd.eq(m_dec.o_rsd),
             m_arb.i_ptr.eq(self.s_base + m_dec.o_imm16),
-            m_arb.c_xbus.eq(m_dec.o_xbus),
         ]
 
         m.submodules.alsru = m_alsru = self.m_alsru
@@ -295,28 +265,37 @@ class CoreFSM(Elaboratable):
 
             with m.State("FETCH"):
                 m.d.comb += m_dec.c_done.eq(1)
-                m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_PC)
+                m.d.comb += m_arb.i_ptr.eq(self.r_pc)
+                m.d.comb += m_arb.c_en.eq(1)
+                m.d.comb += m_arb.c_addr.eq(m_arb.Addr.PTR)
                 m.next = "LOAD-A"
 
             with m.State("LOAD-A"):
                 m.d.sync += self.r_insn.eq(m_arb.o_data)
                 m.d.comb += m_dec.i_insn.eq(m_arb.o_data)
                 with m.Switch(m_dec.o_ld_a):
+                    with m.Case(m_dec.LdX_PTR):
+                        m.d.comb += m_arb.c_en.eq(1)
+                with m.Switch(m_dec.o_ld_a):
                     with m.Case(m_dec.LdA.RSD):
-                        m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_RSD)
+                        m.d.comb += m_arb.c_addr.eq(m_arb.Addr.RSD)
                     with m.Case(m_dec.LdA.RA):
-                        m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_RA)
+                        m.d.comb += m_arb.c_addr.eq(m_arb.Addr.RA)
                 m.next = "LOAD-B"
 
             with m.State("LOAD-B"):
                 m.d.comb += self.s_base.eq(self.s_a)
                 with m.Switch(m_dec.o_ld_b):
+                    with m.Case(m_dec.LdX_PTR):
+                        m.d.comb += m_arb.c_en.eq(1)
+                with m.Switch(m_dec.o_ld_b):
                     with m.Case(m_dec.LdB.IND):
-                        m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_PTR)
+                        m.d.comb += m_arb.c_addr.eq(m_arb.Addr.PTR)
+                        m.d.comb += m_arb.c_xbus.eq(m_dec.o_xbus)
                     with m.Case(m_dec.LdB.RSD):
-                        m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_RSD)
+                        m.d.comb += m_arb.c_addr.eq(m_arb.Addr.RSD)
                     with m.Case(m_dec.LdB.RB):
-                        m.d.comb += m_arb.c_op.eq(m_arb.Op.LD_RB)
+                        m.d.comb += m_arb.c_addr.eq(m_arb.Addr.RB)
                 m.next = "EXECUTE"
 
             with m.State("EXECUTE"):
@@ -328,11 +307,15 @@ class CoreFSM(Elaboratable):
                     m.d.comb += self.o_done.eq(self.r_cycle == 1)
                 with m.Else():
                     m.d.comb += self.o_done.eq(1)
+                m.d.comb += m_arb.c_dir.eq(m_arb.Dir.ST)
                 with m.Switch(m_dec.o_st_r):
                     with m.Case(m_dec.StR.IND):
-                        m.d.comb += m_arb.c_op.eq(m_arb.Op.ST_PTR)
+                        m.d.comb += m_arb.c_en.eq(1)
+                        m.d.comb += m_arb.c_addr.eq(m_arb.Addr.PTR)
+                        m.d.comb += m_arb.c_xbus.eq(m_dec.o_xbus)
                     with m.Case(m_dec.StR.RSD):
-                        m.d.comb += m_arb.c_op.eq(m_arb.Op.ST_RSD)
+                        m.d.comb += m_arb.c_en.eq(1)
+                        m.d.comb += m_arb.c_addr.eq(m_arb.Addr.RSD)
                 with m.If(m_dec.o_st_f.zs):
                     m.d.sync += self.r_f["z","s"].eq(self.s_f["z","s"])
                 with m.If(m_dec.o_st_f.cv):
