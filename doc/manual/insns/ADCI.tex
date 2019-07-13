@@ -9,13 +9,13 @@
   \assembly{\mnemonic{} Rd, Ra, imm}
   \purpose{To add a constant to a 16-bit integer in a register, with carry input.}
   \restrictions{None.}
-  \begin{operation}\aluRI{opA + opB + C}\wb\flagZSCV\end{operation}
-  \begin{remarks}
-  A 32-bit addition with a register and an immediate operand can be performed as follows:
-  \begin{alltt}
-  ; Perform (R1|R0) ← (R3|R2) + 0x40001
-  ADDI R0, R2, 1
-  ADCI R1, R3, 4
-  \end{alltt}
-  \end{remarks}
+  \begin{operation}\aluRI{al}{opA + opB + C}\wb\flagZSCV\end{operation}
+\begin{remarks}
+A 32-bit addition with a register and an immediate operand can be performed as follows:
+\begin{alltt}
+; Perform (R1|R0) ← (R3|R2) + 0x40001
+    ADDI R0, R2, 1
+    ADCI R1, R3, 4
+\end{alltt}
+\end{remarks}
 \end{instruction}

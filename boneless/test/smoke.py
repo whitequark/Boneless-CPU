@@ -313,11 +313,11 @@ class SmokeTestCase(metaclass=ABCMeta):
         yield from self.assertW(0x1230)
 
     @simulation_test
-    def test_SWPW(self):
+    def test_XCHW(self):
         yield from self.execute(
             regs=[0x0010],
             code=[STW (R0),
-                  SWPW(R0, R0)],
+                  XCHW(R0, R0)],
             data=[0, 0, 0, 0, 0, 0,
                   0x0018, 0, 0, 0, 0, 0, 0, 0,
                   0, 0, 0, 0, 0, 0, 0, 0])
@@ -351,26 +351,26 @@ class SmokeTestCase(metaclass=ABCMeta):
         yield from self.assertPC(0x1234 + 2)
 
     @simulation_test
-    def test_JALR(self):
+    def test_JRAL(self):
         yield from self.execute(
             regs=[0x1234, 0],
-            code=[JALR(R1, R0)])
+            code=[JRAL(R1, R0)])
         yield from self.assertPC(0x1234)
         yield from self.assertMemory(1, 9)
 
     @simulation_test
-    def test_JV(self):
+    def test_JVT(self):
         yield from self.execute(
             regs=[0x0009],
-            code=[JV  (R0, 1)],
+            code=[JVT (R0, 1)],
             data=[0x1234, 0x5678])
         yield from self.assertPC(0x0009 + 0x5678)
 
     @simulation_test
-    def test_JT(self):
+    def test_JST(self):
         yield from self.execute(
             regs=[0x0001],
-            code=[JT  (R0, 2)],
+            code=[JST (R0, 2)],
             data=[0, 0, 0x1234, 0x5678])
         yield from self.assertPC(9 + 2 + 0x5678)
 

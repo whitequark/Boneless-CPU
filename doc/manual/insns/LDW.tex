@@ -1,0 +1,19 @@
+\begin{instruction}{LDW}{Adjust and Load Window Address}
+  \begin{encoding*}{short}
+    \mnemonic & \op{5}{10100} & \reg{d} & \op{3}{011} & \imm{5} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{5}{10100} & \reg{d} & \op{3}{011} & \imm{5} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} Rd, imm}
+  \purpose{To increase or decrease the address of the register window, and retrieve the prior address of the register window.}
+  \restrictions{If \texttt{imm} contains a value that is not a multiple of 8, the behavior is \unpredictable. If the long form is used, and \texttt{imm5[4:3]} are non-zero, the behavior is \unpredictable.}
+\begin{operation}\imm{5}
+temp ← W
+W ← W + imm
+mem[W|Rd] ← temp
+\end{operation}
+  \begin{remarks}See also \insnref{STW}. This instruction may be used in a function prologue, where \texttt{Rd} is any register chosen to act as a frame pointer.\end{remarks}
+  \begin{notice}The interpretation of the immediate field of this instruction is not final.\end{notice}
+\end{instruction}

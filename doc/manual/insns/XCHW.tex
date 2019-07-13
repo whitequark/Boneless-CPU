@@ -1,0 +1,23 @@
+\begin{instruction}{XCHW}{Exchange Window Address}
+  \begin{encoding}
+    \mnemonic & \op{5}{10100} & \reg{d} & \op{3}{001} & \opx{2}{00} & \reg{b} \\
+  \end{encoding}
+  \assembly{\mnemonic{} Rd, Rb}
+  \purpose{To exchange the address of the register window with a register.}
+  \restrictions{If \texttt{Rb} contains a value that is not a multiple of 8, the behavior is \unpredictable.}
+\begin{operation}
+temp ← W
+W ← mem[W|Rb]
+mem[W|Rd] ← temp
+\end{operation}
+\begin{remarks}
+This instruction may be used in a context switch routine. For example, if multiple register windows are set up such that each contains the address of the next one in \texttt{R7}, the following code may be used to switch contexts:
+\begin{alltt}
+yield:
+    XCHW R7, R7
+    JR   R0
+; Elsewhere:
+    JALR R0, yield
+\end{alltt}
+\end{remarks}
+\end{instruction}

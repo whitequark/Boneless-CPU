@@ -8,7 +8,7 @@
   \end{encoding*}
   \assembly{\mnemonic{} label}
   \purpose{To transfer control after a \texttt{\insnref{CMP} Ra, Rb} instruction if \texttt{Ra} is not equal to \texttt{Rb}.}
-  \input{jump-restrictions.tex}
+  \input{off8-restrictions.tex}
   \begin{operation}\off{8}\jump{\K{not} Z}\end{operation}
   \begin{remarks}This instruction has the same encoding as \insnref{JNZ}.\end{remarks}
 \end{instruction}

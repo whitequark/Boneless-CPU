@@ -7,7 +7,7 @@
     \mnemonic & \op{4}{1011} & \op{4}{0011} & \off{8} \\
   \end{encoding*}
   \assembly{\mnemonic{} label}
-  \purpose{To transfer control if an arithmetic or shift operation did not result in signed overflow.}
-  \input{jump-restrictions.tex}
+  \purpose{To transfer control if an arithmetic operation did not result in signed overflow.}
+  \input{off8-restrictions.tex}
   \begin{operation}\off{8}\jump{\K{not} V}\end{operation}
 \end{instruction}

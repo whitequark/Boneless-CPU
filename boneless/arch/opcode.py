@@ -15,8 +15,8 @@ __all__ = [
     "SLL",  "SLLI", "ROT",  "ROTI", "SRL",  "SRLI", "SRA",  "SRAI",
     "LD",   "LDR",  "ST",   "STR",  "LDX",  "LDXA", "STX",  "STXA",
     "MOVI", "MOVR",
-    "STW",  "SWPW", "ADJW", "LDW",
-    "JR",   "JALR", "JV",   "JT",   "JAL",
+    "STW",  "XCHW", "ADJW", "LDW",
+    "JR",   "JRAL", "JVT",  "JST",  "JAL",
     "JNZ",  "JZ",   "JNS",  "JS",   "JNC",  "JC",   "JNO",  "JO",   "JN",   "J",
     "JNE",  "JE",   "JULT", "JUGE", "JUGT", "JULE", "JSGE", "JSLT", "JSGT", "JSLE",
     "EXTI"
@@ -69,15 +69,15 @@ class C_MOVE (Instr): coding = "1000------------"
 
 # Window opcodes
 class C_STW  (Instr): coding = "10100---000-----"
-class C_SWPW (Instr): coding = "10100---001-----"
+class C_XCHW (Instr): coding = "10100---001-----"
 class C_ADJW (Instr): coding = "10100---010-----"
 class C_LDW  (Instr): coding = "10100---011-----"
 
 # Jump opcodes
 class C_JR   (Instr): coding = "10100---100-----"
-class C_JALR (Instr): coding = "10100---101-----"
-class C_JV   (Instr): coding = "10100---110-----"
-class C_JT   (Instr): coding = "10100---111-----"; pc_rel_ops = {"imm"}
+class C_JRAL (Instr): coding = "10100---101-----"
+class C_JVT  (Instr): coding = "10100---110-----"
+class C_JST  (Instr): coding = "10100---111-----"; pc_rel_ops = {"imm"}
 class C_JAL  (Instr): coding = "10101-----------"; pc_rel_ops = {"imm"}
 
 # Conditional opcode
@@ -147,15 +147,15 @@ class MOVR(C_MOVE,  M_REL,          F_R8  ): pass
 
 # Window instructions
 class STW (C_STW,                   F_XR  ): pass
-class SWPW(C_SWPW,                  F_RR  ): pass
+class XCHW(C_XCHW,                  F_RR  ): pass
 class ADJW(C_ADJW,                  F_X5  ): pass
 class LDW (C_LDW,                   F_R5  ): pass
 
 # Jump instructions
 class JR  (C_JR,                    F_R5  ): pass
-class JALR(C_JALR,                  F_RR  ): pass
-class JV  (C_JV,                    F_R5  ): pass
-class JT  (C_JT,                    F_R5  ): pass
+class JRAL(C_JRAL,                  F_RR  ): pass
+class JVT (C_JVT,                   F_R5  ): pass
+class JST (C_JST,                   F_R5  ): pass
 class JAL (C_JAL,                   F_R8  ): pass
 
 # Conditional instructions

@@ -1,0 +1,12 @@
+\begin{instruction}{STW}{Store to Window Address}
+  \begin{encoding}
+    \mnemonic & \op{5}{10100} & \opx{3}{000} & \op{3}{000} & \opx{2}{00} & \reg{b} \\
+  \end{encoding}
+  \assembly{\mnemonic{} Rb}
+  \purpose{To arbitrarily change the address of the register window.}
+  \restrictions{If \texttt{Rb} contains a value that is not a multiple of 8, the behavior is \unpredictable.}
+\begin{operation}
+W ← mem[W|Rb]
+\end{operation}
+  \begin{remarks}See also \insnref{LDW}. This instruction may be used in a function epilogue, where \texttt{Rb} is any register chosen to act as a frame pointer.\end{remarks}
+\end{instruction}

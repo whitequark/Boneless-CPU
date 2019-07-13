@@ -1,6 +1,9 @@
 \begin{instruction}{ROLI}{Rotate Left Immediate}
+  \begin{encoding}
+    \mnemonic & \op{5}{00101} & \reg{d} & \reg{a} & \op{2}{01} & \imm{3} \\
+  \end{encoding}
   \assembly{\mnemonic{} Rd, Ra, amount}
   \purpose{To perform a left rotate of a 16-bit integer in a register by a constant bit amount.}
-  \restrictions{The \texttt{amount} may be between 0 and 15, inclusive.}
-  \begin{remarks}This instruction is an alias for \insnref{ROTI}.\end{remarks}
+  \input{shifti-restrictions.tex}
+  \begin{operation}\aluRI{sr}{opA[15-imm3:0]|opA[16:15-imm3]}\wb\flagZS\end{operation}
 \end{instruction}

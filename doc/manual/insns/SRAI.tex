@@ -4,7 +4,6 @@
   \end{encoding}
   \assembly{\mnemonic{} Rd, Ra, amount}
   \purpose{To perform a right arithmetical shift of a 16-bit integer in a register by a constant bit amount.}
-  \restrictions{The \texttt{amount} may be between 0 and 15, inclusive.}
-  \begin{operation}\aluRR{opA[15]\string{imm3+1\string}|opA[16:15-imm3]}\wb\flagZS\end{operation}
-  \input{shift-remark.tex}
+  \input{shifti-restrictions.tex}
+  \begin{operation}\aluRI{sr}{opA[15]\string{imm3+1\string}|opA[16:15-imm3]}\wb\flagZS\end{operation}
 \end{instruction}

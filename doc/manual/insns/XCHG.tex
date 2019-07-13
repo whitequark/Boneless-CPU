@@ -2,12 +2,12 @@
   \assembly{\mnemonic{} Ra, Rb}
   \purpose{To exchange the values of two registers.}
   \restrictions{None.}
-  \begin{remarks}
+\begin{remarks}
 The assembler does not translate any instructions for \texttt{\mnemonic} with identical \texttt{Ra} and \texttt{Rb}, and translates \texttt{\mnemonic} with any other register combination to
 \begin{alltt}
-  XOR  Ra, Ra, Rb
-  XOR  Rb, Rb, Ra
-  XOR  Ra, Ra, Rb
+    XOR  Ra, Ra, Rb
+    XOR  Rb, Rb, Ra
+    XOR  Ra, Ra, Rb
 \end{alltt}
-  \end{remarks}
+\end{remarks}
 \end{instruction}

@@ -1,13 +1,15 @@
 \begin{instruction}{JR}{Jump to Register}
-  \begin{encoding}
-    \mnemonic & \op{3}{101} & \op{2}{11} & \reg{a} & \bits{8}{00000000} \\
-  \end{encoding}
-  \assembly{\mnemonic{} Rd}
-  \purpose{To transfer control to an absolute address contained in a register.}
-  \restrictions{None.}
-\begin{operation}
-addr ← mem[W|Ra]
-PC ← addr
+  \begin{encoding*}{short}
+    \mnemonic & \op{5}{10100} & \reg{s} & \op{3}{100} & \off{5} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{5}{10100} & \reg{s} & \op{3}{100} & \off{5} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} Rs, off}
+  \purpose{To transfer control to a variable absolute address contained in a register, with a constant offset.}
+  \input{off5-restrictions.tex}
+\begin{operation}\off{5}
+PC ← mem[W|Ra] + off
 \end{operation}
-  \begin{notice}The exact encoding of this instruction is not final.\end{notice}
 \end{instruction}

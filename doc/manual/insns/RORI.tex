@@ -1,15 +1,15 @@
 \begin{instruction}{RORI}{Rotate Right Immediate}
   \assembly{\mnemonic{} Rd, Ra, amount}
   \purpose{To perform a right rotate of a 16-bit integer in a register by a constant bit amount.}
-  \restrictions{The \texttt{amount} may be between 0 and 15, inclusive.}
-  \begin{remarks}
+  \input{shifti-restrictions.tex}
+\begin{remarks}
 The assembler translates \texttt{\mnemonic} with \texttt{amount} of 0 to
 \begin{alltt}
-  MOV  Rd, Ra
+  ROLI Rd, Ra, 0
 \end{alltt}
 and \texttt{\mnemonic} with any other \texttt{amount} to
 \begin{alltt}
-  ROTI Rd, Rd, (15 - amount)
+  ROLI Rd, Ra, (16 - amount)
 \end{alltt}
-  \end{remarks}
+\end{remarks}
 \end{instruction}

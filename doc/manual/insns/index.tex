@@ -15,6 +15,7 @@
   \newenvironment{encoding}[1][Encoding]{
     \newcommand{\bits}[2]{\multicolumn{####1}{c|}{####2}}
     \newcommand{\op}[2]{\bits{####1}{\texttt{####2}}}
+    \newcommand{\opx}[2]{\bits{####1}{####2}}
     \newcommand{\reg}[1]{\bits{3}{R####1}}
     \newcommand{\imm}[1]{\bits{####1}{imm####1}}
     \newcommand{\off}[1]{\bits{####1}{off####1}}
@@ -48,24 +49,19 @@
   \newenvironment{operation}{
     \newcommand{\K}[1]{\textbf{####1}}
 
-    \newcommand{\aluR}[1]{\begin{alltt}
-    opA ← mem[W|Ra]\\
-    res ← ####1
-    \end{alltt}}
-
     \newcommand{\aluRR}[1]{\begin{alltt}
     opA ← mem[W|Ra]\\
     opB ← mem[W|Rb]\\
     res ← ####1
     \end{alltt}}
 
-    \newcommand{\aluRI}[1]{
+    \newcommand{\aluRI}[2]{
     \begin{alltt}
     opA ← mem[W|Ra]\\
     \K{if} (has\_ext13)\\
     \K{then} opB ← ext13|imm3\\
-    \K{else} opB ← decode\_immediate(imm3)\\
-    res ← ####1
+    \K{else} opB ← decode\_imm\_####1(imm3)\\
+    res ← ####2
     \end{alltt}}
 
     \newcommand{\wb}{mem[W|Rd] ← res}
@@ -91,9 +87,15 @@
     V ← (opA[15] = \K{not} opB[15]) \K{and} (opA[15] <> res[15])
     \end{alltt}}
 
+    \newcommand{\imm}[1]{\begin{alltt}
+    \K{if} (has\_ext13)\\
+    \K{then} imm ← ext13|imm{####1}[2:0]\\
+    \K{else} imm ← sign\_extend(imm{####1})
+    \end{alltt}}
+
     \newcommand{\off}[1]{\begin{alltt}
     \K{if} (has\_ext13)\\
-    \K{then} off ← ext13|off{####1}[3:0]\\
+    \K{then} off ← ext13|off{####1}[2:0]\\
     \K{else} off ← sign\_extend(off{####1})
     \end{alltt}}
 
@@ -125,50 +127,50 @@
 \input{ADCI.tex}
 \input{ADD.tex}
 \input{ADDI.tex}
-\input{ADJW.1.tex}
-\input{ADJW.2.tex}
+\input{ADJW.tex}
 \input{AND.tex}
 \input{ANDI.tex}
 \input{CMP.tex}
 \input{CMPI.tex}
-\input{ENTR.tex} % pseudo
 \input{EXTI.tex}
 \input{J.tex}
 \input{JAL.tex}
 \input{JC.tex}
-\input{JE.tex} % pseudo
+\input{JE.tex} % alias
 \input{JN.tex}
 \input{JNC.tex}
-\input{JNE.tex} % pseudo
+\input{JNE.tex} % alias
 \input{JNO.tex}
 \input{JNS.tex}
 \input{JNZ.tex}
 \input{JO.tex}
 \input{JR.tex}
+\input{JRAL.tex}
 \input{JS.tex}
 \input{JSGE.tex}
 \input{JSGT.tex}
 \input{JSLE.tex}
 \input{JSLT.tex}
-\input{JUGE.tex} % pseudo
+\input{JST.tex}
+\input{JUGE.tex} % alias
 \input{JUGT.tex}
 \input{JULE.tex}
-\input{JULT.tex} % pseudo
+\input{JULT.tex} % alias
+\input{JVT.tex}
 \input{JZ.tex}
 \input{LD.tex}
 \input{LDR.tex}
+\input{LDW.tex}
 \input{LDX.tex}
 \input{LDXA.tex}
-\input{LEAV.tex} % pseudo
 \input{MOV.tex} % pseudo
 \input{MOVI.tex}
 \input{MOVR.tex}
 \input{OR.tex}
 \input{ORI.tex}
-\input{ROLI.tex} % pseudo
+\input{ROL.tex}
+\input{ROLI.tex}
 \input{RORI.tex} % pseudo
-\input{ROT.tex}
-\input{ROTI.tex}
 \input{SBB.tex}
 \input{SBBI.tex}
 \input{SLL.tex}
@@ -179,11 +181,12 @@
 \input{SRLI.tex}
 \input{ST.tex}
 \input{STR.tex}
+\input{STW.tex}
 \input{STX.tex}
 \input{STXA.tex}
 \input{SUB.tex}
 \input{SUBI.tex}
-% \input{SWPW.tex}
 \input{XCHG.tex} % pseudo
+\input{XCHW.tex}
 \input{XOR.tex}
 \input{XORI.tex}

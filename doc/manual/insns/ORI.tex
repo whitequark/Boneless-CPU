@@ -7,7 +7,7 @@
     \mnemonic & \op{5}{00001} & \reg{d} & \reg{a} & \op{2}{01} & \imm{3} \\
   \end{encoding*}
   \assembly{\mnemonic{} Rd, Ra, imm}
-  \purpose{To perform bitwise OR between a constant and a 16-bit integer in a register.}
+  \purpose{To perform bitwise OR between a 16-bit integer in a register and a constant.}
   \restrictions{None.}
-  \begin{operation}\aluRI{opA \K{or} opB}\wb\flagZS\end{operation}
+  \begin{operation}\aluRI{al}{opA \K{or} opB}\wb\flagZS\end{operation}
 \end{instruction}

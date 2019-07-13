@@ -1,0 +1,13 @@
+\begin{instruction}{JRAL}{Jump to Register and Link}
+  \begin{encoding}
+    \mnemonic & \op{5}{10100} & \reg{d} & \op{3}{101} & \opx{2}{00} & \reg{b} \\
+  \end{encoding}
+  \assembly{\mnemonic{} Rd, Rb}
+  \purpose{To transfer control to a subroutine whose variable absolute address is contained in a register.}
+  \restrictions{None.}
+\begin{operation}
+addr ← mem[W|Rb]
+mem[W|Rd] ← PC + 1
+PC ← addr
+\end{operation}
+\end{instruction}

@@ -1,4 +1,4 @@
-\begin{instruction}{JAL}{Jump And Link}
+\begin{instruction}{JAL}{Jump and Link}
   \begin{encoding*}{short}
     \mnemonic & \op{5}{10101} & \reg{d} & \off{8} \\
   \end{encoding*}
@@ -8,9 +8,9 @@
   \end{encoding*}
   \assembly{\mnemonic{} label}
   \purpose{To transfer control to a subroutine.}
-  \input{jump-restrictions.tex}
-  \begin{operation}\off{8}
+  \input{off8-restrictions.tex}
+\begin{operation}\off{8}
 mem[W|Rd] ← PC + 1
 PC ← PC + 1 + off
-  \end{operation}
+\end{operation}
 \end{instruction}

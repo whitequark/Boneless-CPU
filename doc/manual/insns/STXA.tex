@@ -8,9 +8,9 @@
   \end{encoding*}
   \assembly{\mnemonic{} Rs, off}
   \purpose{To complete a store cycle on external bus at a constant absolute address.}
-  \input{mem8-restrictions.tex}
+  \input{off8-restrictions.tex}
 \begin{operation}\off{8}
-temp ← mem[W|Rs]
-ext[off] ← temp
+data ← mem[W|Rs]
+ext[off] ← data
 \end{operation}
 \end{instruction}

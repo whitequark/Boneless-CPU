@@ -7,7 +7,7 @@
     \mnemonic & \op{5}{00001} & \reg{d} & \reg{a} & \op{2}{10} & \imm{3} \\
   \end{encoding*}
   \assembly{\mnemonic{} Rd, Ra, imm}
-  \purpose{To perform bitwise XOR between a constant and a 16-bit integer in a register.}
+  \purpose{To perform bitwise XOR between a 16-bit integer in a register and a constant.}
   \restrictions{None.}
-  \begin{operation}\aluRI{opA \K{xor} opB}\wb\flagZS\end{operation}
+  \begin{operation}\aluRI{al}{opA \K{xor} opB}\wb\flagZS\end{operation}
 \end{instruction}

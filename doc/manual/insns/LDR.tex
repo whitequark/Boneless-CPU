@@ -8,10 +8,10 @@
   \end{encoding*}
   \assembly{\mnemonic{} Rd, Ra, off}
   \purpose{To load a word from memory at a constant PC-relative address, with a variable offset.}
-  \input{mem5-restrictions.tex}
-\begin{operation}\off{8}
-addr ← PC + mem[W|Ra] + off
-temp ← mem[addr]
-mem[W|Rd] ← temp
+  \input{off5-restrictions.tex}
+\begin{operation}\off{5}
+addr ← PC + 1 + off + mem[W|Ra]
+data ← mem[addr]
+mem[W|Rd] ← data
 \end{operation}
 \end{instruction}

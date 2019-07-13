@@ -28,7 +28,9 @@
 \newenvironment{notice}{
   \cbcolor{red}
   \par\textbf{Notice:}\cbstart\par
+  \begin{adjustwidth}{10pt}{0pt}
 }{
+  \end{adjustwidth}
   \cbend
 }
 
@@ -54,17 +56,28 @@ This document is a work in progress and subject to change without warning. Howev
 
 \setcounter{tocdepth}{2}
 
+\section{Introduction}
+TBD
+\pagebreak
+
 \section{Guide to Instruction Set}
 TBD
 \pagebreak
 
 \section{List of Instructions}
-
 The following pages provide a detailed description of instructions, arranged in alphabetical order.
 
 Executing any instruction with an encoding not present on the following pages has \unpredictable{} behavior.
 \pagebreak
 
 \import{insns/}{index.tex}
+
+\section{List of Assembly Directives}
+TBD
+\pagebreak
+
+\section{Function Calling Sequence}
+TBD
+\pagebreak
 
 \end{document}
