@@ -71,25 +71,44 @@ class ImmediateDecoder(Elaboratable):
 
 
 class InstructionDecoder(Elaboratable):
-    LdX_PTR = "1--"
+    class Addr(ControlEnum):
+        IND   = 0b00
+        RSD   = 0b01
+        RB    = 0b10
+        RA    = 0b11
+        x     = 0b00
 
-    class LdA(ControlEnum):
-        ZERO  = 0b0_00
-        W     = 0b0_01
-        PCp1  = 0b0_10
-        RSD   = 0b1_01
-        RA    = 0b1_10
+    class OpAMux(ControlEnum):
+        ZERO  = 0b00
+        PCp1  = 0b01
+        W     = 0b10
+        PTR   = 0b11
 
-    class LdB(ControlEnum):
-        IMM   = 0b0_11
-        IND   = 0b1_00
-        RSD   = 0b1_01
-        RB    = 0b1_11
+    class OpBMux(ControlEnum):
+        IMM   = 0b0
+        PTR   = 0b1
 
-    class StR(ControlEnum):
-        x     = 0b0_00
-        IND   = 0b1_00
-        RSD   = 0b1_01
+    class OpRMux(ControlEnum):
+        ZERO  = 0b0
+        PTR   = 0b1
+
+    class LdA(MultiControlEnum, layout={"mux":OpAMux, "addr":Addr}):
+        ZERO  = ("ZERO", "x"  )
+        PCp1  = ("PCp1", "x"  )
+        W     = ("W",    "x"  )
+        RA    = ("PTR",  "RA" )
+        RSD   = ("PTR",  "RSD")
+
+    class LdB(MultiControlEnum, layout={"mux":OpBMux, "addr":Addr}):
+        IMM   = ("IMM",  "x"  )
+        IND   = ("PTR",  "IND")
+        RB    = ("PTR",  "RB" )
+        RSD   = ("PTR",  "RSD")
+
+    class StR(MultiControlEnum, layout={"mux":OpRMux, "addr":Addr}):
+        x     = ("ZERO", "x"  )
+        IND   = ("PTR",  "IND")
+        RSD   = ("PTR",  "RSD")
 
     class CI(ControlEnum):
         ZERO  = 0b00
