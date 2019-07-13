@@ -91,11 +91,6 @@ class InstructionDecoder(Elaboratable):
         IND   = 0b1_00
         RSD   = 0b1_01
 
-    class StF(ControlEnum):
-        x     = 0b00
-        ZS    = 0b01
-        ZSCV  = 0b11
-
     class CI(ControlEnum):
         ZERO  = 0b00
         ONE   = 0b01
@@ -149,7 +144,7 @@ class InstructionDecoder(Elaboratable):
         self.o_ld_a  = self.LdA.signal()
         self.o_ld_b  = self.LdB.signal()
         self.o_st_r  = self.StR.signal()
-        self.o_st_f  = self.StF.signal()
+        self.o_st_f  = Record([("zs", 1), ("cv", 1)])
         self.o_st_w  = Signal()
         self.o_st_pc = Signal()
 
@@ -217,7 +212,7 @@ class InstructionDecoder(Elaboratable):
                     m_imm.c_width.eq(m_imm.Width.IMM3),
                     self.o_ld_a.eq(self.LdA.RA),
                     self.o_st_r.eq(self.StR.RSD),
-                    self.o_st_f.eq(self.StF.ZS),
+                    self.o_st_f.zs.eq(1),
                 ]
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.M_RRR.coding):
@@ -242,7 +237,7 @@ class InstructionDecoder(Elaboratable):
                             self.o_ci.eq(self.CI.ONE),
                             self.o_op.eq(alsru_cls.Op.AmB),
                             self.o_st_r.eq(self.StR.x),
-                            self.o_st_f.eq(self.StF.ZSCV),
+                            self.o_st_f.cv.eq(1),
                         ]
 
             with m.Case(opcode.C_ARITH.coding):
@@ -250,7 +245,8 @@ class InstructionDecoder(Elaboratable):
                     m_imm.c_width.eq(m_imm.Width.IMM3),
                     self.o_ld_a.eq(self.LdA.RA),
                     self.o_st_r.eq(self.StR.RSD),
-                    self.o_st_f.eq(self.StF.ZSCV),
+                    self.o_st_f.zs.eq(1),
+                    self.o_st_f.cv.eq(1),
                 ]
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.M_RRR.coding):
@@ -285,7 +281,7 @@ class InstructionDecoder(Elaboratable):
                     self.o_shift.eq(1),
                     self.o_ld_a.eq(self.LdA.RA),
                     self.o_st_r.eq(self.StR.RSD),
-                    self.o_st_f.eq(self.StF.ZS),
+                    self.o_st_f.zs.eq(1),
                 ]
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.M_RRR.coding):
