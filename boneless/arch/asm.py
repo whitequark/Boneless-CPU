@@ -1,7 +1,7 @@
 import re
 
 from . import mc
-
+from .directives  import directives
 
 __all__ = ["TranslationError", "assemble", "disassemble"]
 
@@ -50,8 +50,10 @@ def parse_text(input, *, instr_cls):
                 raise TranslationError(f"{{0}} at {{loc}}", error,
                                        loc=(index,), lines=True) from None
         if m["direct"]:
-            if m["direct"] == ".word":
-                line_output.append(int(m["args"], 0))
+            if m["direct"] in directives:
+                val = directives[m['direct']](m)
+                if val != None:
+                    line_output.append(val)
             else:
                 raise TranslationError(f"Unknown directive {m['direct']} at {{loc}}",
                                        loc=(index,), lines=True)
