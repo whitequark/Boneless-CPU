@@ -1,28 +1,34 @@
 " system commands for the assembler"
 
 from .mc import * 
+
 __all__ = []
 
 directives = {}
 directives_params  = {}
 assembler = None
+stuff = {} 
 
 # expose the entire assembler to this module
 def bind(asm):
     global assembler
     assembler = asm
 
-def register_directive(cls, count):
-    def func_wrapper(name):
-        directives[cls] = name
-        directives_params[cls] = count
-
+def register_directive(n, count):
+    def func_wrapper(func):
+        directives[n] = func 
+        directives_params[n] = count
+        stuff[n] = (func,n,count)
     return func_wrapper
 
 
+def args(m):
+    ar = m['args'].split(',')
+    return ar
+
 @register_directive(".def", 2)
 def define(m):
-    return [Constant('test',5)]
+    return [Constant(args(m)[0],int(args(m)[1]))]
 
 @register_directive(".macro",0)
 def macro(m):

@@ -38,6 +38,8 @@ class Assembler:
         self._current_macro = None
         self.macros = {}
 
+        self.constants = {}
+
     def parse_text(self,input):
         for index, line in enumerate(str(input).splitlines()):
             m = re.match(r"""
@@ -121,8 +123,8 @@ class Assembler:
                     # or else relative forward offsets after this point may increase.
                     result -= fwd_adjust
             elif symbol in const_values:
+                print("CONSTANT WOOHOO")
                 result = const_values[symbol]
-            # TODO constants
             else:
                 result = None
             return result
@@ -150,7 +152,7 @@ class Assembler:
                         raise TranslationError(f"Const {repr(elem.name)} at {{new}} has the same name "
                                                f"as the const at {{old}}",
                                                new=indexes, old=str(const_locs[elem.name]))
-                    const_values[elem.name] = elem.value
+                    self.constants[elem.name] = elem.value
                     const_locs[elem.name] = elem_addr
             elif isinstance(elem, mc.Label):
                 if n_pass == 1:
