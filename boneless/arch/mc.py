@@ -17,7 +17,7 @@ class Constant:
 
     def __init__(self, name,value):
         self.name = name
-        self.value = int(value)
+        self.value = value
 
     def __repr__(self):
         return f"Constant({self.name,self.value})"
@@ -47,6 +47,8 @@ class Macro:
     def add(self,input):
         self.instructions.append(input)
 
+    def __repr__(self):
+        return f"Macro({repr(self.name)})"
     # need to add operands , parse and return a [] of instructions 
 
 

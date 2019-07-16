@@ -30,10 +30,13 @@ class Assembler:
         self.instr_cls = instr_cls
         self.output = []
         self.input = [] 
+
         directives.bind(self)
         self.directives = directives.directives
+
         self._in_macro = False
         self._current_macro = None
+        self.macros = {}
 
     def parse_text(self,input):
         for index, line in enumerate(str(input).splitlines()):
@@ -102,6 +105,7 @@ class Assembler:
         label_addrs = {}
         instr_sizes = {}
         const_values = {}
+        const_locs = {}
         fwd_adjust  = 0
 
         def resolve(obj_addr, symbol):
@@ -116,6 +120,9 @@ class Assembler:
                     # Each time we shrink a chunk, we need to move all labels after this chunk lower,
                     # or else relative forward offsets after this point may increase.
                     result -= fwd_adjust
+            elif symbol in const_values:
+                result = const_values[symbol]
+            # TODO constants
             else:
                 result = None
             return result
@@ -138,7 +145,13 @@ class Assembler:
                 # TODO process macro and return
                 pass
             elif isinstance(elem, mc.Constant):
-                const_values[elem.name] = elem.value
+                if n_pass == 1:
+                    if elem.name in const_values:
+                        raise TranslationError(f"Const {repr(elem.name)} at {{new}} has the same name "
+                                               f"as the const at {{old}}",
+                                               new=indexes, old=str(const_locs[elem.name]))
+                    const_values[elem.name] = elem.value
+                    const_locs[elem.name] = elem_addr
             elif isinstance(elem, mc.Label):
                 if n_pass == 1:
                     if elem.name in label_addrs:
