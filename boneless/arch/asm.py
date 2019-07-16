@@ -29,7 +29,7 @@ class Assembler:
     def __init__(self,instr_cls=Instr):
         self.instr_cls = instr_cls
         self.output = []
-        self.input = None
+        self.input = [] 
 
     def parse_text(self,input):
         for index, line in enumerate(str(input).splitlines()):
@@ -62,7 +62,7 @@ class Assembler:
                 else:
                     raise TranslationError(f"Unknown directive {m['direct']} at {{loc}}",
                                            loc=(index,), lines=True)
-            self.output.append(line_output)
+            self.input.append(line_output)
 
 
     def emit_text(self):
