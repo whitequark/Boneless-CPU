@@ -106,6 +106,7 @@ class Assembler:
         label_locs  = {}
         label_addrs = {}
         instr_sizes = {}
+        const_loscs = {}
         fwd_adjust  = 0
 
         def resolve(obj_addr, symbol):
@@ -149,7 +150,9 @@ class Assembler:
                         raise TranslationError(f"Const {repr(elem.name)} at {{new}} has the same name "
                                                f"as the const at {{old}}",
                                                new=indexes, old=str(const_locs[elem.name]))
-                    self.constants[elem.name] = elem.value
+
+                        label_locs[elem.name] = indexes
+                self.constants[elem.name] = elem.value
             elif isinstance(elem, mc.Label):
                 if n_pass == 1:
                     if elem.name in label_addrs:
