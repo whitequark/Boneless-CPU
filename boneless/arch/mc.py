@@ -5,12 +5,25 @@ from parse import parse
 from string import Formatter
 
 
-__all__ = ["UnresolvedRef", "Label", "Operand", "Instr"]
+__all__ = ["UnresolvedRef","Constant",  "Label", "Macro" ,"Operand", "Instr"]
 
 
 class UnresolvedRef(Exception):
     pass
 
+
+class Constant:
+    __slots__ = ["name","value"]
+
+    def __init__(self, name,value):
+        self.name = name
+        self.value = int(value)
+
+    def __repr__(self):
+        return f"Constant({self.name,self.value})"
+
+    def __eq__(self, other):
+        return isinstance(other, Constant) and self.name == other.name
 
 class Label:
     __slots__ = ["name"]
@@ -23,6 +36,18 @@ class Label:
 
     def __eq__(self, other):
         return isinstance(other, Label) and self.name == other.name
+
+
+class Macro:
+    __slots__ = ["name","instructions"]
+    def __init__(self,name):
+        self.name = name
+        self.instructions = []
+
+    def add(self,input):
+        self.instructions.append(input)
+
+    # need to add operands , parse and return a [] of instructions 
 
 
 class OperandMeta(abc.ABCMeta):

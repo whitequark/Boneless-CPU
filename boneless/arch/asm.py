@@ -1,7 +1,7 @@
 import re
 
 from . import mc
-from .directives  import directives
+from . import directives
 from .opcode import Instr
 
 __all__ = ["TranslationError", "assemble", "disassemble"]
@@ -30,6 +30,10 @@ class Assembler:
         self.instr_cls = instr_cls
         self.output = []
         self.input = [] 
+        directives.bind(self)
+        self.directives = directives.directives
+        self._in_macro = False
+        self._current_macro = None
 
     def parse_text(self,input):
         for index, line in enumerate(str(input).splitlines()):
@@ -55,14 +59,17 @@ class Assembler:
                     raise TranslationError(f"{{0}} at {{loc}}", error,
                                            loc=(index,), lines=True) from None
             if m["direct"]:
-                if m["direct"] in directives:
-                    val = directives[m['direct']](m)
+                if m["direct"] in self.directives:
+                    val = self.directives[m['direct']](m)
                     if val != None:
                         line_output.append(val)
                 else:
                     raise TranslationError(f"Unknown directive {m['direct']} at {{loc}}",
                                            loc=(index,), lines=True)
-            self.input.append(line_output)
+            if self._in_macro:
+                self._current_macro.add(line_output)
+            else:
+                self.input.append(line_output)
 
 
     def emit_text(self):
@@ -94,6 +101,7 @@ class Assembler:
         label_locs  = {}
         label_addrs = {}
         instr_sizes = {}
+        const_values = {}
         fwd_adjust  = 0
 
         def resolve(obj_addr, symbol):
@@ -126,6 +134,11 @@ class Assembler:
                 for index, nested_elem in enumerate(elem):
                     translate(nested_elem, output, n_pass,
                               indexes=(*indexes, index), allow_unresolved=allow_unresolved)
+            elif isinstance(elem, mc.Macro):
+                # TODO process macro and return
+                pass
+            elif isinstance(elem, mc.Constant):
+                const_values[elem.name] = elem.value
             elif isinstance(elem, mc.Label):
                 if n_pass == 1:
                     if elem.name in label_addrs:
