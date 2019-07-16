@@ -26,8 +26,8 @@ def args(m):
     ar = m['args'].split(',')
     return ar
 
-@register_directive(".def", 2)
-def define(m):
+@register_directive(".equ", 2)
+def equate(m):
     return [Constant(args(m)[0],int(args(m)[1]))]
 
 @register_directive(".macro",0)

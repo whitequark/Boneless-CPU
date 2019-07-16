@@ -106,8 +106,6 @@ class Assembler:
         label_locs  = {}
         label_addrs = {}
         instr_sizes = {}
-        const_values = {}
-        const_locs = {}
         fwd_adjust  = 0
 
         def resolve(obj_addr, symbol):
@@ -122,9 +120,8 @@ class Assembler:
                     # Each time we shrink a chunk, we need to move all labels after this chunk lower,
                     # or else relative forward offsets after this point may increase.
                     result -= fwd_adjust
-            elif symbol in const_values:
-                print("CONSTANT WOOHOO")
-                result = const_values[symbol]
+            elif symbol in self.constants:
+                result = self.constants[symbol]
             else:
                 result = None
             return result
@@ -148,12 +145,11 @@ class Assembler:
                 pass
             elif isinstance(elem, mc.Constant):
                 if n_pass == 1:
-                    if elem.name in const_values:
+                    if elem.name in self.constants:
                         raise TranslationError(f"Const {repr(elem.name)} at {{new}} has the same name "
                                                f"as the const at {{old}}",
                                                new=indexes, old=str(const_locs[elem.name]))
                     self.constants[elem.name] = elem.value
-                    const_locs[elem.name] = elem_addr
             elif isinstance(elem, mc.Label):
                 if n_pass == 1:
                     if elem.name in label_addrs:
