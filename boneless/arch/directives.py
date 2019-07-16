@@ -40,7 +40,6 @@ def end_macro(m):
     assembler._in_macro = False
     cm = assembler._current_macro
     assembler.macros[cm.name] = cm
-    return assembler._current_macro
 
 @register_directive(".section", 1)
 def section(m):
