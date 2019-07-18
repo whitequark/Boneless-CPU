@@ -43,7 +43,12 @@ class Macro:
     def __init__(self,name,operands):
         self.name = name
         self.instructions = []
-        self.operands = operands 
+        print(operands)
+        op_dict = {}
+        for i in operands:
+            op_dict[i] = 0
+
+        self.operands = str(op_dict) 
 
     def add(self,input):
         self.instructions.append(input)
