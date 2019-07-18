@@ -33,13 +33,14 @@ def equate(m):
 @register_directive(".macro",0)
 def macro(m):
     assembler._in_macro = True
-    assembler._current_macro = Macro(m['args'])
+    assembler._current_macro = Macro(args(m)[0],args(m)[1:])
 
 @register_directive(".endm",0)
 def end_macro(m):
     assembler._in_macro = False
     cm = assembler._current_macro
     assembler.macros[cm.name] = cm
+    assembler.instr_cls.mnemonics[cm.name] = assembler._current_macro
 
 @register_directive(".section", 1)
 def section(m):

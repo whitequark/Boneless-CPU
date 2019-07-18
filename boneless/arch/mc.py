@@ -39,10 +39,11 @@ class Label:
 
 
 class Macro:
-    __slots__ = ["name","instructions"]
-    def __init__(self,name):
+    __slots__ = ["name","instructions","operands"]
+    def __init__(self,name,operands):
         self.name = name
         self.instructions = []
+        self.operands = operands 
 
     def add(self,input):
         self.instructions.append(input)
