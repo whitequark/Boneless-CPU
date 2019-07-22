@@ -40,6 +40,12 @@ class Assembler:
 
         self.constants = {}
 
+    def parse(self,input):
+        if isinstance(input,str):
+            self.parse_text(input)
+        else:
+            self.input.append(input)
+
     def parse_text(self,input):
         for index, line in enumerate(str(input).splitlines()):
             m = re.match(r"""
