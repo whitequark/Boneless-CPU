@@ -60,6 +60,17 @@ def alloc(m):
     v = [0 for i in range(int(args(m)[1],0))] 
     return r+v
 
+@register_directive(".string",2)
+def stringer(m):
+    r = [Label(args(m)[0])]
+    st = args(m)[1]
+    r += [len(st)]
+    sta = []
+    for i in st:
+        sta.append(ord(i))
+    r += sta
+    return r
+        
 # other commands 
 # .include <filename>
 # .macro <name>
