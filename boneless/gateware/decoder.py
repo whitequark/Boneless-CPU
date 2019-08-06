@@ -71,30 +71,44 @@ class ImmediateDecoder(Elaboratable):
 
 
 class InstructionDecoder(Elaboratable):
-    LdX_PTR = "1--"
-
-    class LdA(ControlEnum):
-        ZERO  = 0b0_00
-        W     = 0b0_01
-        PCp1  = 0b0_10
-        RSD   = 0b1_01
-        RA    = 0b1_10
-
-    class LdB(ControlEnum):
-        IMM   = 0b0_11
-        IND   = 0b1_00
-        RSD   = 0b1_01
-        RB    = 0b1_11
-
-    class StR(ControlEnum):
-        x     = 0b0_00
-        IND   = 0b1_00
-        RSD   = 0b1_01
-
-    class StF(ControlEnum):
+    class Addr(ControlEnum):
+        IND   = 0b00
+        RSD   = 0b01
+        RB    = 0b10
+        RA    = 0b11
         x     = 0b00
-        ZS    = 0b01
-        ZSCV  = 0b11
+
+    class OpAMux(ControlEnum):
+        ZERO  = 0b00
+        PCp1  = 0b01
+        W     = 0b10
+        PTR   = 0b11
+
+    class OpBMux(ControlEnum):
+        IMM   = 0b0
+        PTR   = 0b1
+
+    class OpRMux(ControlEnum):
+        ZERO  = 0b0
+        PTR   = 0b1
+
+    class LdA(MultiControlEnum, layout={"mux":OpAMux, "addr":Addr}):
+        ZERO  = ("ZERO", "x"  )
+        PCp1  = ("PCp1", "x"  )
+        W     = ("W",    "x"  )
+        RA    = ("PTR",  "RA" )
+        RSD   = ("PTR",  "RSD")
+
+    class LdB(MultiControlEnum, layout={"mux":OpBMux, "addr":Addr}):
+        IMM   = ("IMM",  "x"  )
+        IND   = ("PTR",  "IND")
+        RB    = ("PTR",  "RB" )
+        RSD   = ("PTR",  "RSD")
+
+    class StR(MultiControlEnum, layout={"mux":OpRMux, "addr":Addr}):
+        x     = ("ZERO", "x"  )
+        IND   = ("PTR",  "IND")
+        RSD   = ("PTR",  "RSD")
 
     class CI(ControlEnum):
         ZERO  = 0b00
@@ -149,7 +163,7 @@ class InstructionDecoder(Elaboratable):
         self.o_ld_a  = self.LdA.signal()
         self.o_ld_b  = self.LdB.signal()
         self.o_st_r  = self.StR.signal()
-        self.o_st_f  = self.StF.signal()
+        self.o_st_f  = Record([("zs", 1), ("cv", 1)])
         self.o_st_w  = Signal()
         self.o_st_pc = Signal()
 
@@ -217,7 +231,7 @@ class InstructionDecoder(Elaboratable):
                     m_imm.c_width.eq(m_imm.Width.IMM3),
                     self.o_ld_a.eq(self.LdA.RA),
                     self.o_st_r.eq(self.StR.RSD),
-                    self.o_st_f.eq(self.StF.ZS),
+                    self.o_st_f.zs.eq(1),
                 ]
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.M_RRR.coding):
@@ -242,7 +256,7 @@ class InstructionDecoder(Elaboratable):
                             self.o_ci.eq(self.CI.ONE),
                             self.o_op.eq(alsru_cls.Op.AmB),
                             self.o_st_r.eq(self.StR.x),
-                            self.o_st_f.eq(self.StF.ZSCV),
+                            self.o_st_f.cv.eq(1),
                         ]
 
             with m.Case(opcode.C_ARITH.coding):
@@ -250,7 +264,8 @@ class InstructionDecoder(Elaboratable):
                     m_imm.c_width.eq(m_imm.Width.IMM3),
                     self.o_ld_a.eq(self.LdA.RA),
                     self.o_st_r.eq(self.StR.RSD),
-                    self.o_st_f.eq(self.StF.ZSCV),
+                    self.o_st_f.zs.eq(1),
+                    self.o_st_f.cv.eq(1),
                 ]
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.M_RRR.coding):
@@ -285,7 +300,7 @@ class InstructionDecoder(Elaboratable):
                     self.o_shift.eq(1),
                     self.o_ld_a.eq(self.LdA.RA),
                     self.o_st_r.eq(self.StR.RSD),
-                    self.o_st_f.eq(self.StF.ZS),
+                    self.o_st_f.zs.eq(1),
                 ]
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.M_RRR.coding):
