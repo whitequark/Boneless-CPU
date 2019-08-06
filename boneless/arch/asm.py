@@ -39,6 +39,8 @@ class Assembler:
         self.macros = {}
 
         self.constants = {}
+        self.label_locs  = {}
+        self.label_addrs = {}
 
     def parse(self,input):
         if isinstance(input,str):
@@ -109,10 +111,7 @@ class Assembler:
 
 
     def assemble(self):
-        label_locs  = {}
-        label_addrs = {}
         instr_sizes = {}
-        const_loscs = {}
         fwd_adjust  = 0
 
         def resolve(obj_addr, symbol):
@@ -121,8 +120,8 @@ class Assembler:
             #   * It's an external symbol.
             # In both cases we return `None`, as a request to downstream code to lower to largest
             # possible encoding.
-            if symbol in label_addrs:
-                result = label_addrs[symbol] - obj_addr
+            if symbol in self.label_addrs:
+                result = self.label_addrs[symbol] - obj_addr
                 if result > 0:
                     # Each time we shrink a chunk, we need to move all labels after this chunk lower,
                     # or else relative forward offsets after this point may increase.
@@ -161,12 +160,12 @@ class Assembler:
                 self.constants[elem.name] = elem.value
             elif isinstance(elem, mc.Label):
                 if n_pass == 1:
-                    if elem.name in label_addrs:
+                    if elem.name in self.label_addrs:
                         raise TranslationError(f"Label {repr(elem.name)} at {{new}} has the same name "
                                                f"as the label at {{old}}",
-                                               new=indexes, old=label_locs[elem.name])
-                    label_locs[elem.name] = indexes
-                label_addrs[elem.name] = elem_addr
+                                               new=indexes, old=self.label_locs[elem.name])
+                    self.label_locs[elem.name] = indexes
+                self.label_addrs[elem.name] = elem_addr
             elif isinstance(elem, self.instr_cls):
                 try:
                     # First, try encoding without relocation. This usually succeeds, and is faster.
