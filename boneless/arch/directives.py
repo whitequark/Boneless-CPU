@@ -56,16 +56,15 @@ def window(m):
 
 @register_directive(".alloc",1)
 def alloc(m):
-    r = [Label(args(m)[0])]
-    v = [0 for i in range(int(args(m)[1],0))] 
-    return r+v
+    v = [0 for i in range(int(args(m)[0],0))] 
+    return v
 
 @register_directive(".string",2)
 def stringer(m):
-    r = [Label(args(m)[0])]
-    st = eval(args(m)[1])
+    r = []
     #r += [len(st)]
     sta = []
+    st = args(m)[0]
     for i in st:
         sta.append(ord(i))
     r += sta
