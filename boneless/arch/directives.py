@@ -28,7 +28,7 @@ def args(m):
 
 @register_directive(".equ", 2)
 def equate(m):
-    return [Constant(args(m)[0],int(args(m)[1]))]
+    return [Constant(args(m)[0],args(m)[1])]
 
 @register_directive(".macro",0)
 def macro(m):
@@ -56,9 +56,21 @@ def window(m):
 
 @register_directive(".alloc",1)
 def alloc(m):
-    return [0 for i in range(int(m['args'],0))]
+    v = [0 for i in range(int(args(m)[0],0))] 
+    return v
 
-
+@register_directive(".string",2)
+def stringer(m):
+    r = []
+    #r += [len(st)]
+    sta = []
+    st = args(m)[0]
+    for i in st:
+        sta.append(ord(i))
+    r += sta
+    r += [0] # null ending
+    return r
+        
 # other commands 
 # .include <filename>
 # .macro <name>

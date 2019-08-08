@@ -55,6 +55,9 @@ class Macro:
 
     def __repr__(self):
         return f"Macro({repr(self.name)})"
+
+    def __call__(self):
+        return self.instructions
     # need to add operands , parse and return a [] of instructions 
 
 
