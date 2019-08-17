@@ -62,13 +62,13 @@ def alloc(m):
 @register_directive(".string",2)
 def stringer(m):
     r = []
-    #r += [len(st)]
     sta = []
-    st = args(m)[0]
+    st = eval(args(m)[0])
+    r += [len(st)]
     for i in st:
         sta.append(ord(i))
     r += sta
-    r += [0] # null ending
+    #r += [0] # null ending
     return r
         
 # other commands 
