@@ -372,7 +372,6 @@ if __name__ == "__main__":
 
     if args.type == "core-fsm+memory":
         memory = Memory(width=16, depth=256)
-        memory.init = [0b10000_111_10101010] # MOVI R7, 0xAA
         dut = CoreFSM(alsru_cls=ALSRU_4LUT, memory=memory)
         ports = (
             dut.o_bus_addr,
