@@ -4,6 +4,7 @@ __pycache__/
 build/
 *.pyc
 *.v
+*.il
 *.vcd
 *.gtkw
 *.hex
