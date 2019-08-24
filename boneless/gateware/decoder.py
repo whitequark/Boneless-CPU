@@ -114,10 +114,7 @@ class InstructionDecoder(Elaboratable):
         ZERO  = 0b00
         ONE   = 0b01
         FLAG  = 0b10
-
-    class SI(ControlEnum):
-        ZERO  = 0b0
-        MSB   = 0b1
+        MSB   = 0b11
 
     class Cond(ControlEnum):
         Z     = 0b000
@@ -169,7 +166,6 @@ class InstructionDecoder(Elaboratable):
         self.o_op    = alsru_cls.Op.signal()
         self.o_dir   = alsru_cls.Dir.signal()
         self.o_ci    = self.CI.signal()
-        self.o_si    = self.SI.signal()
 
         self.r_exti  = Signal()
 
@@ -313,22 +309,22 @@ class InstructionDecoder(Elaboratable):
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.T_SLL.coding):
                         m.d.comb += [
-                            self.o_si.eq(self.SI.ZERO),
+                            self.o_ci.eq(self.CI.ZERO),
                             self.o_op.eq(alsru_cls.Op.SLR),
                         ]
                     with m.Case(opcode.T_ROT.coding):
                         m.d.comb += [
-                            self.o_si.eq(self.SI.MSB),
+                            self.o_ci.eq(self.CI.MSB),
                             self.o_op.eq(alsru_cls.Op.SLR),
                         ]
                     with m.Case(opcode.T_SRL.coding):
                         m.d.comb += [
-                            self.o_si.eq(self.SI.ZERO),
+                            self.o_ci.eq(self.CI.ZERO),
                             self.o_op.eq(alsru_cls.Op.SLR),
                         ]
                     with m.Case(opcode.T_SRA.coding):
                         m.d.comb += [
-                            self.o_si.eq(self.SI.MSB),
+                            self.o_ci.eq(self.CI.MSB),
                             self.o_op.eq(alsru_cls.Op.SLR),
                         ]
                 with m.If(self.c_cycle == 0):
@@ -554,7 +550,7 @@ if __name__ == "__main__":
             dut.o_imm16, dut.o_rsd, dut.o_ra, dut.o_rb, dut.o_cond, dut.o_flag,
             dut.o_shift, dut.o_multi, dut.o_xbus, dut.o_skip,
             dut.o_ld_a, dut.o_ld_b, dut.o_st_r, dut.o_st_w, dut.o_st_pc,
-            dut.o_op, dut.o_ci, dut.o_si,
+            dut.o_op, dut.o_ci,
         )
 
     cli.main_runner(parser, args, dut, ports=ports)

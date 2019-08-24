@@ -35,9 +35,6 @@ class ALSRU:
         self.co = Signal() # carry out
         self.vo = Signal() # overflow out
 
-        self.si = Signal() # shift in
-        self.so = Signal() # shift out
-
         self.op  = self.Op.signal() # redefined by subclasses
         self.dir = self.Dir.signal()
 
@@ -114,13 +111,14 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
         op = self.Op.expand(m, self.op)
 
         s = Signal.like(self.o)
+        so = Signal()
         with m.Switch(self.dir):
             with m.Case(self.Dir.L):
-                m.d.comb += s.eq(Cat(self.si, self.r[:-1]))
-                m.d.comb += self.so.eq(self.r[-1])
+                m.d.comb += s.eq(Cat(self.ci, self.r[:-1]))
+                m.d.comb += so.eq(self.r[-1])
             with m.Case(self.Dir.R):
-                m.d.comb += s.eq(Cat(self.r[ 1:], self.si))
-                m.d.comb += self.so.eq(self.r[ 0])
+                m.d.comb += s.eq(Cat(self.r[ 1:], self.ci))
+                m.d.comb += so.eq(self.r[ 0])
 
         x = Signal.like(self.o)
         with m.Switch(op.x):
@@ -145,13 +143,16 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
                 m.d.comb += y.eq(~self.b)
 
         p = Signal.like(self.o)
-        m.d.comb += Cat(p, self.co).eq(x + y + self.ci)
+        co = Signal()
+        m.d.comb += Cat(p, co).eq(x + y + self.ci)
 
         with m.Switch(op.o):
             with m.Case(self.OMux.XpY):
                 m.d.comb += self.o.eq(p)
+                m.d.comb += self.co.eq(co)
             with m.Case(self.OMux.Y):
                 m.d.comb += self.o.eq(y)
+                m.d.comb += self.co.eq(so)
 
         # http://teaching.idallen.com/cst8214/08w/notes/overflow.txt
         with m.Switch(Cat(x[-1], y[-1], self.o[-1])):

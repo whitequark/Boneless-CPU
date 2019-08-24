@@ -253,11 +253,8 @@ class CoreFSM(Elaboratable):
                 m.d.comb += m_alsru.ci.eq(1)
             with m.Case(m_dec.CI.FLAG):
                 m.d.comb += m_alsru.ci.eq(self.r_f.c)
-        with m.Switch(m_dec.o_si):
-            with m.Case(m_dec.SI.ZERO):
-                m.d.comb += m_alsru.si.eq(0)
-            with m.Case(m_dec.SI.MSB):
-                m.d.comb += m_alsru.si.eq(m_alsru.r[-1])
+            with m.Case(m_dec.CI.MSB):
+                m.d.comb += m_alsru.ci.eq(m_alsru.r[-1])
 
         m.submodules.shift = m_shift = self.m_shift
         m.d.comb += [
