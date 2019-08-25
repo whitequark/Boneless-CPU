@@ -227,6 +227,11 @@ class InstructionDecoder(Elaboratable):
                 m.d.comb += self.o_dir.eq(alsru_cls.Dir.L)
             with m.Case(opcode.S_RIGHT.coding):
                 m.d.comb += self.o_dir.eq(alsru_cls.Dir.R)
+        with m.Switch(self.i_insn):
+            with m.Case(opcode.S_IZERO.coding):
+                m.d.comb += self.o_si.eq(self.SI.ZERO)
+            with m.Case(opcode.S_IMSB.coding):
+                m.d.comb += self.o_si.eq(self.SI.MSB)
 
         with m.Switch(self.i_insn):
             with m.Case(opcode.C_LOGIC.coding):
@@ -310,29 +315,10 @@ class InstructionDecoder(Elaboratable):
                         m.d.comb += self.o_ld_b.eq(self.LdB.RB)
                     with m.Case(opcode.M_RRI.coding):
                         m.d.comb += self.o_ld_b.eq(self.LdB.IMM)
-                with m.Switch(self.i_insn):
-                    with m.Case(opcode.T_SLL.coding):
-                        m.d.comb += [
-                            self.o_si.eq(self.SI.ZERO),
-                            self.o_op.eq(alsru_cls.Op.SLR),
-                        ]
-                    with m.Case(opcode.T_ROT.coding):
-                        m.d.comb += [
-                            self.o_si.eq(self.SI.MSB),
-                            self.o_op.eq(alsru_cls.Op.SLR),
-                        ]
-                    with m.Case(opcode.T_SRL.coding):
-                        m.d.comb += [
-                            self.o_si.eq(self.SI.ZERO),
-                            self.o_op.eq(alsru_cls.Op.SLR),
-                        ]
-                    with m.Case(opcode.T_SRA.coding):
-                        m.d.comb += [
-                            self.o_si.eq(self.SI.MSB),
-                            self.o_op.eq(alsru_cls.Op.SLR),
-                        ]
                 with m.If(self.c_cycle == 0):
-                    m.d.comb += self.o_op.eq(alsru_cls.Op.A)    # overrides above
+                    m.d.comb += self.o_op.eq(alsru_cls.Op.A)
+                with m.Else():
+                    m.d.comb += self.o_op.eq(alsru_cls.Op.SLR)
 
             with m.Case(opcode.C_LD.coding, opcode.C_ST.coding):
                 m.d.comb += [
