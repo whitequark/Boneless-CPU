@@ -8,7 +8,7 @@
   \end{encoding*}
   \assembly{\mnemonic{} Rd, imm}
   \purpose{To load a register with a constant.}
-  \restrictions{If the long form is used, and \texttt{imm8[8:3]} are non-zero, the behavior is \unpredictable.}
+  \restrictions{If the long form is used, and \texttt{imm8[7:3]} are non-zero, the behavior is \unpredictable.}
 \begin{operation}\imm{8}
 mem[W+Rd] ← imm
 \end{operation}
