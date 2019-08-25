@@ -16,7 +16,7 @@ class ALSRUTestCase:
         self.dut    = self.dut_cls(self.width)
 
     @contextlib.contextmanager
-    def assertComputes(self, op, ci=None, si=None):
+    def assertComputes(self, op, dir=None, *, ci=None, si=None):
         asserts = []
         yield(self.dut, asserts)
 
@@ -31,6 +31,7 @@ class ALSRUTestCase:
             with Simulator(self.dut) as sim:
                 def process():
                     yield self.dut.op.eq(op)
+                    yield self.dut.dir.eq(self.dut_cls.Dir.L if dir is None else dir)
                     yield self.dut.a.eq(rand_a)
                     yield self.dut.b.eq(rand_b)
                     yield self.dut.r.eq(rand_r)
@@ -100,13 +101,13 @@ class ALSRUTestCase:
                                   (dut.a[-1] != result[self.width - 1]))]
 
     def test_SL(self):
-        with self.assertComputes(self.dut_cls.Op.SL) as (dut, asserts):
+        with self.assertComputes(self.dut_cls.Op.SLR, self.dut_cls.Dir.L) as (dut, asserts):
             result   = (dut.r << 1) | dut.si
             asserts += [(dut.o,   result[:self.width]),
                         (dut.so,  dut.r[-1])]
 
     def test_SR(self):
-        with self.assertComputes(self.dut_cls.Op.SR) as (dut, asserts):
+        with self.assertComputes(self.dut_cls.Op.SLR, self.dut_cls.Dir.R) as (dut, asserts):
             result   = (dut.r >> 1) | (dut.si << (self.width - 1))
             asserts += [(dut.o,   result[:self.width]),
                         (dut.so,  dut.r[0])]

@@ -210,6 +210,7 @@ class CoreFSM(Elaboratable):
             m_alsru.a.eq(self.r_a),
             m_alsru.b.eq(self.s_b),
             m_alsru.op.eq(m_dec.o_op),
+            m_alsru.dir.eq(m_dec.o_dir),
             self.s_f.z.eq(m_alsru.o == 0),
             self.s_f.s.eq(m_alsru.o[-1]),
             self.s_f.c.eq(m_alsru.co),
