@@ -19,8 +19,11 @@ class ALSRU:
         AxB  = ()
         ApB  = ()
         AmB  = ()
-        SL   = ()
-        SR   = ()
+        SLR  = ()
+
+    class Dir(ControlEnum):
+        L    = ()
+        R    = ()
 
     def __init__(self, width):
         self.a  = Signal(width)
@@ -35,7 +38,8 @@ class ALSRU:
         self.si = Signal() # shift in
         self.so = Signal() # shift out
 
-        self.op = self.Op.signal() # redefined by subclasses
+        self.op  = self.Op.signal() # redefined by subclasses
+        self.dir = self.Dir.signal()
 
 
 class ALSRU_4LUT(ALSRU, Elaboratable):
@@ -72,39 +76,37 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
     #   R<<1: S=SLn-1         Y=S   O=Y    (pre-load R)
     #   R>>1: S=SRn+1         Y=S   O=Y    (pre-load R)
 
-    class MuxS(ControlEnum):
-        L   = 0b0
-        R   = 0b1
-        x   = 0
-
-    class MuxX(ControlEnum):
+    class XMux(ControlEnum):
         A   = 0b00
         AaB = 0b01
         AoB = 0b10
         AxB = 0b11
         x   = 0
 
-    class MuxY(ControlEnum):
+    class YMux(ControlEnum):
         Z   = 0b00
         S   = 0b01
         B   = 0b10
         nB  = 0b11
 
-    class MuxO(ControlEnum):
+    class OMux(ControlEnum):
         XpY = 0b0
         Y   = 0b1
 
-    class Op(MultiControlEnum, layout={"s":MuxS, "x":MuxX, "y":MuxY, "o":MuxO}):
-        A    = ("x", "A",   "Z",  "XpY",)
-        B    = ("x", "x",   "B",  "Y",  )
-        nB   = ("x", "x",   "nB", "Y",  )
-        AaB  = ("x", "AaB", "Z",  "XpY",)
-        AoB  = ("x", "AoB", "Z",  "XpY",)
-        AxB  = ("x", "AxB", "Z",  "XpY",)
-        ApB  = ("x", "A",   "B",  "XpY",)
-        AmB  = ("x", "A",   "nB", "XpY",)
-        SL   = ("L", "x",   "S",  "Y",  )
-        SR   = ("R", "x",   "S",  "Y",  )
+    class Op(MultiControlEnum, layout={"x":XMux, "y":YMux, "o":OMux}):
+        A    = ("A",   "Z",  "XpY",)
+        B    = ("x",   "B",  "Y",  )
+        nB   = ("x",   "nB", "Y",  )
+        AaB  = ("AaB", "Z",  "XpY",)
+        AoB  = ("AoB", "Z",  "XpY",)
+        AxB  = ("AxB", "Z",  "XpY",)
+        ApB  = ("A",   "B",  "XpY",)
+        AmB  = ("A",   "nB", "XpY",)
+        SLR  = ("x",   "S",  "Y",  )
+
+    class Dir(ControlEnum):
+        L    = 0b0
+        R    = 0b1
 
     def elaborate(self, platform):
         m = Module()
@@ -112,43 +114,43 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
         op = self.Op.expand(m, self.op)
 
         s = Signal.like(self.o)
-        with m.Switch(op.s):
-            with m.Case(self.MuxS.L):
+        with m.Switch(self.dir):
+            with m.Case(self.Dir.L):
                 m.d.comb += s.eq(Cat(self.si, self.r[:-1]))
                 m.d.comb += self.so.eq(self.r[-1])
-            with m.Case(self.MuxS.R):
+            with m.Case(self.Dir.R):
                 m.d.comb += s.eq(Cat(self.r[ 1:], self.si))
                 m.d.comb += self.so.eq(self.r[ 0])
 
         x = Signal.like(self.o)
         with m.Switch(op.x):
-            with m.Case(self.MuxX.AaB):
+            with m.Case(self.XMux.AaB):
                 m.d.comb += x.eq(self.a & self.b)
-            with m.Case(self.MuxX.AoB):
+            with m.Case(self.XMux.AoB):
                 m.d.comb += x.eq(self.a | self.b)
-            with m.Case(self.MuxX.AxB):
+            with m.Case(self.XMux.AxB):
                 m.d.comb += x.eq(self.a ^ self.b)
-            with m.Case(self.MuxX.A):
+            with m.Case(self.XMux.A):
                 m.d.comb += x.eq(self.a)
 
         y = Signal.like(self.o)
         with m.Switch(op.y):
-            with m.Case(self.MuxY.Z):
+            with m.Case(self.YMux.Z):
                 m.d.comb += y.eq(0)
-            with m.Case(self.MuxY.S):
+            with m.Case(self.YMux.S):
                 m.d.comb += y.eq(s)
-            with m.Case(self.MuxY.B):
+            with m.Case(self.YMux.B):
                 m.d.comb += y.eq(self.b)
-            with m.Case(self.MuxY.nB):
+            with m.Case(self.YMux.nB):
                 m.d.comb += y.eq(~self.b)
 
         p = Signal.like(self.o)
         m.d.comb += Cat(p, self.co).eq(x + y + self.ci)
 
         with m.Switch(op.o):
-            with m.Case(self.MuxO.XpY):
+            with m.Case(self.OMux.XpY):
                 m.d.comb += self.o.eq(p)
-            with m.Case(self.MuxO.Y):
+            with m.Case(self.OMux.Y):
                 m.d.comb += self.o.eq(y)
 
         # http://teaching.idallen.com/cst8214/08w/notes/overflow.txt
@@ -177,7 +179,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.type == "4lut":
         alsru = ALSRU_4LUT(args.width)
-        ctrl  = (alsru.ctrl.s, alsru.ctrl.x, alsru.ctrl.y, alsru.ctrl.o)
+        ctrl  = (alsru.op, alsru.dir)
 
     ports = (
         alsru.a,  alsru.b,  alsru.o,  alsru.r,
