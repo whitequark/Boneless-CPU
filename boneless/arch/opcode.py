@@ -53,11 +53,13 @@ class T_SUB  (Instr): coding = "-----------10---"
 class T_SBB  (Instr): coding = "-----------11---"
 class C_SHIFT(Instr): coding = "0010------------"
 class S_LEFT (Instr): coding = "-----------0----"
-class T_SLL  (Instr): coding = "-----------00---"
-class T_ROT  (Instr): coding = "-----------01---"
 class S_RIGHT(Instr): coding = "-----------1----"
-class T_SRL  (Instr): coding = "-----------10---"
-class T_SRA  (Instr): coding = "-----------11---"
+class S_IZERO(Instr): coding = "------------0---"
+class S_IMSB (Instr): coding = "------------1---"
+class T_SLL  (S_LEFT,  S_IZERO): pass
+class T_ROT  (S_LEFT,  S_IMSB):  pass
+class T_SRL  (S_RIGHT, S_IZERO): pass
+class T_SRA  (S_RIGHT, S_IMSB):  pass
 
 # Memory opcodes
 class M_ABS  (Instr): coding = "----0-----------"
