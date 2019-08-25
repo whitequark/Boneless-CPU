@@ -49,7 +49,7 @@ class CondSelector(Elaboratable):
             with m.Case(self.Cond.nCoZ):
                 m.d.comb += self.o_flag.eq(~self.i_f.c | self.i_f.z)
             with m.Case(self.Cond.SxV):
-                m.d.comb += self.o_flag.eq(self.i_f.s ^ self.i_f.v)
+                m.d.comb += self.o_flag.eq( self.i_f.s ^ self.i_f.v)
             with m.Case(self.Cond.SxVoZ):
                 m.d.comb += self.o_flag.eq((self.i_f.s ^ self.i_f.v) | self.i_f.z)
             with m.Case(self.Cond.A):
@@ -237,33 +237,33 @@ class CoreFSM(Elaboratable):
 
         m.submodules.alsru = m_alsru = self.m_alsru
         m.d.comb += [
-            m_alsru.a.eq(self.r_a),
-            m_alsru.b.eq(self.s_b),
-            m_alsru.op.eq(m_dec.o_op),
-            m_alsru.dir.eq(m_dec.o_dir),
-            self.s_f.z.eq(m_alsru.o == 0),
-            self.s_f.s.eq(m_alsru.o[-1]),
-            self.s_f.c.eq(m_alsru.co),
-            self.s_f.v.eq(m_alsru.vo),
-            m_pc.i_addr.eq(m_alsru.o),
-            m_arb.i_data.eq(m_alsru.o),
+            m_alsru.c_op.eq(m_dec.o_op),
+            m_alsru.c_dir.eq(m_dec.o_dir),
+            m_alsru.i_a.eq(self.r_a),
+            m_alsru.i_b.eq(self.s_b),
+            self.s_f.z.eq(m_alsru.o_z),
+            self.s_f.s.eq(m_alsru.o_s),
+            self.s_f.c.eq(m_alsru.o_c),
+            self.s_f.v.eq(m_alsru.o_v),
+            m_pc.i_addr.eq(m_alsru.o_o),
+            m_arb.i_data.eq(m_alsru.o_o),
         ]
         with m.If(m_dec.o_jcc):
             assert (m_alsru.Op.A | m_alsru.Op.ApB) == m_alsru.Op.ApB
             with m.If(m_dec.o_flag == m_csel.o_flag):
-                m.d.comb += m_alsru.op.eq(m_dec.o_op | m_alsru.Op.ApB)
+                m.d.comb += m_alsru.c_op.eq(m_dec.o_op | m_alsru.Op.ApB)
         with m.Switch(m_dec.o_ci):
             with m.Case(m_dec.CI.ZERO):
-                m.d.comb += m_alsru.ci.eq(0)
+                m.d.comb += m_alsru.i_c.eq(0)
             with m.Case(m_dec.CI.ONE):
-                m.d.comb += m_alsru.ci.eq(1)
+                m.d.comb += m_alsru.i_c.eq(1)
             with m.Case(m_dec.CI.FLAG):
-                m.d.comb += m_alsru.ci.eq(self.r_f.c)
+                m.d.comb += m_alsru.i_c.eq(self.r_f.c)
         with m.Switch(m_dec.o_si):
             with m.Case(m_dec.SI.ZERO):
-                m.d.comb += m_alsru.si.eq(0)
+                m.d.comb += m_alsru.i_h.eq(0)
             with m.Case(m_dec.SI.MSB):
-                m.d.comb += m_alsru.si.eq(m_alsru.r[-1])
+                m.d.comb += m_alsru.i_h.eq(m_alsru.r_o[-1])
 
         m.submodules.shift = m_shift = self.m_shift
         m.d.comb += [
@@ -336,7 +336,7 @@ class CoreFSM(Elaboratable):
                 with m.If(m_dec.o_st_f.cv):
                     m.d.sync += self.r_f["c","v"].eq(self.s_f["c","v"])
                 with m.If(m_dec.o_st_w):
-                    m.d.sync += self.r_w.eq(m_alsru.o >> 3)
+                    m.d.sync += self.r_w.eq(m_alsru.o_o >> 3)
                 with m.If(m_dec.o_shift):
                     m.d.comb += m_shift.c_en.eq(1)
                     m.d.comb += m_shift.c_load.eq(self.r_cycle == 0)
