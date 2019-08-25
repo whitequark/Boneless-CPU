@@ -174,7 +174,6 @@ class CoreFSM(Elaboratable):
         self.s_a     = Signal(16)
         self.r_a     = Signal(16)
         self.s_b     = Signal(16)
-        self.s_f     = Record.like(self.r_f)
 
         self.r_cycle = Signal(1)
         self.o_done  = Signal()
@@ -241,10 +240,6 @@ class CoreFSM(Elaboratable):
             m_alsru.c_dir.eq(m_dec.o_dir),
             m_alsru.i_a.eq(self.r_a),
             m_alsru.i_b.eq(self.s_b),
-            self.s_f.z.eq(m_alsru.o_z),
-            self.s_f.s.eq(m_alsru.o_s),
-            self.s_f.c.eq(m_alsru.o_c),
-            self.s_f.v.eq(m_alsru.o_v),
             m_pc.i_addr.eq(m_alsru.o_o),
             m_arb.i_data.eq(m_alsru.o_o),
         ]
@@ -332,9 +327,11 @@ class CoreFSM(Elaboratable):
                     with m.Case(m_dec.OpRMux.PTR):
                         m.d.comb += m_arb.c_en.eq(1)
                 with m.If(m_dec.o_st_f.zs):
-                    m.d.sync += self.r_f["z","s"].eq(self.s_f["z","s"])
+                    m.d.sync += self.r_f.z.eq(m_alsru.o_z)
+                    m.d.sync += self.r_f.s.eq(m_alsru.o_s)
                 with m.If(m_dec.o_st_f.cv):
-                    m.d.sync += self.r_f["c","v"].eq(self.s_f["c","v"])
+                    m.d.sync += self.r_f.c.eq(m_alsru.o_c)
+                    m.d.sync += self.r_f.v.eq(m_alsru.o_v)
                 with m.If(m_dec.o_st_w):
                     m.d.sync += self.r_w.eq(m_alsru.o_o >> 3)
                 with m.If(m_dec.o_shift):
