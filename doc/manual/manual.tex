@@ -82,8 +82,8 @@ The following operators reference parts of variables or the attached memory.
   \item \texttt{op[b:a]}: Reference bits \texttt{a} through \texttt{b}, inclusive, of \texttt{op}.
   \item \texttt{mem[addr]}: Reference memory at address \texttt{addr}. The address is implicitly ANDed with \texttt{0xFFFF}.
   \item \texttt{ext[addr]}: Reference the external bus at address \texttt{addr}. The address is implicitly ANDed with \texttt{0xFFFF}.
-  \item \texttt{\{opA, opB\}}: Concatenate the bits of \texttt{opA} and \texttt{opB}. \texttt{opA} makes the high-order bits of the result and \texttt{opB} makes the low-order bits.
-  \item \texttt{\{opB\{opA\}\}}: Construct the result by repeating \texttt{opA} \texttt{opB} times.
+  \item \texttt{\string{opA, opB\string}}: Concatenate the bits of \texttt{opA} and \texttt{opB}. \texttt{opA} makes the high-order bits of the result and \texttt{opB} makes the low-order bits.
+  \item \texttt{\string{opB\string{opA\string}\string}}: Construct the result by repeating \texttt{opA} \texttt{opB} times.
 \end{itemize}
 
 \subsubsection{Arithmetic Operators}
