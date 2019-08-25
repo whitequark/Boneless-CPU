@@ -1,9 +1,9 @@
-\begin{instruction}{SBB}{Subtract Register with Borrow}
+\begin{instruction}{SBC}{Subtract Register with Carry}
   \begin{encoding}
     \mnemonic & \op{5}{00010} & \reg{d} & \reg{a} & \op{2}{11} & \reg{b} \\
   \end{encoding}
   \assembly{\mnemonic{} Rd, Ra, Rb}
-  \purpose{To subtract 16-bit two's complement integers in registers, with borrow input.}
+  \purpose{To subtract 16-bit two's complement integers in registers, with carry input. If the carry input is 1, the previous operation did not borrow.}
   \restrictions{None.}
   \begin{operation}\aluRR{opA + \K{not} opB + C}\wb\flagZSBV\end{operation}
 \begin{remarks}
@@ -11,7 +11,7 @@ A 32-bit subtraction with both operands in registers can be performed as follows
 \begin{alltt}
 ; Perform \string{R1, R0\string} ← \string{R3, R2\string} - \string{R5, R4\string}
     SUB  R0, R2, R4
-    SBB  R1, R3, R5
+    SBC  R1, R3, R5
 \end{alltt}
 \end{remarks}
 \end{instruction}
