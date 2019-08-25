@@ -10,6 +10,6 @@
   \purpose{To load a register with an address relative to PC with a constant offset.}
   \input{off8-restrictions.tex}
 \begin{operation}\off{8}
-mem[W+Rd] ← (PC + 1 + off)[15:0]
+mem[W+Rd] ← PC + 1 + off
 \end{operation}
 \end{instruction}

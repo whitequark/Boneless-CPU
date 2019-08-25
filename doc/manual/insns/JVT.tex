@@ -12,6 +12,6 @@
 \begin{operation}\off{5}
 table ← mem[W+Rs]
 addr ← mem[table + off]
-PC ← (table + addr)[15:0]
+PC ← table + addr
 \end{operation}
 \end{instruction}

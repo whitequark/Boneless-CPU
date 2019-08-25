@@ -64,7 +64,7 @@
     res ← ####2
     \end{alltt}}
 
-    \newcommand{\wb}{mem[W+Rd] ← res[15:0]}
+    \newcommand{\wb}{mem[W+Rd] ← res}
 
     \newcommand{\flagZS}{\begin{alltt}
     Z ← res[15:0] = 0\\
@@ -101,8 +101,8 @@
 
     \newcommand{\jump}[1]{\begin{alltt}
     \K{if} (####1)\\
-    \K{then} PC ← (PC + 1 + off)[15:0]\\
-    \K{else} PC ← (PC + 1)[15:0]
+    \K{then} PC ← PC + 1 + off\\
+    \K{else} PC ← PC + 1
     \end{alltt}}
 
     \field{Operation}

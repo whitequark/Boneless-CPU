@@ -11,7 +11,7 @@
   \restrictions{If \texttt{imm} contains a value that is not a multiple of 8, the behavior is \unpredictable. If the long form is used, and \texttt{imm5[4:3]} are non-zero, the behavior is \unpredictable.}
 \begin{operation}\imm{5}
 old ← W
-W ← (W + imm)[15:0]
+W ← W + imm
 mem[W+Rd] ← old
 \end{operation}
   \begin{remarks}See also \insnref{STW}. This instruction may be used in a function prologue, where \texttt{Rd} is any register chosen to act as a frame pointer.\end{remarks}
