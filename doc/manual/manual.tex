@@ -109,7 +109,7 @@ The logical operators yield 1 if the condition is satisfied and 0 if it is not. 
 
 \begin{itemize}
   \item \texttt{sign\_extend\_16(op)}: Perform a sign extension of \texttt{op} by replicating the high bit until the total length is 16 bits.
-  \item \texttt{decode\_imm\_al(op)}: Calculate the immediate value of an arithmetic or logical instruction according to the following table. If \texttt{op} is not in the table, the result is \undefined.\linebreak
+  \item \texttt{decode\_imm\_al(op)}: Calculate the immediate value of an arithmetic or logical instruction according to the following table.\linebreak
     \begin{tabular}{|c c|}
     \hline
     \texttt{op} & Result \\
@@ -117,13 +117,14 @@ The logical operators yield 1 if the condition is satisfied and 0 if it is not. 
     0 & \texttt{0x0000} \\
     1 & \texttt{0x0001} \\
     2 & \texttt{0x8000} \\
+    3 & \texttt{TBD} \\
     4 & \texttt{0x00FF} \\
     5 & \texttt{0xFF00} \\
     6 & \texttt{0x7FFF} \\
     7 & \texttt{0xFFFF} \\
     \hline
     \end{tabular}
-  \item \texttt{decode\_imm\_sr(op)}: Calculate the immediate value of a shift or rotate instruction according to the following table. If \texttt{op} is not in the table, the result is \undefined.\linebreak
+  \item \texttt{decode\_imm\_sr(op)}: Calculate the immediate value of a shift or rotate instruction according to the following table.\linebreak
     \begin{tabular}{|c c|}
     \hline
     \texttt{op} & Result \\
