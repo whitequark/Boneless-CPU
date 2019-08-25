@@ -236,11 +236,12 @@ class CoreFSM(Elaboratable):
             m_alsru.b.eq(self.s_b),
             m_alsru.op.eq(m_dec.o_op),
             m_alsru.dir.eq(m_dec.o_dir),
-            m_pc.i_addr.eq(m_alsru.o),
             self.s_f.z.eq(m_alsru.o == 0),
             self.s_f.s.eq(m_alsru.o[-1]),
             self.s_f.c.eq(m_alsru.co),
             self.s_f.v.eq(m_alsru.vo),
+            m_pc.i_addr.eq(m_alsru.o),
+            m_arb.i_data.eq(m_alsru.o),
         ]
         with m.If(m_dec.o_jcc):
             assert (m_alsru.Op.A | m_alsru.Op.ApB) == m_alsru.Op.ApB
@@ -284,7 +285,6 @@ class CoreFSM(Elaboratable):
                 m.d.comb += self.s_b.eq(m_arb.o_data)
 
         dec_st_r = m_dec.StR.expand(m, m_dec.o_st_r)
-        m.d.comb += m_arb.i_data.eq(m_alsru.o)
 
         with m.FSM():
             m.d.comb += m_dec.i_insn.eq(self.r_insn)
@@ -292,7 +292,7 @@ class CoreFSM(Elaboratable):
 
             with m.State("FETCH"):
                 m.d.comb += m_pc.c_inc.eq(1)
-                m.d.comb += m_dec.c_done.eq(1)
+                m.d.comb += m_dec.c_fetch.eq(1)
                 m.d.comb += m_arb.i_ptr.eq(m_pc.r_addr)
                 m.d.comb += m_arb.c_en.eq(1)
                 m.d.comb += m_arb.c_addr.eq(m_arb.Addr.IND)

@@ -143,8 +143,8 @@ class InstructionDecoder(Elaboratable):
         self.i_pc    = Signal(16)
         self.i_insn  = Signal(16, decoder=self._insn_decoder)
 
+        self.c_fetch = Signal()
         self.c_cycle = Signal(1)
-        self.c_done  = Signal()
 
         self.o_imm16 = Signal(16)
         self.o_rsd   = Signal(3)
@@ -516,7 +516,7 @@ class InstructionDecoder(Elaboratable):
                     self.o_skip.eq(1),
                 ]
 
-        with m.If(self.c_done):
+        with m.If(self.c_fetch):
             m.d.sync += self.r_exti.eq(m_imm.c_exti)
 
         with m.If(self.r_exti):
