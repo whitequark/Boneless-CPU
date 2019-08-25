@@ -59,7 +59,7 @@
     \begin{alltt}
     opA ← mem[W+Ra]\\
     \K{if} (has\_ext13)\\
-    \K{then} opB ← \{ext13, imm3\}\\
+    \K{then} opB ← \string{ext13, imm3\string}\\
     \K{else} opB ← decode\_imm\_####1(imm3)\\
     res ← ####2
     \end{alltt}}
@@ -89,13 +89,13 @@
 
     \newcommand{\imm}[1]{\begin{alltt}
     \K{if} (has\_ext13)\\
-    \K{then} imm ← \{ext13, imm{####1}[2:0]\}\\
+    \K{then} imm ← \string{ext13, imm{####1}[2:0]\string}\\
     \K{else} imm ← sign\_extend\_16(imm{####1})
     \end{alltt}}
 
     \newcommand{\off}[1]{\begin{alltt}
     \K{if} (has\_ext13)\\
-    \K{then} off ← \{ext13, off{####1}[2:0]\}\\
+    \K{then} off ← \string{ext13, off{####1}[2:0]\string}\\
     \K{else} off ← sign\_extend\_16(off{####1})
     \end{alltt}}
 
