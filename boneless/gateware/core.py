@@ -4,7 +4,7 @@ from .control import *
 from .decoder import InstructionDecoder
 
 
-__all__ = ["BusArbiter", "CoreFSM"]
+__all__ = ["ProgramCounter", "CondSelector", "ShiftSequencer", "BusArbiter", "CoreFSM"]
 
 
 class ProgramCounter(Elaboratable):
