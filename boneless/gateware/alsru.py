@@ -26,20 +26,25 @@ class ALSRU:
         R    = ()
 
     def __init__(self, width):
-        self.a  = Signal(width)
-        self.b  = Signal(width)
-        self.o  = Signal(width)
-        self.r  = Signal(width)
+        self.width = width
 
-        self.ci = Signal() # carry in
-        self.co = Signal() # carry out
-        self.vo = Signal() # overflow out
+        self.i_a = Signal(width)
+        self.i_b = Signal(width)
+        self.i_c = Signal()
+        self.o_o = Signal(width)
+        self.r_o = Signal(width)
 
-        self.si = Signal() # shift in
-        self.so = Signal() # shift out
+        self.o_z = Signal() # zero out
+        self.o_s = Signal() # sign out
+        self.o_c = Signal() # carry out
+        self.o_v = Signal() # overflow out
 
-        self.op  = self.Op.signal() # redefined by subclasses
-        self.dir = self.Dir.signal()
+        self.c_op  = self.Op.signal() # redefined by subclasses
+
+        self.i_h = Signal() # shift in
+        self.o_h = Signal() # shift out
+
+        self.c_dir = self.Dir.signal()
 
 
 class ALSRU_4LUT(ALSRU, Elaboratable):
@@ -111,56 +116,59 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
     def elaborate(self, platform):
         m = Module()
 
-        op = self.Op.expand(m, self.op)
+        dec_op = self.Op.expand(m, self.c_op)
 
-        s = Signal.like(self.o)
-        with m.Switch(self.dir):
+        s_s = Signal(self.width)
+        with m.Switch(self.c_dir):
             with m.Case(self.Dir.L):
-                m.d.comb += s.eq(Cat(self.si, self.r[:-1]))
-                m.d.comb += self.so.eq(self.r[-1])
+                m.d.comb += s_s.eq(Cat(self.i_h, self.r_o[:-1]))
+                m.d.comb += self.o_h.eq(self.r_o[-1])
             with m.Case(self.Dir.R):
-                m.d.comb += s.eq(Cat(self.r[ 1:], self.si))
-                m.d.comb += self.so.eq(self.r[ 0])
+                m.d.comb += s_s.eq(Cat(self.r_o[ 1:], self.i_h))
+                m.d.comb += self.o_h.eq(self.r_o[ 0])
 
-        x = Signal.like(self.o)
-        with m.Switch(op.x):
+        s_x = Signal(self.width)
+        with m.Switch(dec_op.x):
             with m.Case(self.XMux.AaB):
-                m.d.comb += x.eq(self.a & self.b)
+                m.d.comb += s_x.eq(self.i_a & self.i_b)
             with m.Case(self.XMux.AoB):
-                m.d.comb += x.eq(self.a | self.b)
+                m.d.comb += s_x.eq(self.i_a | self.i_b)
             with m.Case(self.XMux.AxB):
-                m.d.comb += x.eq(self.a ^ self.b)
+                m.d.comb += s_x.eq(self.i_a ^ self.i_b)
             with m.Case(self.XMux.A):
-                m.d.comb += x.eq(self.a)
+                m.d.comb += s_x.eq(self.i_a)
 
-        y = Signal.like(self.o)
-        with m.Switch(op.y):
+        s_y = Signal(self.width)
+        with m.Switch(dec_op.y):
             with m.Case(self.YMux.Z):
-                m.d.comb += y.eq(0)
+                m.d.comb += s_y.eq(0)
             with m.Case(self.YMux.S):
-                m.d.comb += y.eq(s)
+                m.d.comb += s_y.eq(s_s)
             with m.Case(self.YMux.B):
-                m.d.comb += y.eq(self.b)
+                m.d.comb += s_y.eq(self.i_b)
             with m.Case(self.YMux.nB):
-                m.d.comb += y.eq(~self.b)
+                m.d.comb += s_y.eq(~self.i_b)
 
-        p = Signal.like(self.o)
-        m.d.comb += Cat(p, self.co).eq(x + y + self.ci)
+        s_p = Signal(self.width)
+        m.d.comb += Cat(s_p, self.o_c).eq(s_x + s_y + self.i_c)
 
-        with m.Switch(op.o):
+        with m.Switch(dec_op.o):
             with m.Case(self.OMux.XpY):
-                m.d.comb += self.o.eq(p)
+                m.d.comb += self.o_o.eq(s_p)
             with m.Case(self.OMux.Y):
-                m.d.comb += self.o.eq(y)
+                m.d.comb += self.o_o.eq(s_y)
 
         # http://teaching.idallen.com/cst8214/08w/notes/overflow.txt
-        with m.Switch(Cat(x[-1], y[-1], self.o[-1])):
+        with m.Switch(Cat(s_x[-1], s_y[-1], self.o_o[-1])):
             with m.Case(0b100):
-                m.d.comb += self.vo.eq(1)
+                m.d.comb += self.o_v.eq(1)
             with m.Case(0b011):
-                m.d.comb += self.vo.eq(1)
+                m.d.comb += self.o_v.eq(1)
 
-        m.d.sync += self.r.eq(self.o)
+        m.d.comb += self.o_z.eq(self.o_o == 0)
+        m.d.comb += self.o_s.eq(self.o_o[-1])
+
+        m.d.sync += self.r_o.eq(self.o_o)
 
         return m
 
