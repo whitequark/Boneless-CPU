@@ -67,6 +67,13 @@ TBD
 
 This document uses the following syntax and operators to describe the operation of each instruction.
 
+\subsubsection{Undefined and Unpredictable Behavior}
+To describe the boundaries of legal program behavior, this document uses the words \undefined{} and \unpredictable{}.
+
+When execution encounters \unpredictable{} behavior, the implementation may perform any behavior, including but not limited to hanging and failing to continue execution. The resulting behavior may be different between executions even under the same circumstances.
+
+Certain operations, including any operation with an \undefined{} input, will produce an undefined result. Reading a register whose value is currently \undefined{} may produce any bit pattern. Multiple consecutive reads of such a register may also produce different bit patterns on each read.
+
 \subsubsection{Reference Operators}
 The following operators reference parts of variables or the attached memory.
 
@@ -102,7 +109,7 @@ The logical operators yield 1 if the condition is satisfied and 0 if it is not. 
 
 \begin{itemize}
   \item \texttt{sign\_extend\_16(op)}: Perform a sign extension of \texttt{op} by replicating the high bit until the total length is 16 bits.
-  \item \texttt{decode\_imm\_al(op)}: Calculate the immediate value of an arithmetic or logical instruction according to the following table. If \texttt{op} is not in the table, behavior is \unpredictable.\linebreak
+  \item \texttt{decode\_imm\_al(op)}: Calculate the immediate value of an arithmetic or logical instruction according to the following table. If \texttt{op} is not in the table, the result is \undefined.\linebreak
     \begin{tabular}{|c c|}
     \hline
     \texttt{op} & Result \\
@@ -116,7 +123,7 @@ The logical operators yield 1 if the condition is satisfied and 0 if it is not. 
     7 & \texttt{0xFFFF} \\
     \hline
     \end{tabular}
-  \item \texttt{decode\_imm\_sr(op)}: Calculate the immediate value of a shift or rotate instruction according to the following table. If \texttt{op} is not in the table, behavior is \unpredictable.\linebreak
+  \item \texttt{decode\_imm\_sr(op)}: Calculate the immediate value of a shift or rotate instruction according to the following table. If \texttt{op} is not in the table, the result is \undefined.\linebreak
     \begin{tabular}{|c c|}
     \hline
     \texttt{op} & Result \\
