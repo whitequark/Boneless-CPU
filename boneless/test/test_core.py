@@ -45,7 +45,7 @@ class CoreSmokeTestCase(SmokeTestCase, unittest.TestCase):
                 vcd_file=open(f"{case.__name__}.vcd", "w"),
                 gtkw_file=open(f"{case.__name__}.gtkw", "w"),
                 traces=(
-                    dut.r_pc, dut.r_w, dut.m_dec.i_insn, frag.find_generated("dut", "fsm").state,
+                    dut.o_pc, dut.r_w, dut.m_dec.i_insn, frag.find_generated("dut", "fsm").state,
                     dut.r_cycle, dut.o_done,
                 )) as sim:
             sim.add_clock(1e-6)
@@ -76,7 +76,7 @@ class CoreSmokeTestCase(SmokeTestCase, unittest.TestCase):
         self.assertEqual((yield self.tb.dut.r_w) << 3, win, msg=f"W")
 
     def assertPC(self, addr):
-        self.assertEqual((yield self.tb.dut.r_pc), addr, msg=f"PC")
+        self.assertEqual((yield self.tb.dut.o_pc), addr, msg=f"PC")
 
     def assertMemory(self, addr, value):
         self.assertEqual((yield self.tb.mem[addr]), value, msg=f"M[{addr}]")

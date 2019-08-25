@@ -7,6 +7,25 @@ from .decoder import InstructionDecoder
 __all__ = ["BusArbiter", "CoreFSM"]
 
 
+class ProgramCounter(Elaboratable):
+    def __init__(self, reset):
+        self.i_addr = Signal(16)
+        self.r_addr = Signal(16, reset=reset)
+
+        self.c_set  = Signal()
+        self.c_inc  = Signal()
+
+    def elaborate(self, platform):
+        m = Module()
+
+        with m.If(self.c_set):
+            m.d.sync += self.r_addr.eq(self.i_addr)
+        with m.Elif(self.c_inc):
+            m.d.sync += self.r_addr.eq(self.r_addr + 1)
+
+        return m
+
+
 class CondSelector(Elaboratable):
     Cond = InstructionDecoder.Cond
 
@@ -135,7 +154,14 @@ class BusArbiter(Elaboratable):
 
 class CoreFSM(Elaboratable):
     def __init__(self, alsru_cls, reset_pc=0, reset_w=0xffff, memory=None):
-        self.r_pc    = Signal(16, reset=reset_pc)
+        self.m_pc    = ProgramCounter(reset_pc)
+        self.m_dec   = InstructionDecoder(alsru_cls)
+        self.m_csel  = CondSelector()
+        self.m_arb   = BusArbiter()
+        self.m_alsru = alsru_cls(width=16)
+        self.m_shift = ShiftSequencer()
+
+        self.o_pc    = Signal(16)
         self.r_w     = Signal(13, reset=reset_w >> 3)
         self.r_f     = Record([("z", 1), ("s", 1), ("c", 1), ("v", 1)])
 
@@ -148,12 +174,6 @@ class CoreFSM(Elaboratable):
 
         self.r_cycle = Signal(1)
         self.o_done  = Signal()
-
-        self.m_dec   = InstructionDecoder(alsru_cls)
-        self.m_csel  = CondSelector()
-        self.m_arb   = BusArbiter()
-        self.m_alsru = alsru_cls(width=16)
-        self.m_shift = ShiftSequencer()
 
         self.o_bus_addr = self.m_arb.o_bus_addr
 
@@ -184,9 +204,14 @@ class CoreFSM(Elaboratable):
                 m_memwr.en.eq(self.o_mem_we),
             ]
 
+        m.submodules.pc = m_pc = self.m_pc
+        m.d.comb += [
+            self.o_pc.eq(m_pc.r_addr),
+        ]
+
         m.submodules.dec = m_dec = self.m_dec
         m.d.comb += [
-            m_dec.i_pc.eq(self.r_pc),
+            m_dec.i_pc.eq(m_pc.r_addr),
             m_dec.c_cycle.eq(self.r_cycle),
         ]
 
@@ -211,6 +236,7 @@ class CoreFSM(Elaboratable):
             m_alsru.b.eq(self.s_b),
             m_alsru.op.eq(m_dec.o_op),
             m_alsru.dir.eq(m_dec.o_dir),
+            m_pc.i_addr.eq(m_alsru.o),
             self.s_f.z.eq(m_alsru.o == 0),
             self.s_f.s.eq(m_alsru.o[-1]),
             self.s_f.c.eq(m_alsru.co),
@@ -243,7 +269,7 @@ class CoreFSM(Elaboratable):
             with m.Case(m_dec.OpAMux.ZERO):
                 m.d.comb += self.s_a.eq(0)
             with m.Case(m_dec.OpAMux.PCp1):
-                m.d.comb += self.s_a.eq(m_dec.o_pc_p1)
+                m.d.comb += self.s_a.eq(m_pc.r_addr)
             with m.Case(m_dec.OpAMux.W):
                 m.d.comb += self.s_a.eq(self.r_w << 3)
             with m.Case(m_dec.OpAMux.PTR):
@@ -265,8 +291,9 @@ class CoreFSM(Elaboratable):
             m.d.comb += self.s_base.eq(self.r_a)
 
             with m.State("FETCH"):
+                m.d.comb += m_pc.c_inc.eq(1)
                 m.d.comb += m_dec.c_done.eq(1)
-                m.d.comb += m_arb.i_ptr.eq(self.r_pc)
+                m.d.comb += m_arb.i_ptr.eq(m_pc.r_addr)
                 m.d.comb += m_arb.c_en.eq(1)
                 m.d.comb += m_arb.c_addr.eq(m_arb.Addr.IND)
                 m.next = "LOAD-A"
@@ -315,10 +342,7 @@ class CoreFSM(Elaboratable):
                 with m.Else():
                     m.d.comb += self.o_done.eq(1)
                 with m.If(self.o_done):
-                    with m.If(m_dec.o_st_pc):
-                        m.d.sync += self.r_pc.eq(m_alsru.o)
-                    with m.Else():
-                        m.d.sync += self.r_pc.eq(m_dec.o_pc_p1)
+                    m.d.comb += m_pc.c_set.eq(m_dec.o_st_pc)
                     m.d.sync += self.r_cycle.eq(0)
                     m.next = "FETCH"
                 with m.Else():
