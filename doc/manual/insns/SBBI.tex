@@ -13,7 +13,7 @@
 \begin{remarks}
 A 32-bit subtraction with a register and an immediate operand can be performed as follows:
 \begin{alltt}
-; Perform (R1|R0) ← (R3|R2) - 0x40001
+; Perform \string{R1, R0\string} ← \string{R3, R2\string} - 0x40001
     SUBI R0, R2, 1
     SBBI R1, R3, 4
 \end{alltt}
