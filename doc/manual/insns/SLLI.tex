@@ -1,7 +1,11 @@
 \begin{instruction}{SLLI}{Shift Left Logical Immediate}
-  \begin{encoding}
+  \begin{encoding*}{short}
     \mnemonic & \op{5}{00101} & \reg{d} & \reg{a} & \op{2}{00} & \imm{3} \\
-  \end{encoding}
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{5}{00101} & \reg{d} & \reg{a} & \op{2}{00} & \imm{3} \\
+  \end{encoding*}
   \assembly{\mnemonic{} Rd, Ra, amount}
   \purpose{To perform a left logical shift of a 16-bit integer in a register by a constant bit amount.}
   \input{shifti-restrictions.tex}
