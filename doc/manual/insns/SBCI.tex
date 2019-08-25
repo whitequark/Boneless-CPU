@@ -1,4 +1,4 @@
-\begin{instruction}{SBBI}{Subtract Immediate with Borrow}
+\begin{instruction}{SBCI}{Subtract Immediate with Carry}
   \begin{encoding*}{short}
     \mnemonic & \op{5}{00011} & \reg{d} & \reg{a} & \op{2}{11} & \imm{3} \\
   \end{encoding*}
@@ -7,7 +7,7 @@
     \mnemonic & \op{5}{00011} & \reg{d} & \reg{a} & \op{2}{11} & \imm{3} \\
   \end{encoding*}
   \assembly{\mnemonic{} Rd, Ra, imm}
-  \purpose{To subtract a two's complement constant from a 16-bit two's complement integer in a register, with borrow input.}
+  \purpose{To subtract a two's complement constant from a 16-bit two's complement integer in a register, with carry input. If the carry input is 1, the previous operation did not borrow.}
   \restrictions{None.}
   \begin{operation}\aluRI{al}{opA + \K{not} opB + C}\wb\flagZSBV\end{operation}
 \begin{remarks}
@@ -15,7 +15,7 @@ A 32-bit subtraction with a register and an immediate operand can be performed a
 \begin{alltt}
 ; Perform \string{R1, R0\string} ← \string{R3, R2\string} - 0x40001
     SUBI R0, R2, 1
-    SBBI R1, R3, 4
+    SBCI R1, R3, 4
 \end{alltt}
 \end{remarks}
 \end{instruction}
