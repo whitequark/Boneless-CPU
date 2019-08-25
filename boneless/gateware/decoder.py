@@ -63,7 +63,7 @@ class ImmediateDecoder(Elaboratable):
                 m.d.comb += s_imm16.eq(Cat(d_imm3, self.r_ext13))
 
         with m.If(self.c_pcrel):
-            m.d.comb += self.o_imm16.eq(s_imm16 + self.i_pc + 1)
+            m.d.comb += self.o_imm16.eq(s_imm16 + self.i_pc)
         with m.Else():
             m.d.comb += self.o_imm16.eq(s_imm16)
 
@@ -146,7 +146,6 @@ class InstructionDecoder(Elaboratable):
         self.c_cycle = Signal(1)
         self.c_done  = Signal()
 
-        self.o_pc_p1 = Signal(16)
         self.o_imm16 = Signal(16)
         self.o_rsd   = Signal(3)
         self.o_ra    = Signal(3)
@@ -180,10 +179,6 @@ class InstructionDecoder(Elaboratable):
         alsru_cls = self.alsru_cls
 
         m = Module()
-
-        m.d.comb += [
-            self.o_pc_p1.eq(self.i_pc + 1),
-        ]
 
         m.submodules.imm = m_imm = self.m_imm
         m.d.comb += [
@@ -556,7 +551,7 @@ if __name__ == "__main__":
         dut = InstructionDecoder(alsru_cls=ALSRU_4LUT)
         ports = (
             dut.i_pc, dut.i_insn,
-            dut.o_pc_p1, dut.o_imm16, dut.o_rsd, dut.o_ra, dut.o_rb, dut.o_cond, dut.o_flag,
+            dut.o_imm16, dut.o_rsd, dut.o_ra, dut.o_rb, dut.o_cond, dut.o_flag,
             dut.o_shift, dut.o_multi, dut.o_xbus, dut.o_skip,
             dut.o_ld_a, dut.o_ld_b, dut.o_st_r, dut.o_st_w, dut.o_st_pc,
             dut.o_op, dut.o_ci, dut.o_si,
