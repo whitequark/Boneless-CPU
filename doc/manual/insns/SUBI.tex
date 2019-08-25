@@ -7,7 +7,7 @@
     \mnemonic & \op{5}{00011} & \reg{d} & \reg{a} & \op{2}{10} & \imm{3} \\
   \end{encoding*}
   \assembly{\mnemonic{} Rd, Ra, imm}
-  \purpose{To subtract a constant from a 16-bit integer in a register.}
+  \purpose{To subtract a two's complement constant from a 16-bit two's complement integer in a register.}
   \restrictions{None.}
-  \begin{operation}\aluRI{al}{opA - opB}\wb\flagZSBV\end{operation}
+  \begin{operation}\aluRI{al}{opA + \K{not} opB + 1}\wb\flagZSBV\end{operation}
 \end{instruction}

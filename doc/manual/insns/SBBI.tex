@@ -7,9 +7,9 @@
     \mnemonic & \op{5}{00011} & \reg{d} & \reg{a} & \op{2}{11} & \imm{3} \\
   \end{encoding*}
   \assembly{\mnemonic{} Rd, Ra, imm}
-  \purpose{To subtract a constant from a 16-bit integer in a register, with borrow input.}
+  \purpose{To subtract a two's complement constant from a 16-bit two's complement integer in a register, with borrow input.}
   \restrictions{None.}
-  \begin{operation}\aluRI{al}{opA - opB - \K{not} C}\wb\flagZSBV\end{operation}
+  \begin{operation}\aluRI{al}{opA + \K{not} opB + C}\wb\flagZSBV\end{operation}
 \begin{remarks}
 A 32-bit subtraction with a register and an immediate operand can be performed as follows:
 \begin{alltt}
