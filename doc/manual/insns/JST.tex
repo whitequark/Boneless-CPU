@@ -13,6 +13,6 @@
 table ← PC + 1 + off
 entry ← mem[W+Rs]
 addr ← mem[table + entry]
-PC ← (table + addr)[15:0]
+PC ← table + addr
 \end{operation}
 \end{instruction}

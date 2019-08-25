@@ -10,6 +10,6 @@
   \purpose{To transfer control to a variable absolute address contained in a register, with a constant offset.}
   \input{off5-restrictions.tex}
 \begin{operation}\off{5}
-PC ← (mem[W+Ra] + off)[15:0]
+PC ← mem[W+Ra] + off
 \end{operation}
 \end{instruction}

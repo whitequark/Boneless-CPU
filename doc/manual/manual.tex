@@ -78,7 +78,7 @@ Certain operations, including any operation with an \undefined{} input, will pro
 The following operators reference parts of variables or the attached memory.
 
 \begin{itemize}
-  \item \texttt{opB} ← \texttt{opA}: Store \texttt{opA} into \texttt{opB}.
+  \item \texttt{opB} ← \texttt{opA}: Store \texttt{opA} into \texttt{opB}. If necessary, \texttt{opA} is implicitly zero-extended or truncated to match the length of \texttt{opB}.
   \item \texttt{op[b:a]}: Reference bits \texttt{a} through \texttt{b}, inclusive, of \texttt{op}.
   \item \texttt{mem[addr]}: Reference memory at address \texttt{addr}. The address is implicitly ANDed with \texttt{0xFFFF}.
   \item \texttt{ext[addr]}: Reference the external bus at address \texttt{addr}. The address is implicitly ANDed with \texttt{0xFFFF}.
