@@ -61,10 +61,12 @@ TBD
 \pagebreak
 
 \section{Guide to Instruction Set}
-
-\subsection{Operation Syntax}
+\newcommand{\ginsnref}[1]{\hyperref[insn:#1]{\texttt{#1}}}
 \def←{$\leftarrow$}
 
+This guide first explains how to interpret the notation used in this document. After, it explains the available registers and their behavior.
+
+\subsection{Operation Syntax}
 This document uses the following syntax and operators to describe the operation of each instruction.
 
 \subsubsection{Undefined and Unpredictable Behavior}
@@ -72,7 +74,7 @@ To describe the boundaries of legal program behavior, this document uses the wor
 
 When execution encounters \unpredictable{} behavior, the implementation may perform any behavior, including but not limited to hanging and failing to continue execution. The resulting behavior may be different between executions even under the same circumstances.
 
-Certain operations, including any operation with an \undefined{} input, will produce an undefined result. Reading a register whose value is currently \undefined{} may produce any bit pattern. Multiple consecutive reads of such a register may also produce different bit patterns on each read.
+Certain operations, including any operation with an \undefined{} input, will produce an \undefined{} result. Reading a register whose value is currently \undefined{} may produce any bit pattern. Multiple consecutive reads of such a register may also produce different bit patterns on each read.
 
 \subsubsection{Reference Operators}
 The following operators reference parts of variables or the attached memory.
@@ -80,8 +82,8 @@ The following operators reference parts of variables or the attached memory.
 \begin{itemize}
   \item \texttt{opB} ← \texttt{opA}: Store \texttt{opA} into \texttt{opB}. If necessary, \texttt{opA} is implicitly zero-extended or truncated to match the length of \texttt{opB}.
   \item \texttt{op[b:a]}: Reference bits \texttt{a} through \texttt{b}, inclusive, of \texttt{op}.
-  \item \texttt{mem[addr]}: Reference memory at address \texttt{addr}. The address is implicitly ANDed with \texttt{0xFFFF}.
-  \item \texttt{ext[addr]}: Reference the external bus at address \texttt{addr}. The address is implicitly ANDed with \texttt{0xFFFF}.
+  \item \texttt{mem[addr]}: Reference memory word at word address \texttt{addr}. The address is implicitly ANDed with \texttt{0xFFFF}.
+  \item \texttt{ext[addr]}: Reference external bus word at word address \texttt{addr}. The address is implicitly ANDed with \texttt{0xFFFF}.
   \item \texttt{\string{opA, opB\string}}: Concatenate the bits of \texttt{opA} and \texttt{opB}. \texttt{opA} makes the high-order bits of the result and \texttt{opB} makes the low-order bits.
   \item \texttt{opB\string{opA\string}}: Construct the result by repeating \texttt{opA} \texttt{opB} times.
 \end{itemize}
@@ -140,6 +142,49 @@ The logical operators yield 1 if the condition is satisfied and 0 if it is not. 
     \hline
     \end{tabular}
 \end{itemize}
+
+\subsection{Registers}
+The CPU contains a number of registers that are used to store data, computation results, and system state. The registers are operated on as described by the operation of each instruction. If a register is not modified by an instruction, its value is preserved, except where noted in this register definition.
+
+\subsubsection{Program Counter}
+The CPU features a 16-bit program counter named \texttt{PC}. All instructions are 16 bit, so all values of \texttt{PC} are valid.
+
+Unless otherwise specified by an instruction's operation, \texttt{PC ← PC+1} after each instruction.
+
+The behavior of \texttt{PC ← op} defines that \texttt{op} is truncated to 16 bits to fit \texttt{PC}. Thus, adjusting \texttt{PC} is defined to wrap.
+
+At reset, \texttt{PC ← 0x0000}, but this value can be changed by the implementation.
+
+\subsubsection{General Purpose Registers and the Window}
+The CPU has eight 16-bit general purpose (GP) integer registers, named \texttt{R0} through \texttt{R7}. They are fully interchangeable and can be used as source and/or destination for any instruction which uses a GP register. The register file is windowed: register values are stored in main memory, starting at the window address.
+
+The current window address is stored in a 16-bit register named \texttt{W}. Its value can only be set and/or read by the four window instructions: \ginsnref{ADJW}, \ginsnref{LDW}, \ginsnref{STW}, and \ginsnref{XCHW}. Setting \texttt{W} logically changes the values of all GP registers simultaneously, enabling fast procedure calls and task switches.
+
+\texttt{W} is added to the number of a GP register to calculate the address where that register is stored. For example, the operation \texttt{mem[W+3] ← mem[W+1]} sets \texttt{R3} equal to \texttt{R1}.
+
+The behavior of \texttt{W ← op} and \texttt{mem[op]} defines that \texttt{op} is truncated to 16 bits to fit \texttt{W}. Thus, adjusting \texttt{W} and calculating GP register addresses are defined to wrap.
+
+At reset, \texttt{W ← 0xFFF8}, but this value can be changed by the implementation.
+
+\subsubsection{Result Flags}
+The CPU has four result flags to describe the result of ALU computations. The flags are updated by most ALU instructions. The CPU can act on the result of the flags by executing a conditional jump which transfers control if the flags are in the desired state. The exact contents of each flag after an instruction executes are explained in the instruction's operation, but the general purpose and behavior of each flag are explained below.
+
+The \texttt{Z} (Zero) flag is set to 1 if the low 16 bits of the result of the operation were zero, and 0 otherwise.
+
+The \texttt{S} (negative) flag is set to the 15th bit of the result of the operation.
+
+The \texttt{C} (Carry) flag is set to the 16th bit of the result of an arithmetic operation, or \undefined{} if the operation was logical.
+
+The \texttt{V} (oVerflow) flag is set if the arithmetic operation encountered two's complement overflow, or \undefined{} if the operation was logical.
+
+\subsubsection{Extended Immediate}
+The CPU has two registers that help build a 16-bit immediate value.
+
+The \ginsnref{EXTI} instruction sets the \texttt{ext13} register to its 13-bit immediate and the \texttt{has\_ext13} register to 1.
+
+Generally, if an instruction can use an immediate and \texttt{has\_ext13} is 1, the instruction will use \texttt{ext13} as the high 13 bits of the the immediate value and take the low 3 bits from the instruction itself. The exact behavior of an instruction with regards to \texttt{has\_ext13} and \texttt{ext13} is specified in the instruction's operation.
+
+Except for after \ginsnref{EXTI}, \texttt{ext13 ← \undefined{}} and \texttt{has\_ext13 ← 0} after every instruction, even those which do not use either register.
 
 \pagebreak
 
