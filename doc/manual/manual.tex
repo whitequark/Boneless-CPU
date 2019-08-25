@@ -61,7 +61,78 @@ TBD
 \pagebreak
 
 \section{Guide to Instruction Set}
-TBD
+
+\subsection{Operation Syntax}
+\def←{$\leftarrow$}
+
+This document uses the following syntax and operators to describe the operation of each instruction.
+
+\subsubsection{Reference Operators}
+The following operators reference parts of variables or the attached memory.
+
+\begin{itemize}
+  \item \texttt{opB} ← \texttt{opA}: Store \texttt{opA} into \texttt{opB}.
+  \item \texttt{op[b:a]}: Reference bits \texttt{a} through \texttt{b}, inclusive, of \texttt{op}.
+  \item \texttt{mem[addr]}: Reference memory at address \texttt{addr}. The address is implicitly ANDed with \texttt{0xFFFF}.
+  \item \texttt{ext[addr]}: Reference the external bus at address \texttt{addr}. The address is implicitly ANDed with \texttt{0xFFFF}.
+  \item \texttt{\{opA, opB\}}: Concatenate the bits of \texttt{opA} and \texttt{opB}. \texttt{opA} makes the high-order bits of the result and \texttt{opB} makes the low-order bits.
+  \item \texttt{\{opB\{opA\}\}}: Construct the result by repeating \texttt{opA} \texttt{opB} times.
+\end{itemize}
+
+\subsubsection{Arithmetic Operators}
+The arithmetic operators perform arithmetic or bitwise logic between the operands. All operands to these operators are unsigned. If one operand is shorter than the other, it is zero-extended to match the length of the other.
+
+\begin{itemize}
+  \item \texttt{opA + opB}: Add \texttt{opA} and \texttt{opB}. The high bit of the result is a carry bit.
+  \item \texttt{opA \textbf{and} opB}: Perform a bitwise AND between \texttt{opA} and \texttt{opB}.
+  \item \texttt{opA \textbf{or} opB}: Perform a bitwise OR between \texttt{opA} and \texttt{opB}.
+  \item \texttt{opA \textbf{xor} opB}: Perform a bitwise XOR between \texttt{opA} and \texttt{opB}.
+  \item \texttt{\textbf{not} op}: Perform a bitwise negation of \texttt{op}.
+\end{itemize}
+
+\subsubsection{Logical Operators}
+The logical operators yield 1 if the condition is satisfied and 0 if it is not. If one operand is shorter than the other, it is zero-extended to match the length of the other.
+
+\begin{itemize}
+  \item \texttt{opA = opB}: Satisfied if \texttt{opA} equals \texttt{opB}.
+  \item \texttt{opA <> opB}: Satisfied if \texttt{opA} does not equal \texttt{opB}.
+\end{itemize}
+
+\subsubsection{Functions}
+
+\begin{itemize}
+  \item \texttt{sign\_extend\_16(op)}: Perform a sign extension of \texttt{op} by replicating the high bit until the total length is 16 bits.
+  \item \texttt{decode\_imm\_al(op)}: Calculate the immediate value of an arithmetic or logical instruction according to the following table. If \texttt{op} is not in the table, behavior is \unpredictable.\linebreak
+    \begin{tabular}{|c c|}
+    \hline
+    \texttt{op} & Result \\
+    \hline
+    0 & \texttt{0x0000} \\
+    1 & \texttt{0x0001} \\
+    2 & \texttt{0x8000} \\
+    4 & \texttt{0x00FF} \\
+    5 & \texttt{0xFF00} \\
+    6 & \texttt{0x7FFF} \\
+    7 & \texttt{0xFFFF} \\
+    \hline
+    \end{tabular}
+  \item \texttt{decode\_imm\_sr(op)}: Calculate the immediate value of a shift or rotate instruction according to the following table. If \texttt{op} is not in the table, behavior is \unpredictable.\linebreak
+    \begin{tabular}{|c c|}
+    \hline
+    \texttt{op} & Result \\
+    \hline
+    0 & 8 \\
+    1 & 1 \\
+    2 & 2 \\
+    3 & 3 \\
+    4 & 4 \\
+    5 & 5 \\
+    6 & 6 \\
+    7 & 7 \\
+    \hline
+    \end{tabular}
+\end{itemize}
+
 \pagebreak
 
 \section{List of Instructions}
