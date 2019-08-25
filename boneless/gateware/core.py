@@ -92,6 +92,7 @@ class BusArbiter(Elaboratable):
     Addr = InstructionDecoder.Addr
 
     def __init__(self):
+        self.i_pc   = Signal(16)
         self.i_w    = Signal(13)
         self.i_ra   = Signal(3)
         self.i_rb   = Signal(3)
@@ -103,6 +104,7 @@ class BusArbiter(Elaboratable):
         self.c_en   = Signal()
         self.c_dir  = self.Dir.signal()
         self.c_addr = self.Addr.signal()
+        self.c_pc   = Signal()
         self.c_xbus = Signal()
 
         self.o_bus_addr = Signal(16)
@@ -129,6 +131,8 @@ class BusArbiter(Elaboratable):
                 m.d.comb += self.o_bus_addr.eq(Cat(self.i_rb,  self.i_w))
             with m.Case(self.Addr.RSD):
                 m.d.comb += self.o_bus_addr.eq(Cat(self.i_rsd, self.i_w))
+        with m.If(self.c_pc):
+            m.d.comb += self.o_bus_addr.eq(self.i_pc)
 
         r_xbus = Signal()
         with m.Switch(self.c_dir):
@@ -223,6 +227,7 @@ class CoreFSM(Elaboratable):
 
         m.submodules.arb = m_arb = self.m_arb
         m.d.comb += [
+            m_arb.i_pc .eq(m_pc.r_addr),
             m_arb.i_w  .eq(self.r_w),
             m_arb.i_ra .eq(m_dec.o_ra),
             m_arb.i_rb .eq(m_dec.o_rb),
@@ -293,9 +298,8 @@ class CoreFSM(Elaboratable):
             with m.State("FETCH"):
                 m.d.comb += m_pc.c_inc.eq(1)
                 m.d.comb += m_dec.c_fetch.eq(1)
-                m.d.comb += m_arb.i_ptr.eq(m_pc.r_addr)
+                m.d.comb += m_arb.c_pc.eq(1)
                 m.d.comb += m_arb.c_en.eq(1)
-                m.d.comb += m_arb.c_addr.eq(m_arb.Addr.IND)
                 m.next = "LOAD-A"
 
             with m.State("LOAD-A"):
