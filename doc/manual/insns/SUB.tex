@@ -3,7 +3,7 @@
     \mnemonic & \op{5}{00010} & \reg{d} & \reg{a} & \op{2}{10} & \reg{b} \\
   \end{encoding}
   \assembly{\mnemonic{} Rd, Ra, Rb}
-  \purpose{To subtract 16-bit integers in registers.}
+  \purpose{To subtract 16-bit two's complement integers in registers.}
   \restrictions{None.}
-  \begin{operation}\aluRR{opA - opB}\wb\flagZSBV\end{operation}
+  \begin{operation}\aluRR{opA + \K{not} opB + 1}\wb\flagZSBV\end{operation}
 \end{instruction}
