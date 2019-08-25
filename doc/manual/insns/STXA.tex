@@ -10,7 +10,7 @@
   \purpose{To complete a store cycle on external bus at a constant absolute address.}
   \input{off8-restrictions.tex}
 \begin{operation}\off{8}
-data ← mem[W|Rs]
+data ← mem[W+Rs]
 ext[off] ← data
 \end{operation}
 \end{instruction}

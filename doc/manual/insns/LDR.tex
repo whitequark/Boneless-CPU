@@ -10,8 +10,8 @@
   \purpose{To load a word from memory at a constant PC-relative address, with a variable offset.}
   \input{off5-restrictions.tex}
 \begin{operation}\off{5}
-addr ← PC + 1 + off + mem[W|Ra]
+addr ← PC + 1 + off + mem[W+Ra]
 data ← mem[addr]
-mem[W|Rd] ← data
+mem[W+Rd] ← data
 \end{operation}
 \end{instruction}

@@ -5,5 +5,5 @@
   \assembly{\mnemonic{} Rd, Ra, amount}
   \purpose{To perform a left rotate of a 16-bit integer in a register by a constant bit amount.}
   \input{shifti-restrictions.tex}
-  \begin{operation}\aluRI{sr}{opA[15-imm3:0]|opA[16:15-imm3]}\wb\flagZS\end{operation}
+  \begin{operation}\aluRI{sr}{\string{opA[15-opB:0], opA[15:15-opB]\string}}\wb\flagZS\end{operation}
 \end{instruction}

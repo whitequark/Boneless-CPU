@@ -7,9 +7,9 @@
     \mnemonic & \op{5}{10001} & \reg{d} & \off{8} \\
   \end{encoding*}
   \assembly{\mnemonic{} Rd, off}
-  \purpose{To load a register with an address relative to PC with a constant offset..}
+  \purpose{To load a register with an address relative to PC with a constant offset.}
   \input{off8-restrictions.tex}
 \begin{operation}\off{8}
-mem[W|Rd] ← PC + 1 + off
+mem[W+Rd] ← (PC + 1 + off)[15:0]
 \end{operation}
 \end{instruction}

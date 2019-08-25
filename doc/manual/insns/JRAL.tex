@@ -6,8 +6,8 @@
   \purpose{To transfer control to a subroutine whose variable absolute address is contained in a register.}
   \restrictions{None.}
 \begin{operation}
-addr ← mem[W|Rb]
-mem[W|Rd] ← PC + 1
+addr ← mem[W+Rb]
+mem[W+Rd] ← (PC + 1)[15:0]
 PC ← addr
 \end{operation}
 \end{instruction}

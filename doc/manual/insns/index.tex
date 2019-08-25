@@ -50,38 +50,38 @@
     \newcommand{\K}[1]{\textbf{####1}}
 
     \newcommand{\aluRR}[1]{\begin{alltt}
-    opA ← mem[W|Ra]\\
-    opB ← mem[W|Rb]\\
+    opA ← mem[W+Ra]\\
+    opB ← mem[W+Rb]\\
     res ← ####1
     \end{alltt}}
 
     \newcommand{\aluRI}[2]{
     \begin{alltt}
-    opA ← mem[W|Ra]\\
+    opA ← mem[W+Ra]\\
     \K{if} (has\_ext13)\\
-    \K{then} opB ← ext13|imm3\\
+    \K{then} opB ← \{ext13, imm3\}\\
     \K{else} opB ← decode\_imm\_####1(imm3)\\
     res ← ####2
     \end{alltt}}
 
-    \newcommand{\wb}{mem[W|Rd] ← res}
+    \newcommand{\wb}{mem[W+Rd] ← res[15:0]}
 
     \newcommand{\flagZS}{\begin{alltt}
-    Z ← res = 0\\
+    Z ← res[15:0] = 0\\
     S ← res[15]\\
     C ← \undefined\\
     V ← \undefined
     \end{alltt}}
 
     \newcommand{\flagZSCV}{\begin{alltt}
-    Z ← res = 0\\
+    Z ← res[15:0] = 0\\
     S ← res[15]\\
     C ← res[16]\\
     V ← (opA[15] = opB[15]) \K{and} (opA[15] <> res[15])
     \end{alltt}}
 
     \newcommand{\flagZSBV}{\begin{alltt}
-    Z ← res = 0\\
+    Z ← res[15:0] = 0\\
     S ← res[15]\\
     C ← res[16]\\
     V ← (opA[15] = \K{not} opB[15]) \K{and} (opA[15] <> res[15])
@@ -89,20 +89,20 @@
 
     \newcommand{\imm}[1]{\begin{alltt}
     \K{if} (has\_ext13)\\
-    \K{then} imm ← ext13|imm{####1}[2:0]\\
-    \K{else} imm ← sign\_extend(imm{####1})
+    \K{then} imm ← \{ext13, imm{####1}[2:0]\}\\
+    \K{else} imm ← sign\_extend\_16(imm{####1})
     \end{alltt}}
 
     \newcommand{\off}[1]{\begin{alltt}
     \K{if} (has\_ext13)\\
-    \K{then} off ← ext13|off{####1}[2:0]\\
-    \K{else} off ← sign\_extend(off{####1})
+    \K{then} off ← \{ext13, off{####1}[2:0]\}\\
+    \K{else} off ← sign\_extend\_16(off{####1})
     \end{alltt}}
 
     \newcommand{\jump}[1]{\begin{alltt}
     \K{if} (####1)\\
-    \K{then} PC ← PC + 1 + off\\
-    \K{else} PC ← PC + 1
+    \K{then} PC ← (PC + 1 + off)[15:0]\\
+    \K{else} PC ← (PC + 1)[15:0]
     \end{alltt}}
 
     \field{Operation}

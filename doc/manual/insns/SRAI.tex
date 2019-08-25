@@ -5,5 +5,5 @@
   \assembly{\mnemonic{} Rd, Ra, amount}
   \purpose{To perform a right arithmetical shift of a 16-bit integer in a register by a constant bit amount.}
   \input{shifti-restrictions.tex}
-  \begin{operation}\aluRI{sr}{opA[15]\string{imm3+1\string}|opA[16:15-imm3]}\wb\flagZS\end{operation}
+  \begin{operation}\aluRI{sr}{\string{\string{opB\string{opA[15]\string}\string}, opA[15:opB]\string}}\wb\flagZS\end{operation}
 \end{instruction}
