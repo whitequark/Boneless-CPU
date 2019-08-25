@@ -10,9 +10,8 @@
   \purpose{To transfer control to an address contained in a jump table at a constant offset, where the address is relative to the location of the table.}
   \input{off5-restrictions.tex}
 \begin{operation}\off{5}
-table ← mem[W|Rs]
-entry ← off
-addr ← mem[table + entry]
-PC ← table + addr
+table ← mem[W+Rs]
+addr ← mem[table + off]
+PC ← (table + addr)[15:0]
 \end{operation}
 \end{instruction}

@@ -9,6 +9,6 @@
   \assembly{\mnemonic{} label}
   \purpose{To serve as a placeholder for a jump instruction.}
   \input{off8-restrictions.tex}
-  \begin{operation}PC ← PC + 1\end{operation}
+  \begin{operation}PC ← (PC + 1)[15:0]\end{operation}
   \begin{remarks}The \texttt{JN} instruction has no effect. It may be used as a placeholder for a different jump instruction with a predefined offset when the exact condition is unknown, such as in certain self-modifying code.\end{remarks}
 \end{instruction}

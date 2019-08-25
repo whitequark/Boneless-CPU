@@ -5,5 +5,5 @@
   \assembly{\mnemonic{} Rd, Ra, Rb}
   \purpose{To perform a right logical shift of a 16-bit integer in a register by a variable bit amount.}
   \input{shift-restrictions.tex}
-  \begin{operation}\aluRR{0\string{opB\string}|opA[16:16-opB]}\wb\flagZS\end{operation}
+  \begin{operation}\aluRR{\string{\string{opB\string{0\string}\string}, opA[15:opB]\string}}\wb\flagZS\end{operation}
 \end{instruction}

@@ -11,8 +11,8 @@
   \input{off5-restrictions.tex}
 \begin{operation}\off{5}
 table ← PC + 1 + off
-entry ← mem[W|Rs]
+entry ← mem[W+Rs]
 addr ← mem[table + entry]
-PC ← table + addr
+PC ← (table + addr)[15:0]
 \end{operation}
 \end{instruction}

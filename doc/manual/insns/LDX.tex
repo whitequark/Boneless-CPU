@@ -10,8 +10,8 @@
   \purpose{To complete a load cycle on external bus at a variable address, with a constant offset.}
   \input{off5-restrictions.tex}
 \begin{operation}\off{5}
-addr ← mem[W|Ra] + off
+addr ← mem[W+Ra] + off
 data ← ext[addr]
-mem[W|Rd] ← data
+mem[W+Rd] ← data
 \end{operation}
 \end{instruction}
