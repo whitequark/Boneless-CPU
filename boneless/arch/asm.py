@@ -278,3 +278,11 @@ class Assembler:
             return emit_text(output)
         else:
             return output
+
+# short cuts 
+
+def assemble():
+    pass
+
+def disassemble():
+    pass
