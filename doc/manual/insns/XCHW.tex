@@ -3,7 +3,7 @@
     \mnemonic & \op{5}{10100} & \reg{d} & \op{3}{001} & \opx{2}{00} & \reg{b} \\
   \end{encoding}
   \assembly{\mnemonic{} Rd, Rb}
-  \purpose{To exchange the address of the register window with a register.}
+  \purpose{To exchange the address of the register window with a general purpose register.}
   \restrictions{If \texttt{Rb} contains a value that is not a multiple of 8, the behavior is \unpredictable.}
 \begin{operation}
 old ← W
@@ -17,7 +17,7 @@ yield:
     XCHW R7, R7
     JR   R0
 ; Elsewhere:
-    JALR R0, yield
+    JAL R0, yield
 \end{alltt}
 \end{remarks}
 \end{instruction}
