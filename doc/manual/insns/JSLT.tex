@@ -9,5 +9,5 @@
   \assembly{\mnemonic{} label}
   \purpose{To transfer control after a \texttt{\insnref{CMP} Ra, Rb} instruction if \texttt{Ra} is less than \texttt{Rb} when interpreted as signed integer.}
   \input{off8-restrictions.tex}
-  \begin{operation}\off{8}\jump{(S \K{xor} V)}\end{operation}
+  \begin{operation}\off{8}\jump{S \K{xor} V}\end{operation}
 \end{instruction}
