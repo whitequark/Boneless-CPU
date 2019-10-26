@@ -7,7 +7,7 @@
     \mnemonic & \op{4}{1011} & \op{4}{1000} & \off{8} \\
   \end{encoding*}
   \assembly{\mnemonic{} label}
-  \purpose{To transfer control if an arithmetic or shift operation produced a zero result.}
+  \purpose{To transfer control if the last operation produced a result equal to zero.}
   \input{off8-restrictions.tex}
   \begin{operation}\off{8}\jump{Z}\end{operation}
   \begin{remarks}This instruction has the same encoding as \insnref{JE}.\end{remarks}

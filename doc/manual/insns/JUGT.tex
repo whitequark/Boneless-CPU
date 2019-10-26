@@ -7,7 +7,7 @@
     \mnemonic & \op{4}{1011} & \op{4}{0100} & \off{8} \\
   \end{encoding*}
   \assembly{\mnemonic{} label}
-  \purpose{To transfer control after a \texttt{\insnref{CMP} Ra, Rb} instruction if \texttt{Ra} is greater than to \texttt{Rb} when interpreted as unsigned integer.}
+  \purpose{To transfer control after a \texttt{\insnref{CMP} Ra, Rb} instruction if \texttt{Ra} is greater than \texttt{Rb} when interpreted as unsigned integers.}
   \input{off8-restrictions.tex}
   \begin{operation}\off{8}\jump{\K{not} ((\K{not} C) \K{or} Z)}\end{operation}
 \end{instruction}

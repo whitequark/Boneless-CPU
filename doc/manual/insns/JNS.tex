@@ -7,7 +7,7 @@
     \mnemonic & \op{4}{1011} & \op{4}{0001} & \off{8} \\
   \end{encoding*}
   \assembly{\mnemonic{} label}
-  \purpose{To transfer control if an arithmetic or shift operation produced a non-negative result.}
+  \purpose{To transfer control if the negative (S) flag is clear (e.g. the last arithmetic operation produced a negative result).}
   \input{off8-restrictions.tex}
   \begin{operation}\off{8}\jump{\K{not} S}\end{operation}
 \end{instruction}
