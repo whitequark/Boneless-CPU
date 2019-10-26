@@ -6,7 +6,7 @@
     \exti
     \mnemonic & \op{5}{00001} & \opx{3}{000} & \reg{a} & \op{2}{11} & \imm{3} \\
   \end{encoding*}
-  \assembly{\mnemonic{} Rd, Ra, imm}
+  \assembly{\mnemonic{} Ra, imm}
   \purpose{To compare a two's complement constant to a 16-bit two's complement integer in a register.}
   \restrictions{None.}
   \begin{operation}\aluRI{al}{opA + \K{not} opB + 1}\flagZSBV\end{operation}

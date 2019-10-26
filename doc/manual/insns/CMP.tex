@@ -2,7 +2,7 @@
   \begin{encoding}
     \mnemonic & \op{5}{00000} & \op{3}{000} & \reg{a} & \op{2}{11} & \reg{b} \\
   \end{encoding}
-  \assembly{\mnemonic{} Rd, Ra, Rb}
+  \assembly{\mnemonic{} Ra, Rb}
   \purpose{To compare 16-bit two's complement integers in registers.}
   \restrictions{None.}
   \begin{operation}\aluRR{opA + \K{not} opB + 1}\flagZSBV\end{operation}
