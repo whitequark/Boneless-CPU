@@ -1,47 +1,23 @@
-import enum
+from enum import Enum, EnumMeta
 from nmigen import *
 
 
-__all__ = ["ControlEnum", "MultiControlEnum"]
-
-
-# We have to do an annoying metaclass dance because there's no @classproperty.
-class ControlEnumMeta(enum.EnumMeta):
-    @property
-    def width(cls):
-        return max(cls).bit_length()
-
-
-@enum.unique
-class ControlEnum(enum.IntEnum, metaclass=ControlEnumMeta):
-    @classmethod
-    def decoder(cls, value):
-        try:
-            return cls(value).name.replace("_", "-")
-        except ValueError:
-            return str(value)
-
-    @classmethod
-    def signal(cls, **kwargs):
-        return Signal(cls.width, decoder=cls.decoder, src_loc_at=1, **kwargs)
-
-    def __repr__(self):
-        return "<{}: {:0{}b}>".format(self.name, self.value, self.width)
+__all__ = ["EnumGroup"]
 
 
 # We have to do an annoying metaclass dance because we want to do something like:
 #
-#   class MuxA(ControlEnum): ...
-#   class MuxB(ControlEnum): ...
-#   class Mode(MultiControlEnum):
+#   class MuxA(Enum): ...
+#   class MuxB(Enum): ...
+#   class Mode(EnumGroup):
 #       FOO = (MuxA.X, MuxB.Y)
 #
 # but by the time we're inside the body of `Mode` it is no longer possible to access the names from
 # the outer scope, so we can't easily name `MuxA` for example, so we rewrite it as:
 #
-#   class Mode(MultiControlEnum, layout=[MuxA, MuxB]):
+#   class Mode(EnumGroup, layout=[MuxA, MuxB]):
 #       FOO = ("X", "Y")
-class MultiControlEnumMeta(ControlEnumMeta):
+class EnumGroupMeta(EnumMeta):
     @classmethod
     def __prepare__(metacls, name, bases, **kwargs):
         return super().__prepare__(name, bases)
@@ -54,7 +30,7 @@ class MultiControlEnumMeta(ControlEnumMeta):
             offset  = 0
             for enum in layout.values():
                 offsets.append(offset)
-                offset += enum.width
+                offset += Shape.cast(enum).width
 
             for key in old_classdict:
                 if key.startswith("_"):
@@ -62,15 +38,12 @@ class MultiControlEnumMeta(ControlEnumMeta):
                 else:
                     value = 0
                     for item, enum, offset in zip(old_classdict[key], layout.values(), offsets):
-                        value |= enum[item] << offset
+                        value |= enum[item].value << offset
                     classdict[key] = value
 
             @classmethod
             def expand(cls, m, signal):
-                rec = Record([(name, enum.width)   for (name, enum) in layout.items()],
-                             src_loc_at=1)
-                for name, enum in layout.items():
-                    rec[name].decoder = enum.decoder
+                rec = Record([*layout.items()], src_loc_at=1)
                 m.d.comb += rec.eq(signal)
                 return rec
             classdict["expand"] = expand
@@ -78,6 +51,6 @@ class MultiControlEnumMeta(ControlEnumMeta):
         return super().__new__(cls, name, bases, classdict)
 
 
-class MultiControlEnum(ControlEnum, metaclass=MultiControlEnumMeta):
+class EnumGroup(Enum, metaclass=EnumGroupMeta):
     def foo(self):
         pass

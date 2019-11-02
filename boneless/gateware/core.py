@@ -1,3 +1,4 @@
+from enum import Enum
 from nmigen import *
 
 from .control import *
@@ -31,7 +32,7 @@ class CondSelector(Elaboratable):
 
     def __init__(self):
         self.i_f    = Record([("z", 1), ("s", 1), ("c", 1), ("v", 1)])
-        self.c_cond = self.Cond.signal()
+        self.c_cond = Signal(self.Cond)
         self.o_flag = Signal()
 
     def elaborate(self, platform):
@@ -85,7 +86,7 @@ class ShiftSequencer(Elaboratable):
 
 
 class BusArbiter(Elaboratable):
-    class Dir(ControlEnum):
+    class Dir(Enum):
         LD  = 0b0
         ST  = 0b1
 
@@ -102,8 +103,8 @@ class BusArbiter(Elaboratable):
         self.o_data = Signal(16)
 
         self.c_en   = Signal()
-        self.c_dir  = self.Dir.signal()
-        self.c_addr = self.Addr.signal()
+        self.c_dir  = Signal(self.Dir)
+        self.c_addr = Signal(self.Addr)
         self.c_pc   = Signal()
         self.c_xbus = Signal()
 
@@ -244,7 +245,7 @@ class CoreFSM(Elaboratable):
             m_arb.i_data.eq(m_alsru.o_o),
         ]
         with m.If(m_dec.o_jcc):
-            assert (m_alsru.Op.A | m_alsru.Op.ApB) == m_alsru.Op.ApB
+            assert (m_alsru.Op.A.value | m_alsru.Op.ApB.value) == m_alsru.Op.ApB.value
             with m.If(m_dec.o_flag == m_csel.o_flag):
                 m.d.comb += m_alsru.c_op.eq(m_dec.o_op | m_alsru.Op.ApB)
         with m.Switch(m_dec.o_ci):

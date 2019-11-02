@@ -1,3 +1,4 @@
+from enum import Enum
 from nmigen import *
 
 from .control import *
@@ -10,7 +11,7 @@ class ALSRU:
     """Arithmetical, logical, shift, and rotate unit."""
 
     # redefined by subclasses
-    class Op(MultiControlEnum):
+    class Op(EnumGroup):
         A    = ()
         B    = ()
         nB   = ()
@@ -21,7 +22,7 @@ class ALSRU:
         AmB  = ()
         SLR  = ()
 
-    class Dir(ControlEnum):
+    class Dir(Enum):
         L    = ()
         R    = ()
 
@@ -39,12 +40,12 @@ class ALSRU:
         self.o_c = Signal() # carry out
         self.o_v = Signal() # overflow out
 
-        self.c_op  = self.Op.signal() # redefined by subclasses
+        self.c_op  = Signal(self.Op) # redefined by subclasses
 
         self.i_h = Signal() # shift in
         self.o_h = Signal() # shift out
 
-        self.c_dir = self.Dir.signal()
+        self.c_dir = Signal(self.Dir)
 
 
 class ALSRU_4LUT(ALSRU, Elaboratable):
@@ -81,24 +82,24 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
     #   R<<1: S=SLn-1         Y=S   O=Y    (pre-load R)
     #   R>>1: S=SRn+1         Y=S   O=Y    (pre-load R)
 
-    class XMux(ControlEnum):
+    class XMux(Enum):
         A   = 0b00
         AaB = 0b01
         AoB = 0b10
         AxB = 0b11
         x   = 0
 
-    class YMux(ControlEnum):
+    class YMux(Enum):
         Z   = 0b00
         S   = 0b01
         B   = 0b10
         nB  = 0b11
 
-    class OMux(ControlEnum):
+    class OMux(Enum):
         XpY = 0b0
         Y   = 0b1
 
-    class Op(MultiControlEnum, layout={"x":XMux, "y":YMux, "o":OMux}):
+    class Op(EnumGroup, layout={"x":XMux, "y":YMux, "o":OMux}):
         A    = ("A",   "Z",  "XpY",)
         B    = ("x",   "B",  "Y",  )
         nB   = ("x",   "nB", "Y",  )
@@ -109,7 +110,7 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
         AmB  = ("A",   "nB", "XpY",)
         SLR  = ("x",   "S",  "Y",  )
 
-    class Dir(ControlEnum):
+    class Dir(Enum):
         L    = 0b0
         R    = 0b1
 

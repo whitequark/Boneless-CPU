@@ -1,3 +1,4 @@
+from enum import Enum
 from nmigen import *
 
 from ..arch import instr as instr, opcode as opcode
@@ -11,11 +12,11 @@ class ImmediateDecoder(Elaboratable):
     IMM3_TABLE_AL = Array(instr.Imm3AL.lut_to_imm)
     IMM3_TABLE_SR = Array(instr.Imm3SR.lut_to_imm)
 
-    class Table(ControlEnum):
+    class Table(Enum):
         AL    = 0b1
         SR    = 0b0
 
-    class Width(ControlEnum):
+    class Width(Enum):
         IMM3  = 0b00
         IMM5  = 0b01
         IMM8  = 0b10
@@ -27,8 +28,8 @@ class ImmediateDecoder(Elaboratable):
         self.o_imm16 = Signal(16)
 
         self.c_exti  = Signal()
-        self.c_table = self.Table.signal()
-        self.c_width = self.Width.signal()
+        self.c_table = Signal(self.Table)
+        self.c_width = Signal(self.Width)
         self.c_pcrel = Signal()
 
         self.r_ext13 = Signal(13)
@@ -71,55 +72,55 @@ class ImmediateDecoder(Elaboratable):
 
 
 class InstructionDecoder(Elaboratable):
-    class Addr(ControlEnum):
+    class Addr(Enum):
         IND   = 0b00
         RSD   = 0b01
         RB    = 0b10
         RA    = 0b11
         x     = 0b00
 
-    class OpAMux(ControlEnum):
+    class OpAMux(Enum):
         ZERO  = 0b00
         PCp1  = 0b01
         W     = 0b10
         PTR   = 0b11
 
-    class OpBMux(ControlEnum):
+    class OpBMux(Enum):
         IMM   = 0b0
         PTR   = 0b1
 
-    class OpRMux(ControlEnum):
+    class OpRMux(Enum):
         ZERO  = 0b0
         PTR   = 0b1
 
-    class LdA(MultiControlEnum, layout={"mux":OpAMux, "addr":Addr}):
+    class LdA(EnumGroup, layout={"mux":OpAMux, "addr":Addr}):
         ZERO  = ("ZERO", "x"  )
         PCp1  = ("PCp1", "x"  )
         W     = ("W",    "x"  )
         RA    = ("PTR",  "RA" )
         RSD   = ("PTR",  "RSD")
 
-    class LdB(MultiControlEnum, layout={"mux":OpBMux, "addr":Addr}):
+    class LdB(EnumGroup, layout={"mux":OpBMux, "addr":Addr}):
         IMM   = ("IMM",  "x"  )
         IND   = ("PTR",  "IND")
         RB    = ("PTR",  "RB" )
         RSD   = ("PTR",  "RSD")
 
-    class StR(MultiControlEnum, layout={"mux":OpRMux, "addr":Addr}):
+    class StR(EnumGroup, layout={"mux":OpRMux, "addr":Addr}):
         x     = ("ZERO", "x"  )
         IND   = ("PTR",  "IND")
         RSD   = ("PTR",  "RSD")
 
-    class CI(ControlEnum):
+    class CI(Enum):
         ZERO  = 0b00
         ONE   = 0b01
         FLAG  = 0b10
 
-    class SI(ControlEnum):
+    class SI(Enum):
         ZERO  = 0b0
         MSB   = 0b1
 
-    class Cond(ControlEnum):
+    class Cond(Enum):
         Z     = 0b000
         S     = 0b001
         C     = 0b010
@@ -150,7 +151,7 @@ class InstructionDecoder(Elaboratable):
         self.o_rsd   = Signal(3)
         self.o_ra    = Signal(3)
         self.o_rb    = Signal(3)
-        self.o_cond  = self.Cond.signal()
+        self.o_cond  = Signal(self.Cond)
         self.o_flag  = Signal()
 
         self.o_shift = Signal() # shift multicycle instruction
@@ -159,17 +160,17 @@ class InstructionDecoder(Elaboratable):
         self.o_jcc   = Signal() # select ALU operation based on cond/flag
         self.o_skip  = Signal() # skip load/execute/store
 
-        self.o_ld_a  = self.LdA.signal()
-        self.o_ld_b  = self.LdB.signal()
-        self.o_st_r  = self.StR.signal()
+        self.o_ld_a  = Signal(self.LdA)
+        self.o_ld_b  = Signal(self.LdB)
+        self.o_st_r  = Signal(self.StR)
         self.o_st_f  = Record([("zs", 1), ("cv", 1)])
         self.o_st_w  = Signal()
         self.o_st_pc = Signal()
 
-        self.o_op    = alsru_cls.Op.signal()
-        self.o_dir   = alsru_cls.Dir.signal()
-        self.o_ci    = self.CI.signal()
-        self.o_si    = self.SI.signal()
+        self.o_op    = Signal(alsru_cls.Op)
+        self.o_dir   = Signal(alsru_cls.Dir)
+        self.o_ci    = Signal(self.CI)
+        self.o_si    = Signal(self.SI)
 
         self.r_exti  = Signal()
 
