@@ -16,6 +16,14 @@ def _signed(value, bits):
 class Reg(mc.Operand):
     format    = "R{:d}"
 
+    def __init__(self, value, *, explicit=True):
+        if isinstance(value, type(self)):
+            self.value = value.value
+        elif explicit:
+            self.value = self.prepare(value)
+        else:
+            raise ValueError("Register operand must be specified explicitly")
+
     @classmethod
     def prepare(cls, value):
         value = int(value)

@@ -182,3 +182,8 @@ class InstructionTestCase(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,
                 r"Immediate operand 18 must be in range 0\.\.16"):
             op.ROTI(op.R0, op.R0, 18)
+
+    def test_reg_wrong(self):
+        with self.assertRaisesRegex(ValueError,
+                r"Register operand must be specified explicitly"):
+            op.AND(op.R0, op.R0, 0)

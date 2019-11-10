@@ -39,7 +39,7 @@ class Operand(metaclass=OperandMeta):
     format  = abc.abstractproperty()
     prepare = abc.abstractproperty()
 
-    def __init__(self, value):
+    def __init__(self, value, *, explicit=True):
         if isinstance(value, type(self)):
             self.value = value.value
         else:
@@ -153,7 +153,8 @@ class InstrMeta(abc.ABCMeta):
             code += textwrap.dedent(f"""
             def __init__(self, {", ".join(fields)}):
                 '''Unpack an instruction from Python code.'''
-                {"; ".join(f"self.{field} = {field}"
+                {"; ".join(f"self._{field} = "
+                           f"self._field_types[{repr(field)}]({field}, explicit=False)"
                            for field in fields)}
 
             def __repr__(self):
@@ -169,7 +170,7 @@ class InstrMeta(abc.ABCMeta):
 
             @classmethod
             def _from_int(cls, input):
-                return cls({", ".join(f"{field}=cls._field_types[{repr(field_name)}]"
+                return cls({", ".join(f"{field}=cls._field_types[{repr(field)}]"
                                       f".from_int((input >> {offset}) & {mask})"
                                       for field, (mask, offset) in fields.items())})
 
