@@ -3,6 +3,7 @@ import re
 import textwrap
 from parse import parse
 from string import Formatter
+from . import instr # so the operand validator knows what a Reg is
 
 
 __all__ = ["UnresolvedRef", "Label", "Operand", "Instr"]
@@ -148,12 +149,20 @@ class InstrMeta(abc.ABCMeta):
                     self._{field_name} = self._field_types[{repr(field_name)}](value)
                 """)
 
-            namespace["__slots__"] = [f"_{field}" for field in fields]
+            def validate_oper_type(field):
+                if field == "imm":
+                    return "self._validate_imm(imm)"
+                elif field in ("rsd", "ra", "rb"):
+                    return "self._validate_reg(\"{}\", {})".format(field, field)
+                else:
+                    raise ValueError("don't know how to validate field {}".format(field))
 
+
+            namespace["__slots__"] = [f"_{field}" for field in fields]
             code += textwrap.dedent(f"""
             def __init__(self, {", ".join(fields)}):
                 '''Unpack an instruction from Python code.'''
-                {"; ".join(f"self.{field} = {field}"
+                {"; ".join(f"self.{field} = {validate_oper_type(field)}"
                            for field in fields)}
 
             def __repr__(self):
@@ -190,6 +199,16 @@ class InstrMeta(abc.ABCMeta):
                 return ((isinstance(self, type(other)) or isinstance(other, type(self))) and
                         {" and ".join(f"self._{field} == other._{field}"
                                       for field in fields)})
+
+            def _validate_imm(self, imm):
+                if isinstance(imm, instr.Reg):
+                    raise ValueError("Immediate operand expected, not register {{}}.".format(imm))
+                return imm
+
+            def _validate_reg(self, oper, reg):
+                if not isinstance(reg, instr.Reg):
+                    raise ValueError("Register expected for operand {{}}, not value '{{}}'.".format(oper, reg))
+                return reg
             """)
 
             # It's somewhat unfortunate that we have to resort to `eval` here, but there are good
