@@ -1,4 +1,4 @@
-\begin{instruction}{JO}{Jump if Overflow}
+\begin{instruction}{BV1}{Branch if Overflow is 1}
   \begin{encoding*}{short}
     \mnemonic & \op{4}{1011} & \op{4}{1011} & \off{8} \\
   \end{encoding*}
@@ -7,7 +7,7 @@
     \mnemonic & \op{4}{1011} & \op{4}{1011} & \off{8} \\
   \end{encoding*}
   \assembly{\mnemonic{} label}
-  \purpose{To transfer control if the overflow (V) flag is set (e.g. the last arithmetic operation resulted in signed overflow).}
+  \purpose{To transfer control if the overflow (V) flag is 1.}
   \input{off8-restrictions.tex}
   \begin{operation}\off{8}\jump{V}\end{operation}
 \end{instruction}

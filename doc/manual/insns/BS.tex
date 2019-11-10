@@ -1,0 +1,14 @@
+\begin{instruction}{BS}{Branch if Negative}
+  \begin{encoding*}{short}
+    \mnemonic & \op{4}{1011} & \op{4}{1001} & \off{8} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{4}{1011} & \op{4}{1001} & \off{8} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} label}
+  \purpose{To transfer control if the last arithmetic operation produced a negative result.}
+  \input{off8-restrictions.tex}
+  \begin{operation}\off{8}\jump{S}\end{operation}
+  \begin{remarks}This instruction has the same encoding as \insnref{BS1}.\end{remarks}
+\end{instruction}

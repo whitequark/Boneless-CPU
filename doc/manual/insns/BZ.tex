@@ -1,4 +1,4 @@
-\begin{instruction}{JZ}{Jump if Zero}
+\begin{instruction}{BZ}{Branch if Zero}
   \begin{encoding*}{short}
     \mnemonic & \op{4}{1011} & \op{4}{1000} & \off{8} \\
   \end{encoding*}
@@ -10,5 +10,5 @@
   \purpose{To transfer control if the last operation produced a result equal to zero.}
   \input{off8-restrictions.tex}
   \begin{operation}\off{8}\jump{Z}\end{operation}
-  \begin{remarks}This instruction has the same encoding as \insnref{JE}.\end{remarks}
+  \begin{remarks}This instruction has the same encoding as \insnref{BZ1}.\end{remarks}
 \end{instruction}

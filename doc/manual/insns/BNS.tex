@@ -1,4 +1,4 @@
-\begin{instruction}{JNS}{Jump if Not Negative}
+\begin{instruction}{BNS}{Branch if Not Negative}
   \begin{encoding*}{short}
     \mnemonic & \op{4}{1011} & \op{4}{0001} & \off{8} \\
   \end{encoding*}
@@ -7,7 +7,8 @@
     \mnemonic & \op{4}{1011} & \op{4}{0001} & \off{8} \\
   \end{encoding*}
   \assembly{\mnemonic{} label}
-  \purpose{To transfer control if the negative (S) flag is clear (e.g. the last arithmetic operation produced a negative result).}
+  \purpose{To transfer control if the last arithmetic operation did not produce a negative result.}
   \input{off8-restrictions.tex}
   \begin{operation}\off{8}\jump{\K{not} S}\end{operation}
+  \begin{remarks}This instruction has the same encoding as \insnref{BS0}.\end{remarks}
 \end{instruction}
