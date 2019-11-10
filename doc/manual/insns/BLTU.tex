@@ -1,4 +1,4 @@
-\begin{instruction}{JULT}{Jump if Unsigned Less Than}
+\begin{instruction}{BLTU}{Branch if Less Than, Unsigned}
   \begin{encoding*}{short}
     \mnemonic & \op{4}{1011} & \op{4}{0010} & \off{8} \\
   \end{encoding*}
@@ -10,5 +10,5 @@
   \purpose{To transfer control after a \texttt{\insnref{CMP} Ra, Rb} instruction if \texttt{Ra} is less than \texttt{Rb} when interpreted as unsigned integers.}
   \input{off8-restrictions.tex}
   \begin{operation}\off{8}\jump{\K{not} C}\end{operation}
-  \begin{remarks}This instruction has the same encoding as \insnref{JNC}.\end{remarks}
+  \begin{remarks}This instruction has the same encoding as \insnref{BC0}.\end{remarks}
 \end{instruction}

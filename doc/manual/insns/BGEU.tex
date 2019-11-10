@@ -1,4 +1,4 @@
-\begin{instruction}{JUGE}{Jump if Unsigned Greater or Equal}
+\begin{instruction}{BGEU}{Branch if Greater or Equal, Unsigned}
   \begin{encoding*}{short}
     \mnemonic & \op{4}{1011} & \op{4}{1010} & \off{8} \\
   \end{encoding*}
@@ -10,5 +10,5 @@
   \purpose{To transfer control after a \texttt{\insnref{CMP} Ra, Rb} instruction if \texttt{Ra} is greater than or equal to \texttt{Rb} when interpreted as unsigned integers.}
   \input{off8-restrictions.tex}
   \begin{operation}\off{8}\jump{C}\end{operation}
-  \begin{remarks}This instruction has the same encoding as \insnref{JC}.\end{remarks}
+  \begin{remarks}This instruction has the same encoding as \insnref{BC1}.\end{remarks}
 \end{instruction}
