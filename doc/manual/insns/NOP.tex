@@ -1,0 +1,9 @@
+\begin{instruction}{NOP}{No Operation}
+  \begin{encoding}
+    \mnemonic & \op{4}{1011} & \op{4}{0111} & \op{8}{00000000} \\
+  \end{encoding}
+  \assembly{\mnemonic{}}
+  \purpose{To perform no operation while consuming one instruction word.}
+  \begin{operation}PC ← PC + 1\end{operation}
+  \begin{remarks}The \texttt{NOP} instruction is encoded as a conditional branch, whose condition is always false, that targets the next instruction.\end{remarks}
+\end{instruction}
