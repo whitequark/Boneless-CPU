@@ -1,4 +1,4 @@
-\begin{instruction}{JNC}{Jump if Not Carry}
+\begin{instruction}{BC0}{Branch if Carry is 0}
   \begin{encoding*}{short}
     \mnemonic & \op{4}{1011} & \op{4}{0010} & \off{8} \\
   \end{encoding*}
@@ -7,8 +7,7 @@
     \mnemonic & \op{4}{1011} & \op{4}{0010} & \off{8} \\
   \end{encoding*}
   \assembly{\mnemonic{} label}
-  \purpose{To transfer control if the carry (C) flag is clear (e.g. the last arithmetic operation did not result in unsigned overflow).}
+  \purpose{To transfer control if the carry (C) flag is 0.}
   \input{off8-restrictions.tex}
   \begin{operation}\off{8}\jump{\K{not} C}\end{operation}
-  \begin{remarks}This instruction has the same encoding as \insnref{JULT}.\end{remarks}
 \end{instruction}

@@ -1,0 +1,13 @@
+\begin{instruction}{BV0}{Branch if Overflow is 0}
+  \begin{encoding*}{short}
+    \mnemonic & \op{4}{1011} & \op{4}{0011} & \off{8} \\
+  \end{encoding*}
+  \begin{encoding*}{long}
+    \exti
+    \mnemonic & \op{4}{1011} & \op{4}{0011} & \off{8} \\
+  \end{encoding*}
+  \assembly{\mnemonic{} label}
+  \purpose{To transfer control if the overflow (V) flag is 0.}
+  \input{off8-restrictions.tex}
+  \begin{operation}\off{8}\jump{\K{not} V}\end{operation}
+\end{instruction}
