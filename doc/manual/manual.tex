@@ -110,7 +110,7 @@ The logical operators yield 1 if the condition is satisfied and 0 if it is not. 
 \subsubsection{Functions}
 
 \begin{itemize}
-  \item \texttt{sign\_extend\_16(op)}: Perform a sign extension of \texttt{op} by replicating the high bit until the total length is 16 bits.
+  \item \texttt{sign\_extend\_16(op)}: Perform a two's complement sign extension of \texttt{op} by replicating the high bit until the total length is 16 bits.
   \item \texttt{decode\_imm\_al(op)}: Calculate the immediate value of an arithmetic or logical instruction according to the following table.\linebreak
     \begin{tabular}{|c c|}
     \hline
@@ -156,7 +156,9 @@ The behavior of \texttt{PC ← op} defines that \texttt{op} is truncated to 16 b
 At reset, \texttt{PC ← 0x0000}, but this value can be changed by the implementation.
 
 \subsubsection{General Purpose Registers and the Window}
-The CPU has eight 16-bit general purpose (GP) integer registers, named \texttt{R0} through \texttt{R7}. They are fully interchangeable and can be used as source and/or destination for any instruction which uses a GP register. The register file is windowed: register values are stored in main memory, starting at the window address.
+The CPU has eight 16-bit general purpose (GP) integer registers, named \texttt{R0} through \texttt{R7}. Each register can hold any 16-bit value. Most instructions interpret the values as unsigned integers, but some treat values as two's complement signed integers (denoted by a "signed" operation).
+
+The GP registers are fully interchangeable and any register can be used as source and/or destination for any instruction which uses a GP register. The register file is windowed: register values are stored in main memory, starting at the window address.
 
 The current window address is stored in a 16-bit register named \texttt{W}. Its value can only be set and/or read by the four window instructions: \ginsnref{ADJW}, \ginsnref{LDW}, \ginsnref{STW}, and \ginsnref{XCHW}. Setting \texttt{W} logically changes the values of all GP registers simultaneously, enabling fast procedure calls and task switches.
 
