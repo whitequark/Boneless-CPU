@@ -1,4 +1,4 @@
-\begin{instruction}{BS0}{Branch if Negative is 0}
+\begin{instruction}{BS0}{Branch if Sign is 0}
   \begin{encoding*}{short}
     \mnemonic & \op{4}{1011} & \op{4}{0001} & \off{8} \\
   \end{encoding*}
@@ -7,7 +7,7 @@
     \mnemonic & \op{4}{1011} & \op{4}{0001} & \off{8} \\
   \end{encoding*}
   \assembly{\mnemonic{} label}
-  \purpose{To transfer control if the negative (S) flag is 0.}
+  \purpose{To transfer control if the sign (S) flag is 0.}
   \input{off8-restrictions.tex}
   \begin{operation}\off{8}\jump{\K{not} S}\end{operation}
 \end{instruction}
