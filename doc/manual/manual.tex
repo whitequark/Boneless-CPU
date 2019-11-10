@@ -167,7 +167,7 @@ The behavior of \texttt{W ← op} and \texttt{mem[op]} defines that \texttt{op} 
 At reset, \texttt{W ← 0xFFF8}, but this value can be changed by the implementation.
 
 \subsubsection{Result Flags}
-The CPU has four result flags to describe the result of ALU computations. The flags are updated by most ALU instructions. The CPU can act on the result of the flags by executing a conditional jump which transfers control if the flags are in the desired state. The exact contents of each flag after an instruction executes are explained in the instruction's operation, but the general purpose and behavior of each flag are explained below.
+The CPU has four result flags to describe the result of ALU computations. The flags are updated by most ALU instructions. The CPU can act on the result of the flags by executing a conditional branch which transfers control if the flags are in the desired state. The exact contents of each flag after an instruction executes are explained in the instruction's operation, but the general purpose and behavior of each flag are explained below.
 
 The \texttt{Z} (Zero) flag is set to 1 if the low 16 bits of the result of the operation were zero, and 0 otherwise.
 
