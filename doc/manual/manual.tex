@@ -8,6 +8,8 @@
 \usepackage{ragged2e}
 \usepackage{changepage}
 \usepackage{alltt}
+\usepackage{makecell}
+\usepackage{tabularx}
 \renewcommand{\ttdefault}{txtt}
 \usepackage{array}
 \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
@@ -187,6 +189,240 @@ The \ginsnref{EXTI} instruction sets the \texttt{ext13} register to its 13-bit i
 Generally, if an instruction can use an immediate and \texttt{has\_ext13} is 1, the instruction will use \texttt{ext13} as the high 13 bits of the the immediate value and take the low 3 bits from the instruction itself. The exact behavior of an instruction with regards to \texttt{has\_ext13} and \texttt{ext13} is specified in the instruction's operation.
 
 Except for after \ginsnref{EXTI}, \texttt{ext13 ← \undefined{}} and \texttt{has\_ext13 ← 0} after every instruction, even those which do not use either register.
+
+\pagebreak
+
+\section{Quick Reference}
+This chapter summarizes the Boneless instruction set. Instructions are grouped according to their function.
+
+\renewcommand\tabularxcolumn[1]{m{#1}}% for vertical centering text in X column
+\newcommand{\tabinsn}[2]{\ginsnref{#1} \texttt{#2}}
+
+\subsection{ALU Instructions}
+
+\subsubsection{Arithmetic}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+Mnemonic & Function \\
+\hline
+\makecell[l]{\tabinsn{ADD}{Rd, Ra, Rb} \\ \tabinsn{ADDI}{Rd, Ra, imm}} & 
+Add register to register/immediate.\\
+\hline
+\makecell[l]{\tabinsn{ADC}{Rd, Ra, Rb} \\ \tabinsn{ADCI}{Rd, Ra, imm}} & 
+Add register to register/immediate, including carry input. For multi-word addition.\\
+\hline
+\makecell[l]{\tabinsn{SUB}{Rd, Ra, Rb} \\ \tabinsn{SUBI}{Rd, Ra, imm}} & 
+Subtract register/immediate from register.\\
+\hline
+\makecell[l]{\tabinsn{SBC}{Rd, Ra, Rb} \\ \tabinsn{SBCI}{Rd, Ra, imm}} & 
+Subtract register/immediate from register, including carry input. For multi-word subtraction.\\
+\hline
+\makecell[l]{\tabinsn{CMP}{Ra, Rb} \\ \tabinsn{CMPI}{Ra, imm}} & 
+Compare register with register/immediate, then set flags according to result.\\
+\hline
+\end{tabularx}
+
+\subsubsection{Logic}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+Mnemonic & Function \\
+\hline
+\makecell[l]{\tabinsn{AND}{Rd, Ra, Rb} \\ \tabinsn{ANDI}{Rd, Ra, imm}} & 
+Bitwise AND between register and register/immediate.\\
+\hline
+\makecell[l]{\tabinsn{OR}{Rd, Ra, Rb} \\ \tabinsn{ORI}{Rd, Ra, imm}} & 
+Bitwise OR between register and register/immediate.\\
+\hline
+\makecell[l]{\tabinsn{XOR}{Rd, Ra, Rb} \\ \tabinsn{XORI}{Rd, Ra, imm}} & 
+Bitwise XOR between register and register/immediate.\\
+\hline
+\end{tabularx}
+
+\subsubsection{Shift \& Rotate}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+Mnemonic & Function \\
+\hline
+\makecell[l]{\tabinsn{SLL}{Rd, Ra, Rb} \\ \tabinsn{SLLI}{Rd, Ra, imm}} & 
+Shift register left by register/immediate amount.\\
+\hline
+\makecell[l]{\tabinsn{SRL}{Rd, Ra, Rb} \\ \tabinsn{SRLI}{Rd, Ra, imm}} & 
+Shift register right by register/immediate amount, with zero extension.\\
+\hline
+\makecell[l]{\tabinsn{SRA}{Rd, Ra, Rb} \\ \tabinsn{SRAI}{Rd, Ra, imm}} & 
+Shift register right by register/immediate amount, with sign extension.\\
+\hline
+\makecell[l]{\tabinsn{ROL}{Rd, Ra, Rb} \\ \tabinsn{ROLI}{Rd, Ra, imm}} & 
+Rotate register left by register/immediate amount.\\
+\hline
+\makecell[l]{\tabinsn{RORI}{Rd, Ra, imm}} & 
+Rotate register right by immediate amount.\\
+\hline
+\end{tabularx}
+
+\subsection{Data Transfer Instructions}
+
+\subsubsection{General Purpose Registers}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+Mnemonic & Function \\
+\hline
+\makecell[l]{\tabinsn{MOV}{Rd, Rs} \\ \tabinsn{MOVI}{Rd, imm}} & 
+Move register/immediate into register.\\
+\hline
+\makecell[l]{\tabinsn{MOVR}{Rd, off}} & 
+Move PC-relative offset into register.\\
+\hline
+\makecell[l]{\tabinsn{XCHG}{Ra, Rb}} & 
+Exchange values of two registers.\\
+\hline
+\makecell[l]{\tabinsn{NOP}{}} & 
+Do nothing.\\
+\hline
+\makecell[l]{\tabinsn{EXTI}{imm}} & 
+Extend immediate of following instruction. Automatically placed by assembler; should not be manually written.\\
+\hline
+\end{tabularx}
+
+\subsubsection{Window Register}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+Mnemonic & Function \\
+\hline
+\makecell[l]{\tabinsn{ADJW}{imm}} & 
+Add signed immediate to \texttt{W}.\\
+\hline
+\makecell[l]{\tabinsn{LDW}{Rd, imm}} & 
+Add signed immediate to \texttt{W}, then store previous \texttt{W} to register.\\
+\hline
+\makecell[l]{\tabinsn{STW}{Rb}} & 
+Move register into \texttt{W}.\\
+\hline
+\makecell[l]{\tabinsn{XCHW}{Rd, Rb}} & 
+Move \texttt{Rb} into \texttt{W}, then store previous \texttt{W} to \texttt{Rd}.\\
+\hline
+\end{tabularx}
+
+\subsubsection{Memory}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+Mnemonic & Function \\
+\hline
+\makecell[l]{\tabinsn{LD}{Rd, Ra, off}} & 
+Load \texttt{Rd} from memory at \texttt{Ra} plus offset.\\
+\hline
+\makecell[l]{\tabinsn{LDR}{Rd, Ra, off}} & 
+Load \texttt{Rd} from memory at \texttt{Ra} plus PC-relative offset.\\
+\hline
+\makecell[l]{\tabinsn{ST}{Rs, Ra, off}} & 
+Store \texttt{Rs} to memory at \texttt{Ra} plus offset.\\
+\hline
+\makecell[l]{\tabinsn{STR}{Rs, Ra, off}} & 
+Store \texttt{Rs} to memory at \texttt{Ra} plus PC-relative offset.\\
+\hline
+\end{tabularx}
+
+\subsubsection{External Bus}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+Mnemonic & Function \\
+\hline
+\makecell[l]{\tabinsn{LDX}{Rd, Ra, off}} & 
+Load \texttt{Rd} from external bus at \texttt{Ra} plus offset.\\
+\hline
+\makecell[l]{\tabinsn{LDXA}{Rd, off}} & 
+Load \texttt{Rd} from external bus at absolute offset.\\
+\hline
+\makecell[l]{\tabinsn{STX}{Rs, Ra, off}} & 
+Store \texttt{Rs} to external bus at \texttt{Ra} plus offset.\\
+\hline
+\makecell[l]{\tabinsn{STXA}{Rs, off}} & 
+Store \texttt{Rs} to external bus at absolute offset.\\
+\hline
+\end{tabularx}
+
+\subsection{Control Transfer Instructions}
+
+\subsubsection{Unconditional}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+Mnemonic & Function \\
+\hline
+\makecell[l]{\tabinsn{J}{label}} & 
+Jump to \texttt{label}.\\
+\hline
+\makecell[l]{\tabinsn{JAL}{Rd, label}} & 
+Store address of next instruction into register, then jump to \texttt{label}. For calling subroutines.\\
+\hline
+\makecell[l]{\tabinsn{JR}{Rs, off}} & 
+Jump to \texttt{Rs} plus PC-relative offset.\\
+\hline
+\makecell[l]{\tabinsn{JRAL}{Rd, Rb}} & 
+Store address of next instruction into \texttt{Rd}, then jump to \texttt{Rb}.\\
+\hline
+\makecell[l]{\tabinsn{JST}{Rs, off}} & 
+Jump through entry \texttt{Rs} of switch table at PC-relative offset.\\
+\hline
+\makecell[l]{\tabinsn{JVT}{Rd, off}} & 
+Jump through entry \texttt{off} of virtual table at \texttt{Rd}.\\
+\hline
+\end{tabularx}
+
+\subsubsection{Conditional on Comparison}
+These instructions branch to \texttt{label} after a \tabinsn{CMP}{Ra, Rb} instruction if the given condition is met when the operands are treated as numbers with the given signedness.
+
+\begin{tabularx}{\textwidth}{|l|X|X|}
+\hline
+Condition & Signed Comparison & Unsigned Comparison \\
+\hline
+\texttt{Ra = Rb} & \tabinsn{BEQ}{label} & \tabinsn{BEQ}{label}\\
+\hline
+\texttt{Ra > Rb} & \tabinsn{BGTS}{label} & \tabinsn{BGTU}{label}\\
+\hline
+\texttt{Ra >= Rb} & \tabinsn{BGES}{label} & \tabinsn{BGEU}{label}\\
+\hline
+\texttt{Ra <= Rb} & \tabinsn{BLES}{label} & \tabinsn{BLEU}{label}\\
+\hline
+\texttt{Ra < Rb} & \tabinsn{BLTS}{label} & \tabinsn{BLTU}{label}\\
+\hline
+\texttt{Ra <> Rb} & \tabinsn{BNE}{label} & \tabinsn{BNE}{label}\\
+\hline
+\end{tabularx}
+
+\subsubsection{Conditional on Result}
+These instructions branch to \texttt{label} if the last arithmetic or logical operation met the given condition.
+
+\begin{tabularx}{\textwidth}{|l|X|X|}
+\hline
+Condition & is True & is False \\
+\hline
+Result is equal to zero & \tabinsn{BZ}{label} & \tabinsn{BNZ}{label}\\
+\hline
+Result is negative  & \tabinsn{BS}{label} & \tabinsn{BNS}{label}\\
+\hline
+Operation encountered unsigned overflow & \tabinsn{BC}{label} & \tabinsn{BNC}{label}\\
+\hline
+Operation encountered signed overflow & \tabinsn{BV}{label} & \tabinsn{BNV}{label}\\
+\hline
+\end{tabularx}
+
+\subsubsection{Conditional on Flags}
+These instructions branch to \texttt{label} if the given flag is in the given state.
+
+\begin{tabularx}{\textwidth}{|l|X|X|}
+\hline
+Flag & is Set & is Clear \\
+\hline
+Zero & \tabinsn{BZ1}{label} & \tabinsn{BZ0}{label}\\
+\hline
+Sign  & \tabinsn{BS1}{label} & \tabinsn{BS0}{label}\\
+\hline
+Carry & \tabinsn{BC1}{label} & \tabinsn{BC0}{label}\\
+\hline
+oVerflow & \tabinsn{BV1}{label} & \tabinsn{BV0}{label}\\
+\hline
+\end{tabularx}
+
 
 \pagebreak
 
