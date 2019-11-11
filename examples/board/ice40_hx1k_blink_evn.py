@@ -14,7 +14,7 @@ class BonelessDemo(Elaboratable):
         m = Module()
         m.submodules.core = core = self.core
 
-        leds = Cat(platform.request("user_led", n) for n in range(4))
+        leds = Cat(platform.request("led", n) for n in range(4))
         with m.If(core.o_ext_we & (core.o_bus_addr == 0x0000)):
             m.d.sync += leds.eq(core.o_ext_data)
 
