@@ -8,7 +8,7 @@ from ..gateware.core import CoreFSM
 from .smoke import SmokeTestCase
 
 
-class CoreTestbench(Module):
+class CoreTestbench(Elaboratable):
     def __init__(self):
         self.sync = ClockDomain("sync")
         self.sync.rst.reset = 1
@@ -41,28 +41,28 @@ class CoreSmokeTestCase(SmokeTestCase, unittest.TestCase):
     def run_simulator(self, case):
         dut = self.tb.dut
         frag = Fragment.get(self.tb, platform=None)
-        with Simulator(frag,
-                vcd_file=open(f"{case.__name__}.vcd", "w"),
-                gtkw_file=open(f"{case.__name__}.gtkw", "w"),
-                traces=(
-                    dut.o_pc, dut.r_w, dut.m_dec.i_insn, frag.find_generated("dut", "fsm").state,
-                    dut.r_cycle, dut.o_done,
-                )) as sim:
-            sim.add_clock(1e-6)
-            sim.add_sync_process(case(self))
+        sim = Simulator(frag)
+        sim.add_clock(1e-6)
+        sim.add_sync_process(case(self))
+        traces = (
+            dut.o_pc, dut.r_w, dut.m_dec.i_insn, frag.find_generated("dut", "fsm").state,
+            dut.r_cycle, dut.o_done,
+        )
+        with sim.write_vcd(f"{case.__name__}.vcd", f"{case.__name__}.gtkw", traces=traces):
             sim.run()
 
     def execute(self, code, regs=[], data=[], extr=[], flags="", limit=None):
         code = Instr.assemble(code)
         if limit is None:
             limit = len(code)
+        yield self.tb.sync.rst.eq(0)
+        yield Settle()
         for addr, word in enumerate([*regs, *[0] * (8 - len(regs)), *code, *data]):
             yield self.tb.mem[addr].eq(word)
         for addr, word in enumerate(extr):
             yield self.tb.ext[addr].eq(word)
         for flag in flags:
             yield self.tb.dut.r_f[flag].eq(1)
-        yield self.tb.sync.rst.eq(0)
         for cycle in range(limit):
             while not (yield self.tb.dut.o_done):
                 yield

@@ -28,37 +28,37 @@ class ALSRUTestCase:
             rand_c = random.randint(0, 1) if ci is None else ci
             rand_h = random.randint(0, 1) if si is None else si
 
-            with Simulator(self.dut) as sim:
-                def process():
-                    yield self.dut.c_op.eq(op)
-                    yield self.dut.c_dir.eq(self.dut_cls.Dir.L if dir is None else dir)
-                    yield self.dut.i_a.eq(rand_a)
-                    yield self.dut.i_b.eq(rand_b)
-                    yield self.dut.r_o.eq(rand_r)
-                    yield self.dut.i_c.eq(rand_c)
-                    yield self.dut.i_h.eq(rand_h)
-                    yield Delay()
+            def process():
+                yield self.dut.c_op.eq(op)
+                yield self.dut.c_dir.eq(self.dut_cls.Dir.L if dir is None else dir)
+                yield self.dut.i_a.eq(rand_a)
+                yield self.dut.i_b.eq(rand_b)
+                yield self.dut.r_o.eq(rand_r)
+                yield self.dut.i_c.eq(rand_c)
+                yield self.dut.i_h.eq(rand_h)
+                yield Delay()
 
-                    fail = False
-                    msg  = "for a={:0{}x} b={:0{}x} c={} h={}:" \
-                        .format(rand_a, self.width // 4,
-                                rand_b, self.width // 4,
-                                rand_c,
-                                rand_h)
-                    for signal, expr in asserts:
-                        actual = (yield signal)
-                        expect = (yield expr)
-                        if expect != actual:
-                            fail = True
-                            msg += " {}={:0{}x} (expected {:0{}x})"\
-                                .format(signal.name,
-                                        actual, signal.nbits // 4,
-                                        expect, signal.nbits // 4)
-                    if fail:
-                        self.fail(msg)
+                fail = False
+                msg  = "for a={:0{}x} b={:0{}x} c={} h={}:" \
+                    .format(rand_a, self.width // 4,
+                            rand_b, self.width // 4,
+                            rand_c,
+                            rand_h)
+                for signal, expr in asserts:
+                    actual = (yield signal)
+                    expect = (yield expr)
+                    if expect != actual:
+                        fail = True
+                        msg += " {}={:0{}x} (expected {:0{}x})"\
+                            .format(signal.name,
+                                    actual, signal.width // 4,
+                                    expect, signal.width // 4)
+                if fail:
+                    self.fail(msg)
 
-                sim.add_process(process)
-                sim.run()
+            sim = Simulator(self.dut)
+            sim.add_process(process)
+            sim.run()
 
     def test_A(self):
         with self.assertComputes(self.dut_cls.Op.A, ci=0) as (dut, asserts):
