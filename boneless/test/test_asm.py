@@ -220,7 +220,7 @@ class DisassemblerTestCase(unittest.TestCase):
 \tST\tR6, R3, 0x918\t\t; C123 5678
 \tEXTI\t0x123\t\t\t; C123
 \tXOR\tR0, R5, R0\t\t; 00B0
-\tJNZ\t-0x1\t\t\t; B0FF
+\tBZ0\t-0x1\t\t\t; B0FF
 \t.word\t0xffff
             """,
             as_text=True)
@@ -231,7 +231,7 @@ class DisassemblerTestCase(unittest.TestCase):
 \tEXTI\t0x123\t\t\t; C123
 \tXOR\tR0, R5, R0\t\t; 00B0
 L5:
-\tJNZ\tL5\t\t\t; <reloc>
+\tBZ0\tL5\t\t\t; <reloc>
 \t.word\t0xffff
             """,
             as_text=True, labels=True)

@@ -133,22 +133,22 @@ class SmokeTestCase(metaclass=ABCMeta):
         yield from self.do_ALU_I(SUBI, 0x1234, 0x5678, 0xbbbc)
 
     @simulation_test
-    def test_SBB(self):
-        yield from self.do_ALU_R(SBB,  0x1234, 0x5678, 0xbbbb)
+    def test_SBC(self):
+        yield from self.do_ALU_R(SBC,  0x1234, 0x5678, 0xbbbb)
 
     @simulation_test
-    def test_SBBI(self):
-        yield from self.do_ALU_I(SBBI, 0x1234, 0x5678, 0xbbbb)
+    def test_SBCI(self):
+        yield from self.do_ALU_I(SBCI, 0x1234, 0x5678, 0xbbbb)
 
     @simulation_test
-    def test_SUB_SBB(self):
+    def test_SUB_SBC(self):
         yield from self.do_ALU_R_2(SUB,  0xaaaa, 0xbbbb, 0xeeef,
-                                   SBB,  0x0002, 0x0003, 0xfffe)
+                                   SBC,  0x0002, 0x0003, 0xfffe)
 
     @simulation_test
-    def test_SUBI_SBBI(self):
+    def test_SUBI_SBCI(self):
         yield from self.do_ALU_I_2(SUBI, 0xaaaa, 0xbbbb, 0xeeef,
-                                   SBBI, 0x0002, 0x0003, 0xfffe)
+                                   SBCI, 0x0002, 0x0003, 0xfffe)
 
     @simulation_test
     def test_SLL(self):
@@ -163,12 +163,12 @@ class SmokeTestCase(metaclass=ABCMeta):
         yield from self.do_ALU_I(SLLI, 0xFA50, 3, 0xD280)
 
     @simulation_test
-    def test_ROT(self):
-        yield from self.do_ALU_R(ROT,  0xFA50, 3, 0xD287)
+    def test_ROL(self):
+        yield from self.do_ALU_R(ROL,  0xFA50, 3, 0xD287)
 
     @simulation_test
-    def test_ROTI(self):
-        yield from self.do_ALU_I(ROTI, 0xFA50, 3, 0xD287)
+    def test_ROLI(self):
+        yield from self.do_ALU_I(ROLI, 0xFA50, 3, 0xD287)
 
     @simulation_test
     def test_SRL(self):
@@ -388,76 +388,76 @@ class SmokeTestCase(metaclass=ABCMeta):
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JN(self):
-        yield from self.execute(code=[JN  (7)])
+    def test_NOP(self):
+        yield from self.execute(code=[NOP (7)])
         yield from self.assertPC(9)
 
     @simulation_test
-    def test_JZ(self):
-        yield from self.execute(code=[JZ  (7)], flags="z")
+    def test_BZ1(self): # includes aliases BZ, BEQ
+        yield from self.execute(code=[BZ1 (7)], flags="z")
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JNZ(self):
-        yield from self.execute(code=[JNZ (7)], flags="")
+    def test_BZ0(self): # includes aliases BNZ, BNE
+        yield from self.execute(code=[BZ0 (7)], flags="")
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JS(self):
-        yield from self.execute(code=[JS  (7)], flags="s")
+    def test_BS1(self): # includes alias BS
+        yield from self.execute(code=[BS1 (7)], flags="s")
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JNS(self):
-        yield from self.execute(code=[JNS (7)], flags="")
+    def test_BS0(self): # includes alias BNS
+        yield from self.execute(code=[BS0 (7)], flags="")
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JC(self):
-        yield from self.execute(code=[JC  (7)], flags="c")
+    def test_BC1(self): # includes aliases BC, BGEU
+        yield from self.execute(code=[BC1 (7)], flags="c")
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JNC(self):
-        yield from self.execute(code=[JNC (7)], flags="")
+    def test_BC0(self): # includes aliases BNC, BLTU
+        yield from self.execute(code=[BC0 (7)], flags="")
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JO(self):
-        yield from self.execute(code=[JO  (7)], flags="v")
+    def test_BV1(self): # includes alias BV
+        yield from self.execute(code=[BV1 (7)], flags="v")
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JNO(self):
-        yield from self.execute(code=[JNO (7)], flags="")
+    def test_BV0(self): # includes alias BNV
+        yield from self.execute(code=[BV0 (7)], flags="")
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JUGT(self):
-        yield from self.execute(code=[JUGT(7)], flags="c")
+    def test_BGTU(self):
+        yield from self.execute(code=[BGTU(7)], flags="c")
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JULE(self):
-        yield from self.execute(code=[JULE(7)], flags="z")
+    def test_BLEU(self):
+        yield from self.execute(code=[BLEU(7)], flags="z")
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JSGE(self):
-        yield from self.execute(code=[JSGE(7)], flags="sv")
+    def test_BGES(self):
+        yield from self.execute(code=[BGES(7)], flags="sv")
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JSLT(self):
-        yield from self.execute(code=[JSLT(7)], flags="v")
+    def test_BLTS(self):
+        yield from self.execute(code=[BLTS(7)], flags="v")
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JSGT(self):
-        yield from self.execute(code=[JSGT(7)], flags="sv")
+    def test_BGTS(self):
+        yield from self.execute(code=[BGTS(7)], flags="sv")
         yield from self.assertPC(9 + 7)
 
     @simulation_test
-    def test_JSLE(self):
-        yield from self.execute(code=[JSLE(7)], flags="z")
+    def test_BLES(self):
+        yield from self.execute(code=[BLES(7)], flags="z")
         yield from self.assertPC(9 + 7)

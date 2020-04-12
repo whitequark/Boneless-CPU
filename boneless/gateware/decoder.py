@@ -297,7 +297,7 @@ class InstructionDecoder(Elaboratable):
                             self.o_ci.eq(self.CI.ONE),
                             self.o_op.eq(alsru_cls.Op.AmB),
                         ]
-                    with m.Case(opcode.T_SBB.coding):
+                    with m.Case(opcode.T_SBC.coding):
                         m.d.comb += [
                             self.o_ci.eq(self.CI.FLAG),
                             self.o_op.eq(alsru_cls.Op.AmB),

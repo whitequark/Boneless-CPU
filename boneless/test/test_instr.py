@@ -40,22 +40,22 @@ class InstructionTestCase(unittest.TestCase):
         self.assertEqual(op.Instr.decode(stream), (instr, 2))
         self.assertEqual(op.Instr.decode(stream[:1]), (op.EXTI(0), 1))
 
-        stream, instr = [], op.ROTI(op.R2, op.R1, 8)
+        stream, instr = [], op.ROLI(op.R2, op.R1, 8)
         self.assertEqual(instr.encode(stream), 1)
         self.assertEqual(len(stream), 1)
         self.assertEqual(op.Instr.decode(stream), (instr, 1))
 
-        stream, instr = [], op.ROTI(op.R2, op.R1, 11)
+        stream, instr = [], op.ROLI(op.R2, op.R1, 11)
         self.assertEqual(instr.encode(stream), 2)
         self.assertEqual(len(stream), 2)
         self.assertEqual(op.Instr.decode(stream), (instr, 2))
         self.assertEqual(op.Instr.decode(stream[:1]), (op.EXTI(1), 1))
 
     def test_alias(self):
-        self.assertEqual(int(op.JZ(0)), int(op.JE(0)))
-        self.assertEqual(op.JZ(0), op.JE(0))
-        self.assertFalse(op.JZ.alias)
-        self.assertTrue(op.JE.alias)
+        self.assertEqual(int(op.BZ1(0)), int(op.BEQ(0)))
+        self.assertEqual(op.BZ1(0), op.BEQ(0))
+        self.assertFalse(op.BZ1.alias)
+        self.assertTrue(op.BEQ.alias)
 
     def test_max_length(self):
         self.assertEqual(op.ADD(op.R1, op.R1, op.R1).max_length, 1)
@@ -181,7 +181,7 @@ class InstructionTestCase(unittest.TestCase):
     def test_shift_wrong_range(self):
         with self.assertRaisesRegex(ValueError,
                 r"Immediate operand 18 must be in range 0\.\.16"):
-            op.ROTI(op.R0, op.R0, 18)
+            op.ROLI(op.R0, op.R0, 18)
 
     def test_reg_wrong(self):
         with self.assertRaisesRegex(ValueError,
