@@ -128,7 +128,7 @@ class AssemblerTestCase(unittest.TestCase):
     def test_wrong_dup_label(self):
         self.assertTranslationError(
             [L("foo"), L("foo")],
-            r"Label 'foo' at indexes \[1\] has the same name as the label at indexes \[0\]")
+            r"Label 'foo' at indexes \[0\]\[1\] has the same name as the label at indexes \[0\]\[0\]")
 
     def test_wrong_unrecognized(self):
         self.assertTranslationError(

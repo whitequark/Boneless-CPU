@@ -1,16 +1,16 @@
 from collections import defaultdict
 
-from .mc import Label
+from .mc import Label, Constant, RelRef, AbsRef
 from .instr import Instr, Reg
 
 
 __all__ = [
     # Directives
-    "L",
+    "L", "C", "RR", "AR",
     # Registers
     "R0",   "R1",   "R2",   "R3",   "R4",   "R5",   "R6",   "R7",
     # Instructions
-    "AND",  "ANDI", "OR",   "ORI",  "XOR",  "XORI", "CMP",  "CMPI",
+    "AND",  "ANDI", "OR",   "ORI",  "XOR",  "XORI", "CMP",  "CMPI", "NOT",
     "ADD",  "ADDI", "ADC",  "ADCI", "SUB",  "SUBI", "SBC",  "SBCI",
     "SLL",  "SLLI", "ROL",  "ROLI", "RORI", "SRL",  "SRLI", "SRA",  "SRAI",
     "LD",   "LDR",  "ST",   "STR",  "LDX",  "LDXA", "STX",  "STXA",
@@ -104,6 +104,9 @@ class C_EXT  (Instr): coding = "110-------------"
 
 # Directives
 L = Label
+C = Constant
+RR = RelRef
+AR = AbsRef
 
 # Registers
 R0, R1, R2, R3, R4, R5, R6, R7 = map(Reg, range(8))
@@ -206,3 +209,4 @@ def XCHG(Ra, Rb):
         return []
     else:
         return [XOR(Ra, Ra, Rb), XOR(Rb, Rb, Ra), XOR(Ra, Ra, Rb)]
+def NOT(Ra, Rb): return [XORI(Ra,Rb,0xFFFF)]

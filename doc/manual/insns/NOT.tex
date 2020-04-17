@@ -1,0 +1,11 @@
+\begin{instruction}{NOT}{Logical NOT}
+  \assembly{\mnemonic{} Rd, Rs}
+  \purpose{To invert all the bits in a register.}
+  \restrictions{None.}
+\begin{remarks}
+The translates to a XORI with an 0xFFFF immediate 
+\begin{alltt}
+    XORI Rd, Rs, Rs
+\end{alltt}
+\end{remarks}
+\end{instruction}

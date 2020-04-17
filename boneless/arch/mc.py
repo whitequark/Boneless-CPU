@@ -5,12 +5,53 @@ from parse import parse
 from string import Formatter
 
 
-__all__ = ["UnresolvedRef", "Label", "Operand", "Instr"]
+__all__ = ["UnresolvedRef", "Constant", "AbsRef", "RelRef", "Label", "Operand", "Instr"]
 
 
 class UnresolvedRef(Exception):
     pass
 
+
+class Constant:
+    __slots__ = ["name","value"]
+
+    def __init__(self, name,value):
+        self.name = name
+        self.value = value
+
+    def __repr__(self):
+        return f"Constant({self.name,self.value})"
+
+    def __eq__(self, other):
+        return isinstance(other, Constant) and self.name == other.name
+
+class Reference:
+    pass
+
+class AbsRef(Reference):
+    __slots__ = ["name"]
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return f"AbsRef({repr(self.name)})"
+
+    def __eq__(self, other):
+        return isinstance(other, AbsRef) and self.name == other.name
+
+
+class RelRef(Reference):
+    __slots__ = ["name"]
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return f"RelRef({repr(self.name)})"
+
+    def __eq__(self, other):
+        return isinstance(other, RelRef) and self.name == other.name
 
 class Label:
     __slots__ = ["name"]
