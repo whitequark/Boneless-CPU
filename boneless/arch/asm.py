@@ -252,7 +252,7 @@ class Assembler:
         for index, elem in enumerate(output_d):
             if isinstance(elem,mc.Reference):
                 if elem.name not in label_addrs:
-                    raise TranslationError(f"Label {elem.name} does not exist at {index}")
+                    raise TranslationError(f"Label {repr(elem.name)} does not exist at {index}")
                 if isinstance(elem, mc.RelRef):
                     output_d[index] = label_addrs[elem.name]-index
                 if isinstance(elem, mc.AbsRef):

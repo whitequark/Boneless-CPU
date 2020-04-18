@@ -42,6 +42,7 @@ class AssemblerTestCase(unittest.TestCase):
              0,
              int(J(-2))])
 
+
     def test_instr_rel_fwd(self):
         self.assertAssembles(
             [0,
@@ -124,6 +125,38 @@ class AssemblerTestCase(unittest.TestCase):
              int(ORI(R2,R3,123)),
              int(J(-1)),
              5678])
+
+    def test_constants(self):
+        self.assertAssembles(
+            [C('test',0xFF),
+            ADDI(R0,R0,'test')],
+            [int(ADDI(R0,R0,0xFF))]
+        )
+
+    def test_relative_ref_fail(self):
+        self.assertTranslationError(
+            [RR('fail')],
+            r"Label 'fail' does not exist at 0"
+        )
+
+    def test_relative_ref(self):
+        self.assertAssembles(
+            [L('test'),
+            [0] * 10,
+            RR('test'),
+            RR('test')],
+            [*[0] * 10, -10, -11]
+        )
+
+    def test_absolute_ref(self):
+        self.assertAssembles(
+            [[0] * 5,
+            L('test'),
+            [0] * 10,
+            AR('test'),
+            AR('test')],
+            [*[0] * 5 , *[0] * 10,5,5]
+        )
 
     def test_wrong_dup_label(self):
         self.assertTranslationError(
