@@ -43,7 +43,7 @@ class CoreSmokeTestCase(SmokeTestCase, unittest.TestCase):
         frag = Fragment.get(self.tb, platform=None)
         sim = Simulator(frag)
         sim.add_clock(1e-6)
-        sim.add_sync_process(case(self))
+        sim.add_sync_process(lambda: (yield from case(self)))
         traces = (
             dut.o_pc, dut.r_w, dut.m_dec.i_insn, frag.find_generated("dut", "fsm").state,
             dut.r_cycle, dut.o_done,
