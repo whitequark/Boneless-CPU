@@ -305,7 +305,16 @@ class CoreFSM(Elaboratable):
                 with m.Switch(dec_ld_a.mux):
                     with m.Case(m_dec.OpAMux.PTR):
                         m.d.comb += m_arb.c_en.eq(1)
-                m.next = "LOAD-B"
+                with m.If(m_dec.o_skip):
+                    # fetch the next instruction now if this one is skipped
+                    # (for now, only EXTI count as skipped)
+                    m.d.comb += m_pc.c_inc.eq(1)
+                    m.d.comb += m_dec.c_fetch.eq(1)
+                    m.d.comb += m_arb.c_pc.eq(1)
+                    m.d.comb += m_arb.c_en.eq(1)
+                    m.next = "LOAD-A"
+                with m.Else():
+                    m.next = "LOAD-B"
 
             with m.State("LOAD-B"):
                 m.d.comb += self.s_base.eq(self.s_a)
