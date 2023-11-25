@@ -1,5 +1,5 @@
 from enum import Enum
-from nmigen import *
+from amaranth import *
 
 from ..arch import instr as instr, opcode as opcode
 from .control import *
@@ -57,9 +57,9 @@ class ImmediateDecoder(Elaboratable):
             with m.Case(self.Width.IMM3):
                 m.d.comb += s_imm16.eq(s_table)
             with m.Case(self.Width.IMM5):
-                m.d.comb += s_imm16.eq(Cat(d_imm5, Repl(d_imm5[-1], 11)))
+                m.d.comb += s_imm16.eq(Cat(d_imm5, d_imm5[-1].replicate(11)))
             with m.Case(self.Width.IMM8):
-                m.d.comb += s_imm16.eq(Cat(d_imm8, Repl(d_imm8[-1],  8)))
+                m.d.comb += s_imm16.eq(Cat(d_imm8, d_imm8[-1].replicate(8)))
             with m.Case(self.Width.IMM16):
                 m.d.comb += s_imm16.eq(Cat(d_imm3, self.r_ext13))
 
@@ -514,7 +514,7 @@ class InstructionDecoder(Elaboratable):
 # -------------------------------------------------------------------------------------------------
 
 import argparse
-from nmigen import cli
+from amaranth import cli
 
 
 if __name__ == "__main__":

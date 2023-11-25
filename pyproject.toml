@@ -1,0 +1,28 @@
+[tool.pdm.version]
+source = "scm"
+
+[project]
+dynamic = ["version"]
+
+name = "boneless"
+description = "Resource-efficient 16-bit CPU architecture for FPGA control plane"
+authors = [{name = "Catherine", email = "whitequark@whitequark.org"}]
+license = {file = "LICENSE-0BSD.txt"}
+
+requires-python = "~=3.8"
+dependencies = [
+  "amaranth @ git+https://github.com/amaranth-lang/amaranth.git",
+  "parse~=1.12"
+]
+
+[project.urls]
+"Source Code" = "https://github.com/whitequark/Boneless-CPU"
+"Bug Tracker" = "https://github.com/whitequark/Boneless-CPU/issues"
+
+[project.scripts]
+boneless-as = "boneless.cli:as_main"
+boneless-dis = "boneless.cli:dis_main"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"

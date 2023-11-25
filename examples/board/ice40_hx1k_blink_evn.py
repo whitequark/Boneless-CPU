@@ -1,5 +1,5 @@
-from nmigen import *
-from nmigen_boards.ice40_hx1k_blink_evn import *
+from amaranth import *
+from amaranth_boards.ice40_hx1k_blink_evn import *
 from boneless.gateware import ALSRU_4LUT, CoreFSM
 from boneless.arch.opcode import Instr
 from boneless.arch.opcode import *

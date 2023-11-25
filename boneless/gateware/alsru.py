@@ -1,5 +1,5 @@
 from enum import Enum
-from nmigen import *
+from amaranth import *
 
 from .control import *
 
@@ -176,7 +176,7 @@ class ALSRU_4LUT(ALSRU, Elaboratable):
 # -------------------------------------------------------------------------------------------------
 
 import argparse
-from nmigen import cli
+from amaranth import cli
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 import unittest
-from nmigen import *
-from nmigen.back.pysim import *
+from amaranth import *
+from amaranth.sim import *
 
 from ..arch.opcode import Instr
 from ..gateware.alsru import ALSRU_4LUT

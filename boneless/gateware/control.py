@@ -1,5 +1,5 @@
 from enum import Enum, EnumMeta
-from nmigen import *
+from amaranth import *
 
 
 __all__ = ["EnumGroup"]

@@ -1,8 +1,8 @@
 import unittest
 import contextlib
 import random
-from nmigen import *
-from nmigen.back.pysim import *
+from amaranth import *
+from amaranth.sim import *
 
 from ..gateware.alsru import *
 

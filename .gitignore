@@ -1,11 +1,21 @@
+# Python
 __pycache__/
-*.egg-info/
-*.eggs/
-build/
-*.pyc
-*.v
-*.il
+*.egg-info
+/dist
+
+# pdm
+/.pdm-plugins
+/.pdm-python
+/.venv
+/pdm.lock
+
+# tests
 *.vcd
 *.gtkw
-*.hex
+
+# misc user-created
+/build
+/*.v
+/*.il
+/*.hex
 /*.asm
