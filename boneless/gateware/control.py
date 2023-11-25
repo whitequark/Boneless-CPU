@@ -25,6 +25,7 @@ class EnumGroupMeta(EnumMeta):
     def __new__(cls, name, bases, classdict, layout=None):
         if layout is not None:
             classdict, old_classdict = type(classdict)(), classdict
+            classdict._cls_name = cls
 
             offsets = []
             offset  = 0
