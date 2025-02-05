@@ -11,7 +11,7 @@ license = {file = "LICENSE-0BSD.txt"}
 
 requires-python = "~=3.8"
 dependencies = [
-  "amaranth @ git+https://github.com/amaranth-lang/amaranth.git",
+  "amaranth~=0.5.4",
   "parse~=1.12"
 ]
 
@@ -26,3 +26,6 @@ boneless-dis = "boneless.cli:dis_main"
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
+[tool.pdm.scripts]
+test.cmd = "python -m unittest discover"

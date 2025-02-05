@@ -1,9 +1,9 @@
 import unittest
 from amaranth import *
+from amaranth.lib import memory
 from amaranth.sim import *
 
 from ..arch.opcode import Instr
-from ..gateware.alsru import ALSRU_4LUT
 from ..gateware.core import CoreFSM
 from .smoke import SmokeTestCase
 
@@ -11,18 +11,19 @@ from .smoke import SmokeTestCase
 class CoreTestbench(Elaboratable):
     def __init__(self):
         self.sync = ClockDomain("sync")
-        self.sync.rst.reset = 1
-        self.mem = Memory(width=16, depth=32)
-        self.ext = Memory(width=16, depth=32)
-        self.dut = CoreFSM(alsru_cls=ALSRU_4LUT, memory=self.mem, reset_w=0, reset_pc=8)
-        self.rst = Signal(reset=1)
+        self.mem = memory.MemoryData(shape=16, depth=32, init=[])
+        self.ext = memory.MemoryData(shape=16, depth=32, init=[])
+        self.dut = CoreFSM(mem_data=self.mem, reset_w=0, reset_pc=8)
+        self.rst = Signal(init=1)
 
     def elaborate(self, platform):
         m = Module()
         m.domains.sync = self.sync
         m.submodules.dut = self.dut
-        m.submodules.extrd = m_extrd = self.ext.read_port(transparent=False)
-        m.submodules.extwr = m_extwr = self.ext.write_port()
+        m.submodules.mem = mem = memory.Memory(self.mem)
+        m.submodules.ext = ext = memory.Memory(self.ext)
+        m_extrd = ext.read_port()
+        m_extwr = ext.write_port()
         m.d.comb += [
             m_extrd.addr.eq(self.dut.o_bus_addr),
             self.dut.i_ext_data.eq(m_extrd.data),
@@ -55,6 +56,8 @@ class CoreSmokeTestCase(SmokeTestCase, unittest.TestCase):
         code = Instr.assemble(code)
         if limit is None:
             limit = len(code)
+        yield self.tb.sync.rst.eq(1)
+        yield
         yield self.tb.sync.rst.eq(0)
         yield Settle()
         for addr, word in enumerate([*regs, *[0] * (8 - len(regs)), *code, *data]):

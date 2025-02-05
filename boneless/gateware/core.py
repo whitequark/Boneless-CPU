@@ -1,20 +1,23 @@
-from enum import Enum
 from amaranth import *
+from amaranth.lib import enum, data, wiring, memory
+from amaranth.lib.wiring import In, Out
 
-from .control import *
 from .decoder import InstructionDecoder
+from .alsru import ALSRU
 
 
 __all__ = ["ProgramCounter", "CondSelector", "ShiftSequencer", "BusArbiter", "CoreFSM"]
 
 
-class ProgramCounter(Elaboratable):
+class ProgramCounter(wiring.Component):
     def __init__(self, reset):
-        self.i_addr = Signal(16)
-        self.r_addr = Signal(16, reset=reset)
+        super().__init__({
+            "i_addr": In(16),
+            "r_addr": Out(16, init=reset),
 
-        self.c_set  = Signal()
-        self.c_inc  = Signal()
+            "c_set":  In(1),
+            "c_inc":  In(1),
+        })
 
     def elaborate(self, platform):
         m = Module()
@@ -27,13 +30,15 @@ class ProgramCounter(Elaboratable):
         return m
 
 
-class CondSelector(Elaboratable):
+class CondSelector(wiring.Component):
     Cond = InstructionDecoder.Cond
 
     def __init__(self):
-        self.i_f    = Record([("z", 1), ("s", 1), ("c", 1), ("v", 1)])
-        self.c_cond = Signal(self.Cond)
-        self.o_flag = Signal()
+        super().__init__({
+            "i_f":    In(data.StructLayout({"z": 1, "s": 1, "c": 1, "v": 1})),
+            "c_cond": In(self.Cond),
+            "o_flag": Out(1),
+        })
 
     def elaborate(self, platform):
         m = Module()
@@ -59,15 +64,17 @@ class CondSelector(Elaboratable):
         return m
 
 
-class ShiftSequencer(Elaboratable):
+class ShiftSequencer(wiring.Component):
     def __init__(self, width=4):
-        self.i_shamt = Signal(width)
-        self.o_done  = Signal()
+        super().__init__({
+            "i_shamt": In(width),
+            "o_done":  Out(1),
 
-        self.c_en    = Signal()
-        self.c_load  = Signal()
+            "c_en":    In(1),
+            "c_load":  In(1),
 
-        self.r_shamt = Signal(width)
+            "r_shamt": Out(width),
+        })
 
     def elaborate(self, platform):
         m = Module()
@@ -85,40 +92,42 @@ class ShiftSequencer(Elaboratable):
         return m
 
 
-class BusArbiter(Elaboratable):
-    class Dir(Enum):
+class BusArbiter(wiring.Component):
+    class Dir(enum.Enum, shape=1):
         LD  = 0b0
         ST  = 0b1
 
     Addr = InstructionDecoder.Addr
 
     def __init__(self):
-        self.i_pc   = Signal(16)
-        self.i_w    = Signal(13)
-        self.i_ra   = Signal(3)
-        self.i_rb   = Signal(3)
-        self.i_rsd  = Signal(3)
-        self.i_ptr  = Signal(16)
-        self.i_data = Signal(16)
-        self.o_data = Signal(16)
+        super().__init__({
+            "i_pc":   In(16),
+            "i_w":    In(13),
+            "i_ra":   In(3),
+            "i_rb":   In(3),
+            "i_rsd":  In(3),
+            "i_ptr":  In(16),
+            "i_data": In(16),
+            "o_data": Out(16),
 
-        self.c_en   = Signal()
-        self.c_dir  = Signal(self.Dir)
-        self.c_addr = Signal(self.Addr)
-        self.c_pc   = Signal()
-        self.c_xbus = Signal()
+            "c_en":   In(1),
+            "c_dir":  In(self.Dir),
+            "c_addr": In(self.Addr),
+            "c_pc":   In(1),
+            "c_xbus": In(1),
 
-        self.o_bus_addr = Signal(16)
+            "o_bus_addr": Out(16),
 
-        self.i_mem_data = Signal(16)
-        self.o_mem_re   = Signal()
-        self.o_mem_data = Signal(16)
-        self.o_mem_we   = Signal()
+            "i_mem_data": In(16),
+            "o_mem_re":   Out(1),
+            "o_mem_data": Out(16),
+            "o_mem_we":   Out(1),
 
-        self.i_ext_data = Signal(16)
-        self.o_ext_re   = Signal()
-        self.o_ext_data = Signal(16)
-        self.o_ext_we   = Signal()
+            "i_ext_data": In(16),
+            "o_ext_re":   Out(1),
+            "o_ext_data": Out(16),
+            "o_ext_we":   Out(1),
+        })
 
     def elaborate(self, platform):
         m = Module()
@@ -157,48 +166,51 @@ class BusArbiter(Elaboratable):
         return m
 
 
-class CoreFSM(Elaboratable):
-    def __init__(self, alsru_cls, reset_pc=0, reset_w=0xffff, memory=None):
+class CoreFSM(wiring.Component):
+    def __init__(self, reset_pc=0, reset_w=0xffff, mem_data=None):
+        super().__init__({
+            "o_pc":       Out(16),
+            "r_w":        Out(13, init=reset_w >> 3),
+            "r_f":        Out(data.StructLayout({"z": 1, "s": 1, "c": 1, "v": 1})),
+
+            "r_insn":     Out(16),
+            "s_base":     Out(16),
+            "s_a":        Out(16),
+            "r_a":        Out(16),
+            "s_b":        Out(16),
+
+            "r_cycle":    Out(1),
+            "o_done":     Out(1),
+
+            "o_bus_addr": Out(16),
+
+            "i_mem_data": In(16),
+            "o_mem_re":   Out(1),
+            "o_mem_data": Out(16),
+            "o_mem_we":   Out(1),
+
+            "i_ext_data": In(16),
+            "o_ext_re":   Out(1),
+            "o_ext_data": Out(16),
+            "o_ext_we":   Out(1),
+        })
+
         self.m_pc    = ProgramCounter(reset_pc)
-        self.m_dec   = InstructionDecoder(alsru_cls)
+        self.m_dec   = InstructionDecoder()
         self.m_csel  = CondSelector()
         self.m_arb   = BusArbiter()
-        self.m_alsru = alsru_cls(width=16)
+        self.m_alsru = ALSRU(width=16)
         self.m_shift = ShiftSequencer()
 
-        self.o_pc    = Signal(16)
-        self.r_w     = Signal(13, reset=reset_w >> 3)
-        self.r_f     = Record([("z", 1), ("s", 1), ("c", 1), ("v", 1)])
-
-        self.r_insn  = Signal(16)
-        self.s_base  = Signal(16)
-        self.s_a     = Signal(16)
-        self.r_a     = Signal(16)
-        self.s_b     = Signal(16)
-
-        self.r_cycle = Signal(1)
-        self.o_done  = Signal()
-
-        self.o_bus_addr = self.m_arb.o_bus_addr
-
-        self.i_mem_data = self.m_arb.i_mem_data
-        self.o_mem_re   = self.m_arb.o_mem_re
-        self.o_mem_data = self.m_arb.o_mem_data
-        self.o_mem_we   = self.m_arb.o_mem_we
-
-        self.i_ext_data = self.m_arb.i_ext_data
-        self.o_ext_re   = self.m_arb.o_ext_re
-        self.o_ext_data = self.m_arb.o_ext_data
-        self.o_ext_we   = self.m_arb.o_ext_we
-
-        self.memory  = memory
+        self.mem_data = mem_data
 
     def elaborate(self, platform):
         m = Module()
 
-        if self.memory is not None:
-            m.submodules.memrd = m_memrd = self.memory.read_port(transparent=False)
-            m.submodules.memwr = m_memwr = self.memory.write_port()
+        if self.mem_data is not None:
+            m.submodules.mem = mem = memory.Memory(self.mem_data)
+            m_memrd = mem.read_port()
+            m_memwr = mem.write_port()
             m.d.comb += [
                 m_memrd.addr.eq(self.o_bus_addr),
                 self.i_mem_data.eq(m_memrd.data),
@@ -227,6 +239,18 @@ class CoreFSM(Elaboratable):
 
         m.submodules.arb = m_arb = self.m_arb
         m.d.comb += [
+            self.o_bus_addr.eq(self.m_arb.o_bus_addr),
+
+            self.m_arb.i_mem_data.eq(self.i_mem_data),
+            self.o_mem_re.eq(self.m_arb.o_mem_re),
+            self.o_mem_data.eq(self.m_arb.o_mem_data),
+            self.o_mem_we.eq(self.m_arb.o_mem_we),
+
+            self.m_arb.i_ext_data.eq(self.i_ext_data),
+            self.o_ext_re.eq(self.m_arb.o_ext_re),
+            self.o_ext_data.eq(self.m_arb.o_ext_data),
+            self.o_ext_we.eq(self.m_arb.o_ext_we),
+
             m_arb.i_pc .eq(m_pc.r_addr),
             m_arb.i_w  .eq(self.r_w),
             m_arb.i_ra .eq(m_dec.o_ra),
@@ -266,7 +290,7 @@ class CoreFSM(Elaboratable):
             m_shift.i_shamt.eq(self.s_b),
         ]
 
-        dec_ld_a = m_dec.LdA.expand(m, m_dec.o_ld_a)
+        dec_ld_a = m_dec.LdAStruct(m_dec.o_ld_a)
         with m.Switch(dec_ld_a.mux):
             with m.Case(m_dec.OpAMux.ZERO):
                 m.d.comb += self.s_a.eq(0)
@@ -278,14 +302,14 @@ class CoreFSM(Elaboratable):
                 m.d.comb += self.s_a.eq(m_arb.o_data)
         m.d.sync += self.r_a.eq(self.s_a)
 
-        dec_ld_b = m_dec.LdB.expand(m, m_dec.o_ld_b)
+        dec_ld_b = m_dec.LdBStruct(m_dec.o_ld_b)
         with m.Switch(dec_ld_b.mux):
             with m.Case(m_dec.OpBMux.IMM):
                 m.d.comb += self.s_b.eq(m_dec.o_imm16)
             with m.Case(m_dec.OpBMux.PTR):
                 m.d.comb += self.s_b.eq(m_arb.o_data)
 
-        dec_st_r = m_dec.StR.expand(m, m_dec.o_st_r)
+        dec_st_r = m_dec.StRStruct(m_dec.o_st_r)
 
         with m.FSM():
             m.d.comb += m_dec.i_insn.eq(self.r_insn)
@@ -368,8 +392,6 @@ from amaranth import cli
 
 
 if __name__ == "__main__":
-    from .alsru import ALSRU_4LUT
-
     parser = argparse.ArgumentParser()
     parser.add_argument("type", choices=[
         "cond-selector", "bus-arbiter",
@@ -399,7 +421,7 @@ if __name__ == "__main__":
         )
 
     if args.type == "core-fsm":
-        dut = CoreFSM(alsru_cls=ALSRU_4LUT)
+        dut = CoreFSM()
         ports = (
             dut.o_bus_addr,
             dut.i_mem_data, dut.o_mem_re, dut.o_mem_data, dut.o_mem_we,
@@ -407,8 +429,8 @@ if __name__ == "__main__":
         )
 
     if args.type == "core-fsm+memory":
-        memory = Memory(width=16, depth=256)
-        dut = CoreFSM(alsru_cls=ALSRU_4LUT, memory=memory)
+        memory = memory.Memory(shape=16, depth=256)
+        dut = CoreFSM(memory=memory)
         ports = (
             dut.o_bus_addr,
             dut.i_ext_data, dut.o_ext_re, dut.o_ext_data, dut.o_ext_we,

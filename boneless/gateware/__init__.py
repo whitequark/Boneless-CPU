@@ -1,2 +1,2 @@
-from .alsru import ALSRU_4LUT
+from .alsru import ALSRU
 from .core import CoreFSM

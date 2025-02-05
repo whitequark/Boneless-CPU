@@ -1,38 +1,41 @@
-from enum import Enum
 from amaranth import *
+from amaranth.lib import enum, data, wiring
+from amaranth.lib.wiring import In, Out
 
 from ..arch import instr as instr, opcode as opcode
-from .control import *
+from .alsru import ALSRU
 
 
 __all__ = ["ImmediateDecoder", "InstructionDecoder"]
 
 
-class ImmediateDecoder(Elaboratable):
+class ImmediateDecoder(wiring.Component):
     IMM3_TABLE_AL = Array(instr.Imm3AL.lut_to_imm)
     IMM3_TABLE_SR = Array(instr.Imm3SR.lut_to_imm)
 
-    class Table(Enum):
+    class Table(enum.Enum, shape=1):
         AL    = 0b1
         SR    = 0b0
 
-    class Width(Enum):
+    class Width(enum.Enum, shape=2):
         IMM3  = 0b00
         IMM5  = 0b01
         IMM8  = 0b10
         IMM16 = 0b11
 
     def __init__(self):
-        self.i_pc    = Signal(16)
-        self.i_insn  = Signal(16)
-        self.o_imm16 = Signal(16)
+        super().__init__({
+            "i_pc":     In(16),
+            "i_insn":   In(16),
+            "o_imm16":  Out(16),
 
-        self.c_exti  = Signal()
-        self.c_table = Signal(self.Table)
-        self.c_width = Signal(self.Width)
-        self.c_pcrel = Signal()
+            "c_exti":   In(1),
+            "c_table":  In(self.Table),
+            "c_width":  In(self.Width),
+            "c_pcrel":  In(1),
 
-        self.r_ext13 = Signal(13)
+            "r_ext13":  Out(13),
+        })
 
     def elaborate(self, platform):
         m = Module()
@@ -71,56 +74,68 @@ class ImmediateDecoder(Elaboratable):
         return m
 
 
-class InstructionDecoder(Elaboratable):
-    class Addr(Enum):
-        IND   = 0b00
-        RSD   = 0b01
-        RB    = 0b10
-        RA    = 0b11
-        x     = 0b00
+class _Addr(enum.Enum, shape=2):
+    IND   = 0b00
+    RSD   = 0b01
+    RB    = 0b10
+    RA    = 0b11
+    x     = 0b00
 
-    class OpAMux(Enum):
-        ZERO  = 0b00
-        PCp1  = 0b01
-        W     = 0b10
-        PTR   = 0b11
 
-    class OpBMux(Enum):
-        IMM   = 0b0
-        PTR   = 0b1
+class _OpAMux(enum.Enum, shape=2):
+    ZERO  = 0b00
+    PCp1  = 0b01
+    W     = 0b10
+    PTR   = 0b11
 
-    class OpRMux(Enum):
-        ZERO  = 0b0
-        PTR   = 0b1
 
-    class LdA(EnumGroup, layout={"mux":OpAMux, "addr":Addr}):
-        ZERO  = ("ZERO", "x"  )
-        PCp1  = ("PCp1", "x"  )
-        W     = ("W",    "x"  )
-        RA    = ("PTR",  "RA" )
-        RSD   = ("PTR",  "RSD")
+class _OpBMux(enum.Enum, shape=1):
+    IMM   = 0b0
+    PTR   = 0b1
 
-    class LdB(EnumGroup, layout={"mux":OpBMux, "addr":Addr}):
-        IMM   = ("IMM",  "x"  )
-        IND   = ("PTR",  "IND")
-        RB    = ("PTR",  "RB" )
-        RSD   = ("PTR",  "RSD")
 
-    class StR(EnumGroup, layout={"mux":OpRMux, "addr":Addr}):
-        x     = ("ZERO", "x"  )
-        IND   = ("PTR",  "IND")
-        RSD   = ("PTR",  "RSD")
+class _OpRMux(enum.Enum, shape=1):
+    ZERO  = 0b0
+    PTR   = 0b1
 
-    class CI(Enum):
+
+class InstructionDecoder(wiring.Component):
+    Addr = _Addr
+    OpAMux = _OpAMux
+    OpBMux = _OpBMux
+    OpRMux = _OpRMux
+
+    LdAStruct = data.StructLayout({"mux":_OpAMux, "addr":_Addr})
+    class LdA(enum.Enum, shape=LdAStruct):
+        ZERO  = Cat(_OpAMux.ZERO, _Addr.x  )
+        PCp1  = Cat(_OpAMux.PCp1, _Addr.x  )
+        W     = Cat(_OpAMux.W,    _Addr.x  )
+        RA    = Cat(_OpAMux.PTR,  _Addr.RA )
+        RSD   = Cat(_OpAMux.PTR,  _Addr.RSD)
+
+    LdBStruct = data.StructLayout({"mux":_OpBMux, "addr":_Addr})
+    class LdB(enum.Enum, shape=LdBStruct):
+        IMM   = Cat(_OpBMux.IMM,  _Addr.x  )
+        IND   = Cat(_OpBMux.PTR,  _Addr.IND)
+        RB    = Cat(_OpBMux.PTR,  _Addr.RB )
+        RSD   = Cat(_OpBMux.PTR,  _Addr.RSD)
+
+    StRStruct = data.StructLayout({"mux":_OpRMux, "addr":_Addr})
+    class StR(enum.Enum, shape=StRStruct):
+        x     = Cat(_OpRMux.ZERO, _Addr.x  )
+        IND   = Cat(_OpRMux.PTR,  _Addr.IND)
+        RSD   = Cat(_OpRMux.PTR,  _Addr.RSD)
+
+    class CI(enum.Enum, shape=2):
         ZERO  = 0b00
         ONE   = 0b01
         FLAG  = 0b10
 
-    class SI(Enum):
+    class SI(enum.Enum, shape=1):
         ZERO  = 0b0
         MSB   = 0b1
 
-    class Cond(Enum):
+    class Cond(enum.Enum, shape=3):
         Z     = 0b000
         S     = 0b001
         C     = 0b010
@@ -130,58 +145,57 @@ class InstructionDecoder(Elaboratable):
         SxVoZ = 0b110
         A     = 0b111
 
-    @staticmethod
-    def _insn_decoder(encoding):
-        try:
-            insn = opcode.Instr.from_int(encoding)
-            return str(insn).expandtabs(1)
-        except ValueError:
-            return "{:04x}".format(encoding)
+    def __init__(self):
+        super().__init__({
+            "i_pc":    In(16),
+            "i_insn":  In(16),
 
-    def __init__(self, alsru_cls):
-        self.alsru_cls = alsru_cls
+            "c_fetch": In(1),
+            "c_cycle": In(1),
 
-        self.i_pc    = Signal(16)
-        self.i_insn  = Signal(16, decoder=self._insn_decoder)
+            "o_imm16": Out(16),
+            "o_rsd":   Out(3),
+            "o_ra":    Out(3),
+            "o_rb":    Out(3),
+            "o_cond":  Out(self.Cond),
+            "o_flag":  Out(1),
 
-        self.c_fetch = Signal()
-        self.c_cycle = Signal(1)
+            "o_shift": Out(1), # shift multicycle instruction
+            "o_multi": Out(1), # other multicycle instruction
+            "o_xbus":  Out(1), # use external bus for load/store
+            "o_jcc":   Out(1), # select ALU operation based on cond/flag
+            "o_skip":  Out(1), # skip load/execute/store
 
-        self.o_imm16 = Signal(16)
-        self.o_rsd   = Signal(3)
-        self.o_ra    = Signal(3)
-        self.o_rb    = Signal(3)
-        self.o_cond  = Signal(self.Cond)
-        self.o_flag  = Signal()
+            "o_ld_a":  Out(self.LdA),
+            "o_ld_b":  Out(self.LdB),
+            "o_st_r":  Out(self.StR),
+            "o_st_f":  Out(data.StructLayout({"zs": 1, "cv": 1})),
+            "o_st_w":  Out(1),
+            "o_st_pc": Out(1),
 
-        self.o_shift = Signal() # shift multicycle instruction
-        self.o_multi = Signal() # other multicycle instruction
-        self.o_xbus  = Signal() # use external bus for load/store
-        self.o_jcc   = Signal() # select ALU operation based on cond/flag
-        self.o_skip  = Signal() # skip load/execute/store
+            "o_op":    Out(ALSRU.Op),
+            "o_dir":   Out(ALSRU.Dir),
+            "o_ci":    Out(self.CI),
+            "o_si":    Out(self.SI),
 
-        self.o_ld_a  = Signal(self.LdA)
-        self.o_ld_b  = Signal(self.LdB)
-        self.o_st_r  = Signal(self.StR)
-        self.o_st_f  = Record([("zs", 1), ("cv", 1)])
-        self.o_st_w  = Signal()
-        self.o_st_pc = Signal()
+            "r_exti":  Out(1),
+        })
 
-        self.o_op    = Signal(alsru_cls.Op)
-        self.o_dir   = Signal(alsru_cls.Dir)
-        self.o_ci    = Signal(self.CI)
-        self.o_si    = Signal(self.SI)
+        def insn_decoder(encoding):
+            try:
+                insn = opcode.Instr.from_int(encoding)
+                return str(insn).expandtabs(1)
+            except ValueError:
+                return "{:04x}".format(encoding)
+        self.i_insn = Signal.like(self.i_insn, decoder=insn_decoder)
 
-        self.r_exti  = Signal()
-
-        self.m_imm   = ImmediateDecoder()
+        self.m_imm  = ImmediateDecoder()
 
     def elaborate(self, platform):
-        alsru_cls = self.alsru_cls
-
         m = Module()
 
         m.submodules.imm = m_imm = self.m_imm
+
         m.d.comb += [
             m_imm.i_pc.eq(self.i_pc),
             m_imm.i_insn.eq(self.i_insn),
@@ -225,9 +239,9 @@ class InstructionDecoder(Elaboratable):
 
         with m.Switch(self.i_insn):
             with m.Case(opcode.S_LEFT.coding):
-                m.d.comb += self.o_dir.eq(alsru_cls.Dir.L)
+                m.d.comb += self.o_dir.eq(ALSRU.Dir.L)
             with m.Case(opcode.S_RIGHT.coding):
-                m.d.comb += self.o_dir.eq(alsru_cls.Dir.R)
+                m.d.comb += self.o_dir.eq(ALSRU.Dir.R)
         with m.Switch(self.i_insn):
             with m.Case(opcode.S_IZERO.coding):
                 m.d.comb += self.o_si.eq(self.SI.ZERO)
@@ -250,20 +264,20 @@ class InstructionDecoder(Elaboratable):
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.T_AND.coding):
                         m.d.comb += [
-                            self.o_op.eq(alsru_cls.Op.AaB),
+                            self.o_op.eq(ALSRU.Op.AaB),
                         ]
                     with m.Case(opcode.T_OR.coding):
                         m.d.comb += [
-                            self.o_op.eq(alsru_cls.Op.AoB),
+                            self.o_op.eq(ALSRU.Op.AoB),
                         ]
                     with m.Case(opcode.T_XOR.coding):
                         m.d.comb += [
-                            self.o_op.eq(alsru_cls.Op.AxB),
+                            self.o_op.eq(ALSRU.Op.AxB),
                         ]
                     with m.Case(opcode.T_CMP.coding):
                         m.d.comb += [
                             self.o_ci.eq(self.CI.ONE),
-                            self.o_op.eq(alsru_cls.Op.AmB),
+                            self.o_op.eq(ALSRU.Op.AmB),
                             self.o_st_r.eq(self.StR.x),
                             self.o_st_f.cv.eq(1),
                         ]
@@ -285,22 +299,22 @@ class InstructionDecoder(Elaboratable):
                     with m.Case(opcode.T_ADD.coding):
                         m.d.comb += [
                             self.o_ci.eq(self.CI.ZERO),
-                            self.o_op.eq(alsru_cls.Op.ApB),
+                            self.o_op.eq(ALSRU.Op.ApB),
                         ]
                     with m.Case(opcode.T_ADC.coding):
                         m.d.comb += [
                             self.o_ci.eq(self.CI.FLAG),
-                            self.o_op.eq(alsru_cls.Op.ApB),
+                            self.o_op.eq(ALSRU.Op.ApB),
                         ]
                     with m.Case(opcode.T_SUB.coding):
                         m.d.comb += [
                             self.o_ci.eq(self.CI.ONE),
-                            self.o_op.eq(alsru_cls.Op.AmB),
+                            self.o_op.eq(ALSRU.Op.AmB),
                         ]
                     with m.Case(opcode.T_SBC.coding):
                         m.d.comb += [
                             self.o_ci.eq(self.CI.FLAG),
-                            self.o_op.eq(alsru_cls.Op.AmB),
+                            self.o_op.eq(ALSRU.Op.AmB),
                         ]
 
             with m.Case(opcode.C_SHIFT.coding):
@@ -317,15 +331,15 @@ class InstructionDecoder(Elaboratable):
                     with m.Case(opcode.M_RRI.coding):
                         m.d.comb += self.o_ld_b.eq(self.LdB.IMM)
                 with m.If(self.c_cycle == 0):
-                    m.d.comb += self.o_op.eq(alsru_cls.Op.A)
+                    m.d.comb += self.o_op.eq(ALSRU.Op.A)
                 with m.Else():
-                    m.d.comb += self.o_op.eq(alsru_cls.Op.SLR)
+                    m.d.comb += self.o_op.eq(ALSRU.Op.SLR)
 
             with m.Case(opcode.C_LD.coding, opcode.C_ST.coding):
                 m.d.comb += [
                     m_imm.c_width.eq(m_imm.Width.IMM5),
                     self.o_ld_a.eq(self.LdA.RA),
-                    self.o_op.eq(alsru_cls.Op.B),
+                    self.o_op.eq(ALSRU.Op.B),
                 ]
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.M_ABS.coding):
@@ -347,7 +361,7 @@ class InstructionDecoder(Elaboratable):
             with m.Case(opcode.C_LDX.coding, opcode.C_STX.coding):
                 m.d.comb += [
                     self.o_xbus.eq(1),
-                    self.o_op.eq(alsru_cls.Op.B),
+                    self.o_op.eq(ALSRU.Op.B),
                 ]
                 with m.Switch(self.i_insn):
                     with m.Case(opcode.M_ABS.coding):
@@ -382,7 +396,7 @@ class InstructionDecoder(Elaboratable):
                     m_imm.c_width.eq(m_imm.Width.IMM8),
                     self.o_ld_a.eq(self.LdA.ZERO),
                     self.o_ld_b.eq(self.LdB.IMM),
-                    self.o_op.eq(alsru_cls.Op.B),
+                    self.o_op.eq(ALSRU.Op.B),
                     self.o_st_r.eq(self.StR.RSD),
                 ]
 
@@ -397,37 +411,37 @@ class InstructionDecoder(Elaboratable):
                     with m.Case(opcode.C_STW.coding):
                         m.d.comb += [
                             self.o_ld_b.eq(self.LdB.RB),
-                            self.o_op.eq(alsru_cls.Op.B),
+                            self.o_op.eq(ALSRU.Op.B),
                         ]
                     with m.Case(opcode.C_XCHW.coding):
                         m.d.comb += [
                             self.o_ld_b.eq(self.LdB.RB),
-                            self.o_op.eq(alsru_cls.Op.B),
+                            self.o_op.eq(ALSRU.Op.B),
                             self.o_st_r.eq(self.StR.RSD),
                         ]
                     with m.Case(opcode.C_ADJW.coding):
                         m.d.comb += [
                             self.o_ld_b.eq(self.LdB.IMM),
-                            self.o_op.eq(alsru_cls.Op.ApB),
+                            self.o_op.eq(ALSRU.Op.ApB),
                         ]
                     with m.Case(opcode.C_LDW.coding):
                         m.d.comb += [
                             self.o_ld_b.eq(self.LdB.IMM),
-                            self.o_op.eq(alsru_cls.Op.ApB),
+                            self.o_op.eq(ALSRU.Op.ApB),
                             self.o_st_r.eq(self.StR.RSD),
                         ]
                 with m.If(self.c_cycle == 0):
                     m.d.comb += self.o_st_w.eq(1)
                     m.d.comb += self.o_st_r.eq(self.StR.x)      # overrides above
                 with m.If(self.c_cycle == 1):
-                    m.d.comb += self.o_op.eq(alsru_cls.Op.A)    # overrides above
+                    m.d.comb += self.o_op.eq(ALSRU.Op.A)    # overrides above
 
             with m.Case(opcode.C_JR.coding):
                 m.d.comb += [
                     m_imm.c_width.eq(m_imm.Width.IMM5),
                     self.o_ld_a.eq(self.LdA.RSD),
                     self.o_ld_b.eq(self.LdB.IMM),
-                    self.o_op.eq(alsru_cls.Op.ApB),
+                    self.o_op.eq(ALSRU.Op.ApB),
                     self.o_st_pc.eq(1),
                 ]
 
@@ -440,17 +454,17 @@ class InstructionDecoder(Elaboratable):
                     self.o_st_pc.eq(1),
                 ]
                 with m.If(self.c_cycle == 0):
-                    m.d.comb += self.o_op.eq(alsru_cls.Op.A)
+                    m.d.comb += self.o_op.eq(ALSRU.Op.A)
                     m.d.comb += self.o_st_r.eq(self.StR.RSD)
                 with m.If(self.c_cycle == 1):
-                    m.d.comb += self.o_op.eq(alsru_cls.Op.B)
+                    m.d.comb += self.o_op.eq(ALSRU.Op.B)
 
             with m.Case(opcode.C_JVT.coding):
                 m.d.comb += [
                     m_imm.c_width.eq(m_imm.Width.IMM5),
                     self.o_ld_a.eq(self.LdA.RSD),
                     self.o_ld_b.eq(self.LdB.IND),
-                    self.o_op.eq(alsru_cls.Op.ApB),
+                    self.o_op.eq(ALSRU.Op.ApB),
                     self.o_st_pc.eq(1),
                 ]
 
@@ -460,7 +474,7 @@ class InstructionDecoder(Elaboratable):
                     m_imm.c_pcrel.eq(1),
                     self.o_multi.eq(1),
                     self.o_ld_a.eq(self.LdA.RSD),   # latches [M] on 2nd cycle
-                    self.o_op.eq(alsru_cls.Op.ApB),
+                    self.o_op.eq(ALSRU.Op.ApB),
                     self.o_st_pc.eq(1),
                 ]
                 with m.If(self.c_cycle == 0):
@@ -477,10 +491,10 @@ class InstructionDecoder(Elaboratable):
                     self.o_st_pc.eq(1),
                 ]
                 with m.If(self.c_cycle == 0):
-                    m.d.comb += self.o_op.eq(alsru_cls.Op.A)
+                    m.d.comb += self.o_op.eq(ALSRU.Op.A)
                     m.d.comb += self.o_st_r.eq(self.StR.RSD)
                 with m.If(self.c_cycle == 1):
-                    m.d.comb += self.o_op.eq(alsru_cls.Op.ApB)
+                    m.d.comb += self.o_op.eq(ALSRU.Op.ApB)
 
             with m.Case(opcode.C_JCOND.coding):
                 m.d.comb += [
@@ -488,7 +502,7 @@ class InstructionDecoder(Elaboratable):
                     self.o_jcc.eq(1),
                     self.o_ld_a.eq(self.LdA.PCp1),
                     self.o_ld_b.eq(self.LdB.IMM),
-                    self.o_op.eq(alsru_cls.Op.A), # overridden in core if taken
+                    self.o_op.eq(ALSRU.Op.A), # overridden in core if taken
                     self.o_st_pc.eq(1),
                 ]
 
@@ -498,7 +512,7 @@ class InstructionDecoder(Elaboratable):
                     self.o_skip.eq(1),
                 ]
 
-            with m.Case():
+            with m.Default():
                 m.d.comb += [
                     self.o_skip.eq(1),
                 ]
@@ -518,30 +532,13 @@ from amaranth import cli
 
 
 if __name__ == "__main__":
-    from .alsru import ALSRU_4LUT
-
     parser = argparse.ArgumentParser()
     parser.add_argument("type", choices=["immediate", "instruction"])
     cli.main_parser(parser)
 
     args = parser.parse_args()
-
     if args.type == "immediate":
         dut = ImmediateDecoder()
-        ports = (
-            dut.i_pc, dut.i_insn,
-            dut.o_imm16,
-            dut.c_exti, dut.c_table, dut.c_width, dut.c_pcrel,
-        )
-
     if args.type == "instruction":
-        dut = InstructionDecoder(alsru_cls=ALSRU_4LUT)
-        ports = (
-            dut.i_pc, dut.i_insn,
-            dut.o_imm16, dut.o_rsd, dut.o_ra, dut.o_rb, dut.o_cond, dut.o_flag,
-            dut.o_shift, dut.o_multi, dut.o_xbus, dut.o_skip,
-            dut.o_ld_a, dut.o_ld_b, dut.o_st_r, dut.o_st_w, dut.o_st_pc,
-            dut.o_op, dut.o_ci, dut.o_si,
-        )
-
-    cli.main_runner(parser, args, dut, ports=ports)
+        dut = InstructionDecoder()
+    cli.main_runner(parser, args, dut)
