@@ -35,7 +35,7 @@ class _OpWord(data.Struct):
 class ALSRU(wiring.Component):
     """ALSRU optimized for 4-LUT architecture with no adder pre-inversion.
 
-    On iCE40 with Yosys, ABC, and -relut this synthesizes to the optimal 4n+3 LUTs.
+    On iCE40 with Yosys, ABC, and -relut this synthesizes to the optimal 4n+2+ceil((n-1)/3) LUTs.
     """
 
     # The block diagram of an unit cell is as follows:
